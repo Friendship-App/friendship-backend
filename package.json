@@ -22,7 +22,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "db:migrate":
-      "node_modules/.bin/knex --knexfile db/knexfile.js migrate:latest",
+      "node_modules/.bin/knex --knexfile db/knexfile.js migrate:latest && npm run db:seed",
     "db:rollback":
       "node_modules/.bin/knex --knexfile db/knexfile.js migrate:rollback",
     "db:seed": "node_modules/.bin/knex --knexfile db/knexfile.js seed:run",

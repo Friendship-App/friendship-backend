@@ -8,34 +8,31 @@
     "type": "git",
     "url": "git+https://github.com/FruitieX/backend-kit.git"
   },
-  "keywords": [
-    "Node",
-    "Postgres",
-    "Knex",
-    "Jest"
-  ],
+  "keywords": ["Node", "Postgres", "Knex", "Jest"],
   "scripts": {
     "start": "npm run build && node dist/backend_kit.js",
     "build": "mkdir -p dist && babel src --out-dir dist --source-maps",
-    "watch": "cross-env NODE_ENV=development nodemon --exec babel-node src/backend_kit.js",
-    "debug": "cross-env NODE_ENV=development nodemon --exec babel-node --inspect src/backend_kit.js",
+    "watch":
+      "cross-env NODE_ENV=development nodemon --exec babel-node src/backend_kit.js",
+    "debug":
+      "cross-env NODE_ENV=development nodemon --exec babel-node --inspect src/backend_kit.js",
     "register:admin": "babel-node bin/register_admin.js",
     "lint": "eslint src/",
     "lint:fix": "eslint --fix src/",
     "test": "jest",
     "test:watch": "jest --watch",
-    "db:migrate": "node_modules/.bin/knex --knexfile db/knexfile.js migrate:latest",
-    "db:rollback": "node_modules/.bin/knex --knexfile db/knexfile.js migrate:rollback",
+    "db:migrate":
+      "node_modules/.bin/knex --knexfile db/knexfile.js migrate:latest && npm run db:seed",
+    "db:rollback":
+      "node_modules/.bin/knex --knexfile db/knexfile.js migrate:rollback",
     "db:seed": "node_modules/.bin/knex --knexfile db/knexfile.js seed:run",
     "db:wipe": "babel-node bin/wipe_db.js",
     "db:init": "npm run db:wipe && npm run db:migrate && npm run db:seed",
-    "prettier": "prettier --single-quote --trailing-comma all --write \"{,!(dist|node_modules)/**/}*.js\""
+    "prettier":
+      "prettier --single-quote --trailing-comma all --write \"{,!(dist|node_modules)/**/}*.js\""
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --single-quote --trailing-comma all --write",
-      "git add"
-    ]
+    "*.js": ["prettier --single-quote --trailing-comma all --write", "git add"]
   },
   "version": "0.0.1",
   "main": "src/server.js",

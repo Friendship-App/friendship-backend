@@ -6,7 +6,8 @@ import {
   getNbMessagesByConversation,
   getNbMessages,
   getNbActiveUsers,
-} from '../handlers/metrics'
+  getNbRegisteredUsers,
+} from '../handlers/metrics';
 
 const metrics = [
   {
@@ -32,6 +33,12 @@ const metrics = [
     path: '/metrics/messagesmessaging',
     config: getAuthWithScope('admin'),
     handler: getNbMatchesMessaging,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/registeredusers',
+    config: getAuthWithScope('admin'),
+    handler: getNbRegisteredUsers,
   },
 ];
 

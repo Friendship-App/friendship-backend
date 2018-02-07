@@ -17,7 +17,7 @@ export const dbGetNbActiveUsers = () => {
 };
 
 export const dbGetRegisteredUsers = () =>
-  knex('users')
+  knex('metrics_users_registered')
     .select('id');
 
 export const dbUserLastActive = userId =>

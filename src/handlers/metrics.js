@@ -9,6 +9,7 @@ import {
   dbGetRegisteredUsers,
   dbGetRegisteredUser,
   dbCreateRegisteredUser,
+  dbCreateActiveUsersCount,
 } from '../models/metrics';
 
 export const getNbMatchesMessaging = (request, reply) => {
@@ -23,10 +24,6 @@ export const getNbMessages = (request, reply) => {
   dbGetNbMessages().then(reply);
 };
 
-export const getNbActiveUsers = (request, reply) => {
-  dbGetNbActiveUsers().then(reply);
-};
-
 // danni
 export const getNbRegisteredUsers = (request, reply) => {
   dbGetRegisteredUsers().then(reply);
@@ -38,6 +35,16 @@ export const getRegisteredUsers = (request, reply) =>
 
 export const createRegisteredUser = (request, reply) =>
   dbCreateRegisteredUser({
+    ...request.payload,
+    users_count: request.payload.users_count,
+    timestamp: moment(),
+  }).then(reply);
+
+export const getNbActiveUsers = (request, reply) =>
+  dbGetNbActiveUsers().then(reply);
+
+export const createActiveUsersCount = (request, reply) =>
+  dbCreateActiveUsersCount({
     ...request.payload,
     users_count: request.payload.users_count,
     timestamp: moment(),

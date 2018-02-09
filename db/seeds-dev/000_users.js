@@ -8,6 +8,7 @@ const compatibilities = ['54 %', '46 %', '23 %', '98 %', '98 %', '21 %', '76 %']
 
 const userFields = {
   createdAt: moment(),
+  lastActive: moment(),
   email: faker.internet.email,
   description: faker.lorem.sentences,
   active: true,

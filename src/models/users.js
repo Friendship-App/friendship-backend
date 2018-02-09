@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const userListFields = [
   'users.id',
   'createdAt',
+  'lastActive',
   'email',
   'scope',
   'username',
@@ -43,7 +44,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
 
   const users = await knex.raw(`
     WITH "Users"
-    AS (SELECT "users"."id","users"."createdAt","image","email","scope",
+    AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
     "username","description","emoji","active","birthyear","status",
     array_agg(DISTINCT "genders"."gender") AS "genderlist"
     FROM "users"
@@ -108,7 +109,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
     LIMIT ${pageLimit}
     OFFSET ${pageNumber * pageLimit})
 
-    SELECT "id","createdAt","email","scope","username","description","emoji","active",
+    SELECT "id","createdAt","lastActive","email","scope","username","description","emoji","active",
     "birthyear","status","genderlist","loveCommon","hateCommon","locations",
     "image"
     FROM "Users"
@@ -144,7 +145,7 @@ export const dbGetUser = async (userId, currentUserId) => {
 
   const user = await knex.raw(`
     WITH "Users"
-    AS (SELECT "users"."id","users"."createdAt","image","email","scope",
+    AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
     "username","description","emoji","active","birthyear","status",
     array_agg(DISTINCT "genders"."gender") AS "genderlist",
     count("banned_users"."id") AS "isbanned"
@@ -200,7 +201,7 @@ export const dbGetUser = async (userId, currentUserId) => {
     WHERE "users"."id" = ${userId}
     GROUP BY "users"."id")
 
-    SELECT "id","createdAt","image","email","scope","username","description","emoji","active",
+    SELECT "id","createdAt","lastActive","image","email","scope","username","description","emoji","active",
     "birthyear","status","genderlist","loveCommon","hateCommon","locations","isbanned"
     FROM "Users"
     left join "UserLoveCommon"

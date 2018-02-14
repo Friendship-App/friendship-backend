@@ -1,15 +1,10 @@
-import Boom from 'boom';
-import moment from 'moment';
-
 import {
   dbGetNbMatchesMessaging,
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
   dbGetNbActiveUsers,
   dbGetRegisteredUsers,
-  dbGetRegisteredUser,
-  dbCreateRegisteredUser,
-  dbCreateActiveUsersCount,
+  dbCountActiveUsers,
 } from '../models/metrics';
 
 export const getNbMatchesMessaging = (request, reply) => {
@@ -30,22 +25,10 @@ export const getNbRegisteredUsers = (request, reply) => {
 };
 
 // minh
-export const getRegisteredUsers = (request, reply) =>
-  dbGetRegisteredUser(request.params.registeredUserId).then(reply);
-
-export const createRegisteredUser = (request, reply) =>
-  dbCreateRegisteredUser({
-    ...request.payload,
-    users_count: request.payload.users_count,
-    timestamp: moment(),
-  }).then(reply);
-
-export const getNbActiveUsers = (request, reply) =>
+export const getNbActiveUsers = (request, reply) => {
   dbGetNbActiveUsers().then(reply);
+};
 
-export const createActiveUsersCount = (request, reply) =>
-  dbCreateActiveUsersCount({
-    ...request.payload,
-    users_count: request.payload.users_count,
-    timestamp: moment(),
-  }).then(reply);
+export const getCountActiveUsers = (request, reply) => {
+  dbCountActiveUsers().then(reply);
+};

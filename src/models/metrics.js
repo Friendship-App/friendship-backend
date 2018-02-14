@@ -1,3 +1,4 @@
+import moment from 'moment';
 import knex from '../utils/db';
 
 const registeredUsersFields = ['id', 'users_count', 'timestamp'];
@@ -41,29 +42,22 @@ export const dbCreateRegisteredUser = ({ ...fields }) =>
     return registeredUser;
   });
 
-// count lastActive from users table, insert the result into metrics_active_users.users_count
-export const dbCreateActiveUsersCount = () => {
-  const lastActiveUsers = knex('users')
+// count lastActive from users table
+// insert the result into a row on metrics_active_users.users_count
+export const dbCountActiveUsers = async () => {
+  const lastActiveUsers = await knex('users')
     .count('lastActive');
 
-  knex.transaction(async (trx) => {
-    const activeUsersList = await trx('metrics_active_users')
-      .insert({ users_count: lastActiveUsers })
+  return knex.transaction(trx =>
+    trx('metrics_active_users')
+      .insert({ users_count: lastActiveUsers[0].count, timestamp: moment() })
       .returning('*')
-      .then(results => results[0]);
-
-    return activeUsersList;
-  });
-
-  return lastActiveUsers;
+      .then(results => results[0]),
+  );
 };
 
+// display contents of metrics_active_users table
 export const dbGetNbActiveUsers = () =>
   knex('metrics_active_users')
     .select(countActiveUsersFields);
-
-export const dbGetActiveUsersCount = id =>
-  knex('metrics_active_users')
-    .first()
-    .where({ id });
 

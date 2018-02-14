@@ -1,5 +1,3 @@
-import {merge} from 'lodash';
-import Joi from 'joi';
 import { getAuthWithScope } from '../utils/auth';
 import {
   getNbMatchesMessaging,
@@ -7,6 +5,7 @@ import {
   getNbMessages,
   getNbActiveUsers,
   getNbRegisteredUsers,
+  getCountActiveUsers,
 } from '../handlers/metrics';
 
 const metrics = [
@@ -21,6 +20,12 @@ const metrics = [
     path: '/metrics/activeusers',
     config: getAuthWithScope('admin'),
     handler: getNbActiveUsers,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/activeusers/update',
+    config: getAuthWithScope('admin'),
+    handler: getCountActiveUsers,
   },
   {
     method: 'GET',

@@ -5,6 +5,7 @@ import {
   getNbMessages,
   getNbActiveUsers,
   getNbRegisteredUsers,
+  getCountRegisteredUsers,
   getCountActiveUsers,
 } from '../handlers/metrics';
 
@@ -44,6 +45,12 @@ const metrics = [
     path: '/metrics/registeredusers',
     config: getAuthWithScope('admin'),
     handler: getNbRegisteredUsers,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/registeredusers/update',
+    config: getAuthWithScope('admin'),
+    handler: getCountRegisteredUsers,
   },
 ];
 

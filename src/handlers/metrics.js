@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import moment from 'moment';
 
 import {
   dbGetNbMatchesMessaging,
@@ -6,6 +7,7 @@ import {
   dbGetNbMessages,
   dbGetNbActiveUsers,
   dbGetRegisteredUsers,
+  dbGetMetrics
 } from '../models/metrics';
 
 export const getNbMatchesMessaging = (request, reply) => {
@@ -21,10 +23,10 @@ export const getNbMessages = (request, reply) => {
 };
 
 export const getNbActiveUsers = (request, reply) => {
-  dbGetNbActiveUsers().then(reply);
+  dbGetNbActiveUsers().then(reply=>reply);
 };
 
-// danni
-export const getNbRegisteredUsers = (request, reply) => {
-  dbGetRegisteredUsers().then(reply);
-};
+export const getNbRegisteredUsers=(reqest,reply)=>{
+  dbGetRegisteredUsers().then(reply)
+  console.log(typeof dbGetRegisteredUsers);
+}

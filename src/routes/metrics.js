@@ -6,7 +6,7 @@ import {
   getNbMessagesByConversation,
   getNbMessages,
   getNbActiveUsers,
-  getNbRegisteredUsers,
+  getNbRegisteredUsers
 } from '../handlers/metrics';
 
 const metrics = [

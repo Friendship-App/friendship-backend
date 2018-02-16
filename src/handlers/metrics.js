@@ -1,11 +1,11 @@
-import Boom from 'boom';
-
 import {
   dbGetNbMatchesMessaging,
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
   dbGetNbActiveUsers,
-  dbGetRegisteredUsers,
+  dbCountRegisteredUsers,
+  dbGetNbRegisteredUsers,
+  dbCountActiveUsers,
 } from '../models/metrics';
 
 export const getNbMatchesMessaging = (request, reply) => {
@@ -20,11 +20,20 @@ export const getNbMessages = (request, reply) => {
   dbGetNbMessages().then(reply);
 };
 
+// danni
+export const getNbRegisteredUsers = (request, reply) => {
+  dbGetNbRegisteredUsers().then(reply);
+};
+
+// minh
+export const getCountRegisteredUsers = (request, reply) => {
+  dbCountRegisteredUsers().then(reply);
+};
+
 export const getNbActiveUsers = (request, reply) => {
   dbGetNbActiveUsers().then(reply);
 };
 
-// danni
-export const getNbRegisteredUsers = (request, reply) => {
-  dbGetRegisteredUsers().then(reply);
+export const getCountActiveUsers = (request, reply) => {
+  dbCountActiveUsers().then(reply);
 };

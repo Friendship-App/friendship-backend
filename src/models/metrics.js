@@ -77,4 +77,3 @@ export const dbCountActiveUsers = async () => {
 export const dbGetNbActiveUsers = () =>
   knex('metrics_active_users')
     .select(countActiveUsersFields);
-

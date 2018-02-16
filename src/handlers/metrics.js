@@ -8,6 +8,7 @@ import {
   dbCountActiveUsers,
 } from '../models/metrics';
 
+
 export const getNbMatchesMessaging = (request, reply) => {
   dbGetNbMatchesMessaging().then(reply);
 };
@@ -37,3 +38,11 @@ export const getNbActiveUsers = (request, reply) => {
 export const getCountActiveUsers = (request, reply) => {
   dbCountActiveUsers().then(reply);
 };
+
+//insert active usercount everyday at 23:59
+var cron = require('node-cron');
+cron.schedule('*/5 * * * * *', function(){
+  console.log(' START --------------------------');
+  //getCountActiveUsers();
+  console.log(' END --------------------------');
+});

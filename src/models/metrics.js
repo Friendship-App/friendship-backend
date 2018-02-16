@@ -49,7 +49,8 @@ export const dbGetRegisteredUser = id =>
 
 export const dbCountRegisteredUsers = async () => {
   const nbRegisteredUsers = await knex('users')
-    .count('createdAt');
+    .count('*')
+    .where(knex.raw('??::date = ?', ['createdAt', moment().startOf('day')]));
 
   return knex.transaction(trx =>
     trx('metrics_users_registered')
@@ -63,7 +64,8 @@ export const dbCountRegisteredUsers = async () => {
 // insert the result into a row on metrics_active_users.users_count
 export const dbCountActiveUsers = async () => {
   const lastActiveUsers = await knex('users')
-    .count('lastActive');
+    .count('lastActive')
+    .where(knex.raw('??::date = ?', ['lastActive', moment().startOf('day')]));
 
   return knex.transaction(trx =>
     trx('metrics_active_users')

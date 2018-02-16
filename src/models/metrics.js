@@ -19,8 +19,8 @@ export const dbGetNbMessages = () => {
 
 
 export const dbUserLastActive = userId => knex('users')
-    .where({ id: userId })
-    .update({ lastActive: new Date() });
+  .where({id: userId})
+  .update({lastActive: new Date()});
 
 
 // export const dbUserCreatedAt = userId => knex('users')
@@ -35,7 +35,7 @@ export const dbGetNbRegisteredUsers = () =>
 export const dbGetRegisteredUser = id =>
   knex('metrics_users_registered')
     .first()
-    .where({ id });
+    .where({id});
 
 // export const dbCreateRegisteredUser = ({ ...fields }) =>
 //   knex.transaction(async (trx) => {
@@ -53,7 +53,7 @@ export const dbCountRegisteredUsers = async () => {
 
   return knex.transaction(trx =>
     trx('metrics_users_registered')
-      .insert({ users_count: nbRegisteredUsers[0].count, timestamp: moment() })
+      .insert({users_count: nbRegisteredUsers[0].count, timestamp: moment()})
       .returning('*')
       .then(results => results[0]),
   );
@@ -63,11 +63,14 @@ export const dbCountRegisteredUsers = async () => {
 // insert the result into a row on metrics_active_users.users_count
 export const dbCountActiveUsers = async () => {
   const lastActiveUsers = await knex('users')
+  //Remove debug for your function
+    .debug(false)
     .count('lastActive');
-
   return knex.transaction(trx =>
     trx('metrics_active_users')
-      .insert({ users_count: lastActiveUsers[0].count, timestamp: moment() })
+    //Remove debug for your function
+      .debug(false)
+      .insert({users_count: lastActiveUsers[0].count, timestamp: moment()})
       .returning('*')
       .then(results => results[0]),
   );

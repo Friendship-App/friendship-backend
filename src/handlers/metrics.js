@@ -40,7 +40,7 @@ export const getCountActiveUsers = (request, reply) => {
 };
 
 //insert active usercount everyday at 23:59
-var cron = require('node-cron');
+const cron = require('node-cron');
 cron.schedule('*/5 * * * * *', function(){
   console.log(' START --------------------------');
   //getCountActiveUsers();

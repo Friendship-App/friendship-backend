@@ -14,6 +14,7 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
+  get30DaysUsers,
 } from '../handlers/users';
 
 const validateUserId = {
@@ -92,6 +93,12 @@ const users = [
     path: '/users',
     config: getAuthWithScope('user'),
     handler: getUsers,
+  },
+  {
+    method:'GET',
+    path:'/users/30days',
+    config:getAuthWithScope('admin'),
+    handler:get30DaysUsers,
   },
   {
     method: 'GET',

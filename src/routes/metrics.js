@@ -1,12 +1,13 @@
-import {merge} from 'lodash';
-import Joi from 'joi';
 import { getAuthWithScope } from '../utils/auth';
 import {
   getNbMatchesMessaging,
   getNbMessagesByConversation,
   getNbMessages,
   getNbActiveUsers,
-} from '../handlers/metrics'
+  getNbRegisteredUsers,
+  getCountRegisteredUsers,
+  getCountActiveUsers,
+} from '../handlers/metrics';
 
 const metrics = [
   {
@@ -23,6 +24,12 @@ const metrics = [
   },
   {
     method: 'GET',
+    path: '/metrics/activeusers/update',
+    config: getAuthWithScope('admin'),
+    handler: getCountActiveUsers,
+  },
+  {
+    method: 'GET',
     path: '/metrics/messagesbyconversation',
     config: getAuthWithScope('admin'),
     handler: getNbMessagesByConversation,
@@ -32,6 +39,18 @@ const metrics = [
     path: '/metrics/messagesmessaging',
     config: getAuthWithScope('admin'),
     handler: getNbMatchesMessaging,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/registeredusers',
+    config: getAuthWithScope('admin'),
+    handler: getNbRegisteredUsers,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/registeredusers/update',
+    config: getAuthWithScope('admin'),
+    handler: getCountRegisteredUsers,
   },
 ];
 

@@ -32,8 +32,6 @@ export const createMessage = function(request, reply) {
 };
 
 export const updateReadMessages = function(request, reply) {
-  console.log('Request payload is ' + request.payload);
-  console.log('Reply body : ' + reply);
   return dbUpdateReadMessages(
     request.payload.messageIdArr
   )

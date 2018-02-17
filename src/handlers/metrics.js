@@ -23,10 +23,9 @@ export const getNbMessages = (request, reply) => {
 };
 
 export const getNbActiveUsers = (request, reply) => {
-  dbGetNbActiveUsers().then(reply=>reply);
+  dbGetNbActiveUsers().then(reply)
 };
 
 export const getNbRegisteredUsers=(reqest,reply)=>{
   dbGetRegisteredUsers().then(reply)
-  console.log(typeof dbGetRegisteredUsers);
 }

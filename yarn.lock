@@ -4387,6 +4387,10 @@ reach@1.x.x:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/reach/-/reach-1.0.0.tgz#4d12d160960bcac67dc624f0f91bafeb36f794f6"
 
+react-csv@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/react-csv/-/react-csv-1.0.12.tgz#636087c6d5635463dd90d6a1c7c038811696169d"
+
 read-all-stream@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/read-all-stream/-/read-all-stream-3.1.0.tgz#35c3e177f2078ef789ee4bfafa4373074eaef4fa"

@@ -9,6 +9,7 @@ exports.up = knex => (
         table.timestamp('chat_time');
         table.integer('user_id').references('id').inTable('users');
         table.integer('chatroom_id').references('id').inTable('chatrooms');
+        table.boolean('read').defaultTo(false);
       })
   );
 

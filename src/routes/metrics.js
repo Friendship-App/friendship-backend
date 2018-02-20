@@ -4,9 +4,10 @@ import {
   getNbMessagesByConversation,
   getNbMessages,
   getNbActiveUsers,
-  getNbRegisteredUsers,
-  getCountRegisteredUsers,
   getCountActiveUsers,
+  getRegisteredUsersData,
+  updateRegisteredUsersData,
+  displayRegisteredUsers,
 } from '../handlers/metrics';
 
 const metrics = [
@@ -44,14 +45,20 @@ const metrics = [
     method: 'GET',
     path: '/metrics/registeredusers',
     config: getAuthWithScope('admin'),
-    handler: getNbRegisteredUsers,
+    handler: displayRegisteredUsers,
   },
   {
     method: 'GET',
     path: '/metrics/registeredusers/update',
     config: getAuthWithScope('admin'),
-    handler: getCountRegisteredUsers,
+    handler: updateRegisteredUsersData,
   },
+  {
+    method: 'GET',
+    path: '/metrics/registeredusers/get',
+    config: getAuthWithScope('admin'),
+    handler: getRegisteredUsersData,
+  }
 ];
 
 export default metrics;

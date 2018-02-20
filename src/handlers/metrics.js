@@ -3,9 +3,10 @@ import {
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
   dbGetNbActiveUsers,
-  dbCountRegisteredUsers,
-  dbGetNbRegisteredUsers,
   dbCountActiveUsers,
+  dbUpdateRegisterdUsersData,
+  dbGetRegisteredUsersData,
+  dbDisplayRegisteredUsersData,
 } from '../models/metrics';
 
 
@@ -22,13 +23,17 @@ export const getNbMessages = (request, reply) => {
 };
 
 // danni
-export const getNbRegisteredUsers = (request, reply) => {
-  dbGetNbRegisteredUsers().then(reply);
+export const getRegisteredUsersData = (request, reply) => {
+  dbGetRegisteredUsersData().then(reply);
+};
+
+export const updateRegisteredUsersData = (request, reply) => {
+  dbUpdateRegisterdUsersData().then(reply);
 };
 
 // minh
-export const getCountRegisteredUsers = (request, reply) => {
-  dbCountRegisteredUsers().then(reply);
+export const displayRegisteredUsers = (request, reply) => {
+  dbDisplayRegisteredUsersData().then(reply);
 };
 
 export const getNbActiveUsers = (request, reply) => {
@@ -39,7 +44,7 @@ export const getCountActiveUsers = (request, reply) => {
   dbCountActiveUsers().then(reply);
 };
 
-//insert active usercount everyday at 23:59
+// insert active usercount everyday at 23:59
 const cron = require('node-cron');
 cron.schedule('0 0 * * *', function(){
   console.log(' START --------------------------0:00');

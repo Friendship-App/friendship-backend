@@ -2,11 +2,10 @@ import {
   dbGetNbMatchesMessaging,
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
-  dbGetNbActiveUsers,
-  dbCountActiveUsers,
-  dbUpdateRegisterdUsersData,
-  dbGetRegisteredUsersData,
   dbDisplayRegisteredUsersData,
+  dbUpdateRegisteredUsersData,
+  dbDisplayActiveUsersData,
+  dbUpdateActiveUsersData,
 } from '../models/metrics';
 
 
@@ -23,12 +22,9 @@ export const getNbMessages = (request, reply) => {
 };
 
 // danni
-export const getRegisteredUsersData = (request, reply) => {
-  dbGetRegisteredUsersData().then(reply);
-};
 
-export const updateRegisteredUsersData = (request, reply) => {
-  dbUpdateRegisterdUsersData().then(reply);
+export const updateRegisteredUsers = (request, reply) => {
+  dbUpdateRegisteredUsersData().then(reply);
 };
 
 // minh
@@ -36,12 +32,12 @@ export const displayRegisteredUsers = (request, reply) => {
   dbDisplayRegisteredUsersData().then(reply);
 };
 
-export const getNbActiveUsers = (request, reply) => {
-  dbGetNbActiveUsers().then(reply);
+export const displayActiveUsers = (request, reply) => {
+  dbDisplayActiveUsersData().then(reply);
 };
 
-export const getCountActiveUsers = (request, reply) => {
-  dbCountActiveUsers().then(reply);
+export const updateActiveUsers = (request, reply) => {
+  dbUpdateActiveUsersData().then(reply);
 };
 
 // insert active usercount everyday at 23:59

@@ -39,13 +39,14 @@ export const dbDisplayRegisteredUsersData = async () => {
     .select(knex.raw(`count('*') as users_count, Date(users."createdAt") as timestamp`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'desc');
+
   const collectMetricsUsersRegistered = await knex('metrics_users_registered')
     .debug(false)
     .select(registeredUsersFields);
 
   if (collectMetricsUsersRegistered.length === 0) {
-    collectUsersCreatedAt.forEach(element => {
-      knex.transaction(trx =>
+    await collectUsersCreatedAt.forEach(async (element) => {
+      await knex.transaction(trx =>
         trx('metrics_users_registered')
           .debug(false)
           .insert({
@@ -57,8 +58,7 @@ export const dbDisplayRegisteredUsersData = async () => {
       );
     });
   }
-
-  return collectMetricsUsersRegistered;
+  return knex('metrics_users_registered').select(registeredUsersFields).orderBy('timestamp', 'desc');
 };
 
 // count lastActive from users table

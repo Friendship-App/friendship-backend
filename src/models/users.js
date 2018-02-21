@@ -1,5 +1,6 @@
 import knex from '../utils/db';
 import { sendVerificationEmail } from '../utils/email';
+import moment from 'moment';
 
 const crypto = require('crypto');
 
@@ -259,6 +260,14 @@ export const dbDelUser = id =>
     .where({ id })
     .del();
 
+export const dbGet30DaysUsers = async () => {
+  const users30Days = await
+    knex('users')
+    .where('lastActive', '<', moment())
+    .andWhere('lastActive', '>', moment().subtract(30, 'days'));
+  console.log(users30Days);
+  return users30Days;
+};
 export const dbDelVerificationHash = ownerId =>
   knex('email_verification')
     .where({ ownerId })

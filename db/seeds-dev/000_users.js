@@ -6,8 +6,12 @@ const emojis = ['👀', '💋', '🐶', '🦋', '😹', '😘', '🤡', '😈', 
 
 const compatibilities = ['54 %', '46 %', '23 %', '98 %', '98 %', '21 %', '76 %'];
 
+const randomDates = ['2017-04-17', '2018-01-15', '2017-10-02', '2018-02-12', '2017-08-08', '2018-02-16', '2018-02-20'];
+const randomDatesActive = ['2017-04-17', '2018-01-15', '2017-10-02', '2018-02-12', '2017-08-08', '2018-02-16', '2018-02-20', moment()];
+
 const userFields = {
-  createdAt: moment(),
+  createdAt: () => randomDates[Math.floor(Math.random() * randomDates.length)],
+  lastActive: () => randomDatesActive[Math.floor(Math.random() * randomDatesActive.length)],
   email: faker.internet.email,
   description: faker.lorem.sentences,
   active: true,

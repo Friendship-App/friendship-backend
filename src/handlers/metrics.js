@@ -1,14 +1,13 @@
-import Boom from 'boom';
-import moment from 'moment';
-
 import {
   dbGetNbMatchesMessaging,
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
-  dbGetNbActiveUsers,
-  dbGetRegisteredUsers,
-  dbGetMetrics
+  dbDisplayRegisteredUsersData,
+  dbUpdateRegisteredUsersData,
+  dbDisplayActiveUsersData,
+  dbUpdateActiveUsersData,
 } from '../models/metrics';
+
 
 export const getNbMatchesMessaging = (request, reply) => {
   dbGetNbMatchesMessaging().then(reply);
@@ -22,10 +21,29 @@ export const getNbMessages = (request, reply) => {
   dbGetNbMessages().then(reply);
 };
 
-export const getNbActiveUsers = (request, reply) => {
-  dbGetNbActiveUsers().then(reply)
+// danni
+
+export const updateRegisteredUsers = (request, reply) => {
+  dbUpdateRegisteredUsersData().then(reply);
 };
 
-export const getNbRegisteredUsers=(reqest,reply)=>{
-  dbGetRegisteredUsers().then(reply)
-}
+// minh
+export const displayRegisteredUsers = (request, reply) => {
+  dbDisplayRegisteredUsersData().then(reply);
+};
+
+export const displayActiveUsers = (request, reply) => {
+  dbDisplayActiveUsersData().then(reply);
+};
+
+export const updateActiveUsers = (request, reply) => {
+  dbUpdateActiveUsersData().then(reply);
+};
+
+// insert active usercount everyday at 23:59
+const cron = require('node-cron');
+cron.schedule('0 0 * * *', function(){
+  console.log(' START --------------------------0:00');
+  //getCountActiveUsers();
+  console.log(' END --------------------------');
+});

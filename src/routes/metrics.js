@@ -3,15 +3,10 @@ import {
   getNbMatchesMessaging,
   getNbMessagesByConversation,
   getNbMessages,
-<<<<<<< HEAD
-  getNbActiveUsers,
-  getNbRegisteredUsers
-=======
   displayRegisteredUsers,
   updateRegisteredUsers,
   displayActiveUsers,
   updateActiveUsers,
->>>>>>> c7efdc1cf3ea2a3a1a0b75bf92458f280ba94535
 } from '../handlers/metrics';
 
 const metrics = [

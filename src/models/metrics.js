@@ -17,15 +17,6 @@ export const dbGetNbMessages = () => {
   return -1;
 };
 
-<<<<<<< HEAD
-export const dbGetNbActiveUsers = () => 
-  knex.raw(`SELECT metrics_users_registered.timestamp,count(users."lastActive") as lastActive FROM metrics_users_registered LEFT JOIN users ON (Date(metrics_users_registered.timestamp)=Date(users."lastActive"))GROUP BY (metrics_users_registered.timestamp) ORDER BY metrics_users_registered.timestamp ASC`)
-  .then(res=>res.rows)
-
-export const dbGetRegisteredUsers = () =>
-  knex.raw(`SELECT metrics_users_registered.timestamp,count(users."createdAt") as registered FROM metrics_users_registered LEFT JOIN users ON (Date(metrics_users_registered.timestamp)=Date(users."createdAt"))GROUP BY (metrics_users_registered.timestamp) ORDER BY metrics_users_registered.timestamp ASC`)
-  .then(res=>res.rows)
-=======
 
 export const dbUserLastActive = userId => knex('users')
   .where({ id: userId })
@@ -41,7 +32,6 @@ export const dbGetRegisteredUser = id =>
   knex('metrics_users_registered')
     .first()
     .where({ id });
->>>>>>> c7efdc1cf3ea2a3a1a0b75bf92458f280ba94535
 
 // minh - display registered users data on front-end with some logic
 // 1. collect createdAt data from users table

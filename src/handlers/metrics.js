@@ -6,6 +6,8 @@ import {
   dbUpdateRegisteredUsersData,
   dbDisplayActiveUsersData,
   dbUpdateActiveUsersData,
+  dbDisplayActiveConversationData,
+  dbUpDateActiveConversationsData,
 } from '../models/metrics';
 
 
@@ -38,6 +40,14 @@ export const displayActiveUsers = (request, reply) => {
 
 export const updateActiveUsers = (request, reply) => {
   dbUpdateActiveUsersData().then(reply);
+};
+
+export const displayActiveConversation = (request, reply) => {
+  dbDisplayActiveConversationData().then(reply);
+};
+
+export const updateActiveConversations = (request, reply) => {
+  dbUpDateActiveConversationsData().then(reply);
 };
 
 // insert active usercount everyday at 23:59

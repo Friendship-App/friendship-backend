@@ -2,8 +2,7 @@ import {
   dbGetNbMatchesMessaging,
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
-  dbDisplayRegisteredUsersData,
-  dbUpdateRegisteredUsersData,
+  dbDisplayNbRegisteredUsers,
   dbDisplayActiveUsersData,
   dbUpdateActiveUsersData,
   dbDisplayActiveConversationData,
@@ -25,14 +24,22 @@ export const getNbMessages = (request, reply) => {
 
 // danni
 
-export const updateRegisteredUsers = (request, reply) => {
+/* export const updateRegisteredUsers = (request, reply) => {
   dbUpdateRegisteredUsersData().then(reply);
 };
 
 // minh
 export const displayRegisteredUsers = (request, reply) => {
   dbDisplayRegisteredUsersData().then(reply);
-};
+}; */
+
+export const getRegisteredUsers=(request,reply)=>{
+  
+  console.log(typeof dbDisplayNbRegisteredUsers());
+
+  console.log('==Check==',dbDisplayNbRegisteredUsers());
+  return dbDisplayNbRegisteredUsers().then(reply)
+}
 
 export const displayActiveUsers = (request, reply) => {
   dbDisplayActiveUsersData().then(reply);

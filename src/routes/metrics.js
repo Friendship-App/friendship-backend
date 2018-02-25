@@ -3,8 +3,7 @@ import {
   getNbMatchesMessaging,
   getNbMessagesByConversation,
   getNbMessages,
-  displayRegisteredUsers,
-  updateRegisteredUsers,
+  getRegisteredUsers,
   displayActiveUsers,
   updateActiveUsers,
   displayActiveConversation,
@@ -46,14 +45,20 @@ const metrics = [
     method: 'GET',
     path: '/metrics/registeredusers',
     config: getAuthWithScope('admin'),
-    handler: displayRegisteredUsers,
+    handler: getRegisteredUsers,
   },
-  {
+  /* {
+    method: 'GET',
+    path: '/metrics/registeredusers',
+    config: getAuthWithScope('admin'),
+    handler: displayRegisteredUsers,
+  }, */
+  /* {
     method: 'GET',
     path: '/metrics/registeredusers/update',
     config: getAuthWithScope('admin'),
     handler: updateRegisteredUsers,
-  },
+  }, */
   {
     method: 'GET',
     path: '/metrics/activeconversations',

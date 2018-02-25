@@ -39,7 +39,7 @@ export const dbGetRegisteredUser = id =>
 // 4. insert collected data from users table if empty, otherwise do nothing
 // 5. return metrics_users_registered table to front-end.
 
-export const dbDisplayRegisteredUsersData = async () => {
+/* export const dbDisplayRegisteredUsersData = async () => {
   const collectUsersCreatedAt = await knex('users')
     .debug(false)
     .select(knex.raw(`count('*') as users_count, Date(users."createdAt") as timestamp`))
@@ -99,7 +99,12 @@ export const dbUpdateRegisteredUsersData = async () => {
   return knex('metrics_users_registered')
           .select(registeredUsersFields)
           .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
-};
+}; */
+
+export const dbDisplayNbRegisteredUsers=()=>{
+  return knex.raw(`SELECT metrics_users_registered.timestamp,count(users."createdAt") as registered FROM metrics_users_registered LEFT JOIN users ON (Date(metrics_users_registered.timestamp)=Date(users."createdAt"))GROUP BY (metrics_users_registered.timestamp) ORDER BY metrics_users_registered.timestamp ASC`)
+  .then(results=>results.rows)	
+}
 
 // minh - display last active users count on front-end
 export const dbDisplayActiveUsersData = async () => {

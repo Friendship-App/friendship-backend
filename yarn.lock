@@ -3705,6 +3705,10 @@ mock-knex@^0.3.7:
     lodash "^4.14.2"
     semver "^5.3.0"
 
+moment-random@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/moment-random/-/moment-random-1.0.3.tgz#5949b490508f8bcacca3a078d3039dbb0915dea7"
+
 moment@2.15.2, moment@2.15.x, moment@2.x.x:
   version "2.15.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.15.2.tgz#1bfdedf6a6e345f322fe956d5df5bd08a8ce84dc"

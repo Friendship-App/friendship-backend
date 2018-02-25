@@ -7,6 +7,8 @@ import {
   updateRegisteredUsers,
   displayActiveUsers,
   updateActiveUsers,
+  displayActiveConversation,
+  updateActiveConversations,
 } from '../handlers/metrics';
 
 const metrics = [
@@ -51,6 +53,18 @@ const metrics = [
     path: '/metrics/registeredusers/update',
     config: getAuthWithScope('admin'),
     handler: updateRegisteredUsers,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/activeconversations',
+    config: getAuthWithScope('admin'),
+    handler: displayActiveConversation,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/activeconversations/update',
+    config: getAuthWithScope('admin'),
+    handler: updateActiveConversations,
   },
 ];
 

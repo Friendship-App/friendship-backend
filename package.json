@@ -73,6 +73,7 @@
     "lout": "^10.0.2",
     "mkdirp": "^0.5.1",
     "moment": "^2.18.1",
+    "moment-random": "^1.0.3",
     "nes": "^6.4.3",
     "node-cron": "^1.2.1",
     "node-uuid": "^1.4.8",

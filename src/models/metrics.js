@@ -17,10 +17,9 @@ export const dbGetNbMessages = () => {
   return -1;
 };
 
-
 export const dbUserLastActive = userId => knex('users')
   .where({ id: userId })
-  .update({ lastActive: new Date() });
+  .update({ lastActive: moment() });
 
 
 // export const dbUserCreatedAt = userId => knex('users')
@@ -166,3 +165,131 @@ export const dbUpdateActiveUsersData = async () => {
           .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
 
+// minh - display active conversation counts by date
+export const dbDisplayActiveConversationData = async () => {
+  const collectLastMessagesByDate = await knex('messages')
+    .debug(false)
+    .select(knex.raw(`Date(messages."chat_time") as timestamp, count(distinct messages."chatroom_id") as conversations_count`))
+    .groupBy('timestamp')
+    .orderBy('timestamp', 'asc');
+
+  const collectMetricsActiveConversations = await knex('metrics_active_conversations')
+    .debug(false)
+    .select('*');
+
+  if (collectMetricsActiveConversations.length === 0) {
+    await collectLastMessagesByDate.forEach(async (element) => {
+      await knex.transaction(trx =>
+        trx('metrics_active_conversations')
+          .debug(false)
+          .insert({
+            conversations_count: element.conversations_count,
+            timestamp: element.timestamp,
+          })
+          .returning('*')
+          .then(results => results[0]),
+      );
+    });
+  }
+  return knex('metrics_active_conversations').select('*').orderBy('timestamp', 'desc');
+};
+
+// minh - logic to update/ insert data row in metrics_active_conversations
+export const dbUpDateActiveConversationsData = async () => {
+  const existingData = await dbDisplayActiveConversationData();
+
+  const dayActiveConversations = await knex('messages')
+    .debug(false)
+    .countDistinct('chat_id')
+    .where(knex.raw('??::date = ?', ['chat_time', moment().startOf('day')]));
+
+  if (moment(existingData[0].timestamp).startOf('day').isSame(moment().startOf('day'))) {
+    await knex.transaction(trx =>
+      trx('metrics_active_conversations')
+        .debug(false)
+        .update({ conversations_count: dayActiveConversations[0].count })
+        .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')])),
+    );
+  } else {
+    await knex.transaction(trx =>
+      trx('metrics_active_conversations')
+        .debug(false)
+        .insert({
+          conversations_count: dayActiveConversations[0].count,
+          timestamp: moment().startOf('day'),
+        }),
+    );
+  }
+
+  return knex('metrics_active_conversations')
+          .select('*')
+          .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
+};
+
+// minh - display average conversations length by date
+export const dbDisplayAverageConversationsLength = async () => {
+  await dbDisplayActiveConversationData();
+
+  const joinChatroomMessagesByDate = await knex('metrics_active_conversations')
+    .join('messages', knex.raw('??::date', ['timestamp']), knex.raw('??::date', ['messages.chat_time']))
+    .select(knex.raw(`metrics_active_conversations."timestamp" as timestamp, 
+                      metrics_active_conversations."conversations_count" as number_of_chatrooms, 
+                      count(messages."id") as number_of_messages`))
+    .groupBy('timestamp', 'number_of_chatrooms');
+
+
+  const collectMetricsConversationsLength = await knex('metrics_conversations_length')
+    .debug(false)
+    .select('*');
+
+  if (collectMetricsConversationsLength.length === 0) {
+    await joinChatroomMessagesByDate.forEach(async (element) => {
+      await knex.transaction(trx =>
+        trx('metrics_conversations_length')
+          .debug(false)
+          .insert({
+            conversations_length: +((element.number_of_messages / element.number_of_chatrooms).toFixed(2)),
+            timestamp: element.timestamp,
+          }),
+      );
+    });
+  }
+  return knex('metrics_conversations_length').select('*').orderBy('timestamp', 'desc');
+};
+
+// minh - logic to update or insert conversations length row
+export const dbUpdateAverageConversationsLength = async () => {
+  const existingData = await dbDisplayAverageConversationsLength();
+
+  const dayStats = await knex('metrics_active_conversations')
+    .join('messages', knex.raw('??::date', ['timestamp']), knex.raw('??::date', ['messages.chat_time']))
+    .select(knex.raw(`metrics_active_conversations."timestamp" as timestamp, 
+                      metrics_active_conversations."conversations_count" as number_of_chatrooms, 
+                      count(messages."id") as number_of_messages`))
+    .groupBy('timestamp', 'number_of_chatrooms')
+    .where(knex.raw('??::date = ?', ['chat_time', moment().startOf('day')]));
+
+  if (moment(existingData[0].timestamp).startOf('day').isSame(moment().startOf('day'))) {
+    await knex.transaction(trx =>
+      trx('metrics_conversations_length')
+      .debug(false)
+      .update({
+        conversations_length: +(dayStats[0].number_of_messages / dayStats[0].number_of_chatrooms),
+      })
+      .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')])),
+    );
+  } else {
+    await knex.transaction(trx =>
+      trx('metrics_conversations_length')
+        .debug(false)
+        .insert({
+          conversations_length: +(dayStats[0].number_of_messages / dayStats[0].number_of_chatrooms),
+          timestamp: moment().startOf('day'),
+        }),
+    );
+  }
+
+  return knex('metrics_conversations_length')
+              .select('*')
+              .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
+};

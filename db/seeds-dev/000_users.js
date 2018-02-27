@@ -1,3 +1,5 @@
+import { getDates } from '../../src/models/metrics';
+
 const simpleFixtures = require('simple-fixtures');
 const faker = require('faker/locale/en');
 const moment = require('moment');
@@ -6,8 +8,11 @@ const emojis = ['👀', '💋', '🐶', '🦋', '😹', '😘', '🤡', '😈', 
 
 const compatibilities = ['54 %', '46 %', '23 %', '98 %', '98 %', '21 %', '76 %'];
 
+const randomDates = getDates('2018-01-01', moment().startOf('day'));
+
 const userFields = {
-  createdAt: moment(),
+  createdAt: () => randomDates[Math.floor(Math.random() * randomDates.length)].timestamp,
+  lastActive: () => randomDates[Math.floor(Math.random() * randomDates.length)].timestamp,
   email: faker.internet.email,
   description: faker.lorem.sentences,
   active: true,
@@ -46,6 +51,6 @@ exports.seed = knex =>
     .then(() =>
       knex.batchInsert(
         'users',
-        simpleFixtures.generateFixtures(userFields, 50),
+        simpleFixtures.generateFixtures(userFields, 150),
       ),
     );

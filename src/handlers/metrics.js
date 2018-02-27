@@ -1,24 +1,69 @@
-import Boom from 'boom';
-
 import {
   dbGetNbMatchesMessaging,
   dbGetNbMessagesByConversation,
   dbGetNbMessages,
-  dbGetNbActiveUsers,
+  dbDisplayRegisteredUsersData,
+  dbUpdateRegisteredUsersData,
+  dbDisplayActiveUsersData,
+  dbUpdateActiveUsersData,
+  dbDisplayActiveConversationData,
+  dbUpDateActiveConversationsData,
+  dbDisplayAverageConversationsLength,
+  dbUpdateAverageConversationsLength,
 } from '../models/metrics';
+
 
 export const getNbMatchesMessaging = (request, reply) => {
   dbGetNbMatchesMessaging().then(reply);
-}
+};
 
 export const getNbMessagesByConversation = (request, reply) => {
   dbGetNbMessagesByConversation().then(reply);
-}
+};
 
 export const getNbMessages = (request, reply) => {
   dbGetNbMessages().then(reply);
-}
+};
 
-export const getNbActiveUsers = (request, reply) => {
-  dbGetNbActiveUsers().then(reply);
-}
+// danni
+
+export const updateRegisteredUsers = (request, reply) => {
+  dbUpdateRegisteredUsersData().then(reply);
+};
+
+// minh
+export const displayRegisteredUsers = (request, reply) => {
+  dbDisplayRegisteredUsersData().then(reply);
+};
+
+export const displayActiveUsers = (request, reply) => {
+  dbDisplayActiveUsersData().then(reply);
+};
+
+export const updateActiveUsers = (request, reply) => {
+  dbUpdateActiveUsersData().then(reply);
+};
+
+export const displayActiveConversation = (request, reply) => {
+  dbDisplayActiveConversationData().then(reply);
+};
+
+export const updateActiveConversations = (request, reply) => {
+  dbUpDateActiveConversationsData().then(reply);
+};
+
+export const displayConversationsLength = (request, reply) => {
+  dbDisplayAverageConversationsLength().then(reply);
+};
+
+export const updateAverageConversationsLength = (request, reply) => {
+  dbUpdateAverageConversationsLength().then(reply);
+};
+
+// insert active usercount everyday at 23:59
+const cron = require('node-cron');
+cron.schedule('0 0 * * *', function(){
+  console.log(' START --------------------------0:00');
+  //getCountActiveUsers();
+  console.log(' END --------------------------');
+});

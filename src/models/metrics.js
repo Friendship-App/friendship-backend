@@ -207,23 +207,36 @@ export const dbUpdateActiveUsersData = async () => {
 
 // minh - display active conversation counts by date
 export const dbDisplayActiveConversationData = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   const collectLastMessagesByDate = await knex('messages')
     .debug(false)
     .select(knex.raw(`Date(messages."chat_time") as timestamp, count(distinct messages."chatroom_id") as conversations_count`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  await comparingData.forEach(async (element) => {
+    await collectLastMessagesByDate.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.conversations_count;
+      }
+      return element.count;
+    });
+    data.push(element);
+  });
+
   const collectMetricsActiveConversations = await knex('metrics_active_conversations')
     .debug(false)
     .select('*');
 
   if (collectMetricsActiveConversations.length === 0) {
-    await collectLastMessagesByDate.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_active_conversations')
           .debug(false)
           .insert({
-            conversations_count: element.conversations_count,
+            conversations_count: element.count,
             timestamp: element.timestamp,
           })
           .returning('*')
@@ -231,7 +244,10 @@ export const dbDisplayActiveConversationData = async () => {
       );
     });
   }
-  return knex('metrics_active_conversations').select('*').orderBy('timestamp', 'desc');
+  return knex('metrics_active_conversations')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // minh - logic to update/ insert data row in metrics_active_conversations
@@ -240,7 +256,7 @@ export const dbUpDateActiveConversationsData = async () => {
 
   const dayActiveConversations = await knex('messages')
     .debug(false)
-    .countDistinct('chat_id')
+    .countDistinct('chatroom_id')
     .where(knex.raw('??::date = ?', ['chat_time', moment().startOf('day')]));
 
   if (moment(existingData[0].timestamp).startOf('day').isSame(moment().startOf('day'))) {

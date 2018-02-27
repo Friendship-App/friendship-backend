@@ -1,10 +1,6 @@
 import moment from 'moment';
 import knex from '../utils/db';
 
-const registeredUsersFields = ['id', 'users_count', 'timestamp'];
-
-const activeUsersFields = ['id', 'users_count', 'timestamp'];
-
 export const dbGetNbMatchesMessaging = () => {
   return -1;
 };
@@ -41,10 +37,10 @@ export const dbGetRegisteredUser = id =>
 export const getDates = (startDate, endDate) => {
   const dates = [];
   const chosenDate = moment(startDate).startOf('day');
-  while (chosenDate.isBefore(moment(endDate))) {
+  while (chosenDate.isSameOrBefore(moment(endDate))) {
     dates.push({
       timestamp: moment(chosenDate),
-      users_count: 0,
+      count: 0,
     });
     chosenDate.add(1, 'days');
   }
@@ -64,16 +60,16 @@ export const dbDisplayRegisteredUsersData = async () => {
   await comparingData.forEach(async (element) => {
     await collectUsersCreatedAt.forEach((row) => {
       if (moment(element.timestamp).isSame(moment(row.timestamp))) {
-        element.users_count = row.users_count;
+        element.count = row.users_count;
       }
-      return element.users_count;
+      return element.count;
     });
     data.push(element);
   });
 
   const collectMetricsUsersRegistered = await knex('metrics_users_registered')
     .debug(false)
-    .select(registeredUsersFields);
+    .select('*');
 
   if (collectMetricsUsersRegistered.length === 0) {
     await data.forEach(async (element) => {
@@ -81,7 +77,7 @@ export const dbDisplayRegisteredUsersData = async () => {
         trx('metrics_users_registered')
           .debug(false)
           .insert({
-            users_count: element.users_count,
+            users_count: element.count,
             timestamp: element.timestamp,
           })
           .returning('*')
@@ -90,7 +86,7 @@ export const dbDisplayRegisteredUsersData = async () => {
     });
   }
   return knex('metrics_users_registered')
-    .select(registeredUsersFields)
+    .select('*')
     .limit(30)
     .orderBy('timestamp', 'desc');
 };
@@ -125,29 +121,42 @@ export const dbUpdateRegisteredUsersData = async () => {
     );
   }
   return knex('metrics_users_registered')
-          .select(registeredUsersFields)
+          .select('*')
           .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
 
 // minh - display last active users count on front-end
 export const dbDisplayActiveUsersData = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   const collectUsersLastActive = await knex('users')
     .debug(false)
     .select(knex.raw(`count('*') as users_count, Date(users."lastActive") as timestamp`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  await comparingData.forEach(async (element) => {
+    await collectUsersLastActive.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.users_count;
+      }
+      return element.count;
+    });
+    data.push(element);
+  });
+
   const collectMetricsActiveUsers = await knex('metrics_active_users')
     .debug(false)
-    .select(activeUsersFields);
+    .select('*');
 
   if (collectMetricsActiveUsers.length === 0) {
-    await collectUsersLastActive.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_active_users')
           .debug(false)
           .insert({
-            users_count: element.users_count,
+            users_count: element.count,
             timestamp: element.timestamp,
           })
           .returning('*')
@@ -155,7 +164,10 @@ export const dbDisplayActiveUsersData = async () => {
       );
     });
   }
-  return knex('metrics_active_users').select(activeUsersFields).orderBy('timestamp', 'desc');
+  return knex('metrics_active_users')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // count lastActive from users table
@@ -189,7 +201,7 @@ export const dbUpdateActiveUsersData = async () => {
     );
   }
   return knex('metrics_active_users')
-          .select(activeUsersFields)
+          .select('*')
           .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
 

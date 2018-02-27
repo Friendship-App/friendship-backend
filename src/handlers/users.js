@@ -16,6 +16,7 @@ import {
   dbGetUserByUsername,
   dbUpdatePassword,
   dbGetFilteredUsers,
+  dbGet30DaysUsers,
 } from '../models/users';
 import moment from 'moment';
 
@@ -26,6 +27,10 @@ export const getUsers = (request, reply) => {
   return dbGetUsers().then(reply);
 };
 
+export const get30DaysUsers = (request, reply) => {
+  return dbGet30DaysUsers()
+    .then(reply);
+};
 export const getUsersBatch = (request, reply) =>
   dbGetUsersBatch(request.params.pageNumber, request.pre.user.id).then(reply);
 
@@ -105,9 +110,9 @@ export const banUser = (request, reply) => {
       !request.payload.expire || request.payload.expire === 'x'
         ? null
         : moment()
-            .add(request.payload.expire.split(':')[0], request.payload.expire.split(':')[1])
-            .utc()
-            .toISOString(),
+          .add(request.payload.expire.split(':')[0], request.payload.expire.split(':')[1])
+          .utc()
+          .toISOString(),
   };
 
   return dbFetchUserBan(request.params.userId).then((result) => {
@@ -144,31 +149,31 @@ export const registerUser = async (request, reply) => {
   console.log(fields);
 
   return hashPassword(request.payload.password)
-  .then(passwordHash =>
-    dbCreateUser({
-      ...fields,
-      email: request.payload.email.toLowerCase().trim(),
-      password: passwordHash,
-      scope: 'user',
-    }).then((userData) => {
-      reply(
-        createToken({
-          id: userData.id,
-          email: userData.email,
-          scope: userData.scope,
-        }),
-      );
-    }),
+    .then(passwordHash =>
+      dbCreateUser({
+        ...fields,
+        email: request.payload.email.toLowerCase().trim(),
+        password: passwordHash,
+        scope: 'user',
+      }).then((userData) => {
+        reply(
+          createToken({
+            id: userData.id,
+            email: userData.email,
+            scope: userData.scope,
+          }),
+        );
+      }),
   )
-  .catch((err) => {
-    if (err.constraint === 'users_email_unique') {
-      reply(Boom.conflict('Email already exists'));
-    } else if (err.constraint === 'users_username_unique') {
-      reply(Boom.conflict('Username already exists'));
-    } else {
-      reply(Boom.badImplementation(err));
-    }
-  });
+    .catch((err) => {
+      if (err.constraint === 'users_email_unique') {
+        reply(Boom.conflict('Email already exists'));
+      } else if (err.constraint === 'users_username_unique') {
+        reply(Boom.conflict('Username already exists'));
+      } else {
+        reply(Boom.badImplementation(err));
+      }
+    });
 };
 
 // check if the hash value exists in the db

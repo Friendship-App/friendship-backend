@@ -26,3 +26,9 @@ This is a sample Node.js backend to get you started with the following stack qui
 * [babel](https://babeljs.io/), transpile ES6 syntax into ES5
 * [eslint](http://eslint.org/), make sure your code is remotely sane, using [Airbnb's JS style guide](https://github.com/airbnb/javascript)
 * [jest](https://facebook.github.io/jest/), painless JavaScript testing
+
+### Docker 
+docker run -p 5432:5432 -d postgres
+
+### DB
+yarn db:init

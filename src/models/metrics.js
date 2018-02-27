@@ -284,6 +284,9 @@ export const dbUpDateActiveConversationsData = async () => {
 
 // minh - display average conversations length by date
 export const dbDisplayAverageConversationsLength = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   await dbDisplayActiveConversationData();
 
   const joinChatroomMessagesByDate = await knex('metrics_active_conversations')
@@ -293,24 +296,37 @@ export const dbDisplayAverageConversationsLength = async () => {
                       count(messages."id") as number_of_messages`))
     .groupBy('timestamp', 'number_of_chatrooms');
 
+  await comparingData.forEach(async (element) => {
+    await joinChatroomMessagesByDate.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.number_of_chatrooms;
+        element.messages_count = row.number_of_messages;
+      }
+      return element;
+    });
+    data.push(element);
+  });
 
   const collectMetricsConversationsLength = await knex('metrics_conversations_length')
     .debug(false)
     .select('*');
 
   if (collectMetricsConversationsLength.length === 0) {
-    await joinChatroomMessagesByDate.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_conversations_length')
           .debug(false)
           .insert({
-            conversations_length: +((element.number_of_messages / element.number_of_chatrooms).toFixed(2)),
+            conversations_length: +((element.messages_count / element.count).toFixed(2)),
             timestamp: element.timestamp,
           }),
       );
     });
   }
-  return knex('metrics_conversations_length').select('*').orderBy('timestamp', 'desc');
+  return knex('metrics_conversations_length')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // minh - logic to update or insert conversations length row

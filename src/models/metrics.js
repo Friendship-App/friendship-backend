@@ -1,10 +1,6 @@
 import moment from 'moment';
 import knex from '../utils/db';
 
-const registeredUsersFields = ['id', 'users_count', 'timestamp'];
-
-const activeUsersFields = ['id', 'users_count', 'timestamp'];
-
 export const dbGetNbMatchesMessaging = () => {
   return -1;
 };
@@ -38,25 +34,50 @@ export const dbGetRegisteredUser = id =>
 // 3. check if metrics_users_registered table is empty
 // 4. insert collected data from users table if empty, otherwise do nothing
 // 5. return metrics_users_registered table to front-end.
+export const getDates = (startDate, endDate) => {
+  const dates = [];
+  const chosenDate = moment(startDate).startOf('day');
+  while (chosenDate.isSameOrBefore(moment(endDate))) {
+    dates.push({
+      timestamp: moment(chosenDate),
+      count: 0,
+    });
+    chosenDate.add(1, 'days');
+  }
+  return dates;
+};
 
 export const dbDisplayRegisteredUsersData = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   const collectUsersCreatedAt = await knex('users')
     .debug(false)
     .select(knex.raw(`count('*') as users_count, Date(users."createdAt") as timestamp`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  await comparingData.forEach(async (element) => {
+    await collectUsersCreatedAt.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.users_count;
+      }
+      return element.count;
+    });
+    data.push(element);
+  });
+
   const collectMetricsUsersRegistered = await knex('metrics_users_registered')
     .debug(false)
-    .select(registeredUsersFields);
+    .select('*');
 
   if (collectMetricsUsersRegistered.length === 0) {
-    await collectUsersCreatedAt.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_users_registered')
           .debug(false)
           .insert({
-            users_count: element.users_count,
+            users_count: element.count,
             timestamp: element.timestamp,
           })
           .returning('*')
@@ -64,7 +85,10 @@ export const dbDisplayRegisteredUsersData = async () => {
       );
     });
   }
-  return knex('metrics_users_registered').select(registeredUsersFields).orderBy('timestamp', 'desc');
+  return knex('metrics_users_registered')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // minh - logic to insert new row or update the row
@@ -97,29 +121,42 @@ export const dbUpdateRegisteredUsersData = async () => {
     );
   }
   return knex('metrics_users_registered')
-          .select(registeredUsersFields)
+          .select('*')
           .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
 
 // minh - display last active users count on front-end
 export const dbDisplayActiveUsersData = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   const collectUsersLastActive = await knex('users')
     .debug(false)
     .select(knex.raw(`count('*') as users_count, Date(users."lastActive") as timestamp`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  await comparingData.forEach(async (element) => {
+    await collectUsersLastActive.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.users_count;
+      }
+      return element.count;
+    });
+    data.push(element);
+  });
+
   const collectMetricsActiveUsers = await knex('metrics_active_users')
     .debug(false)
-    .select(activeUsersFields);
+    .select('*');
 
   if (collectMetricsActiveUsers.length === 0) {
-    await collectUsersLastActive.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_active_users')
           .debug(false)
           .insert({
-            users_count: element.users_count,
+            users_count: element.count,
             timestamp: element.timestamp,
           })
           .returning('*')
@@ -127,7 +164,10 @@ export const dbDisplayActiveUsersData = async () => {
       );
     });
   }
-  return knex('metrics_active_users').select(activeUsersFields).orderBy('timestamp', 'desc');
+  return knex('metrics_active_users')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // count lastActive from users table
@@ -161,29 +201,42 @@ export const dbUpdateActiveUsersData = async () => {
     );
   }
   return knex('metrics_active_users')
-          .select(activeUsersFields)
+          .select('*')
           .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
 
 // minh - display active conversation counts by date
 export const dbDisplayActiveConversationData = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   const collectLastMessagesByDate = await knex('messages')
     .debug(false)
     .select(knex.raw(`Date(messages."chat_time") as timestamp, count(distinct messages."chatroom_id") as conversations_count`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  await comparingData.forEach(async (element) => {
+    await collectLastMessagesByDate.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.conversations_count;
+      }
+      return element.count;
+    });
+    data.push(element);
+  });
+
   const collectMetricsActiveConversations = await knex('metrics_active_conversations')
     .debug(false)
     .select('*');
 
   if (collectMetricsActiveConversations.length === 0) {
-    await collectLastMessagesByDate.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_active_conversations')
           .debug(false)
           .insert({
-            conversations_count: element.conversations_count,
+            conversations_count: element.count,
             timestamp: element.timestamp,
           })
           .returning('*')
@@ -191,7 +244,10 @@ export const dbDisplayActiveConversationData = async () => {
       );
     });
   }
-  return knex('metrics_active_conversations').select('*').orderBy('timestamp', 'desc');
+  return knex('metrics_active_conversations')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // minh - logic to update/ insert data row in metrics_active_conversations
@@ -200,7 +256,7 @@ export const dbUpDateActiveConversationsData = async () => {
 
   const dayActiveConversations = await knex('messages')
     .debug(false)
-    .countDistinct('chat_id')
+    .countDistinct('chatroom_id')
     .where(knex.raw('??::date = ?', ['chat_time', moment().startOf('day')]));
 
   if (moment(existingData[0].timestamp).startOf('day').isSame(moment().startOf('day'))) {
@@ -228,6 +284,9 @@ export const dbUpDateActiveConversationsData = async () => {
 
 // minh - display average conversations length by date
 export const dbDisplayAverageConversationsLength = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   await dbDisplayActiveConversationData();
 
   const joinChatroomMessagesByDate = await knex('metrics_active_conversations')
@@ -237,24 +296,37 @@ export const dbDisplayAverageConversationsLength = async () => {
                       count(messages."id") as number_of_messages`))
     .groupBy('timestamp', 'number_of_chatrooms');
 
+  await comparingData.forEach(async (element) => {
+    await joinChatroomMessagesByDate.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.count = row.number_of_chatrooms;
+        element.messages_count = row.number_of_messages;
+      }
+      return element;
+    });
+    data.push(element);
+  });
 
   const collectMetricsConversationsLength = await knex('metrics_conversations_length')
     .debug(false)
     .select('*');
 
   if (collectMetricsConversationsLength.length === 0) {
-    await joinChatroomMessagesByDate.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_conversations_length')
           .debug(false)
           .insert({
-            conversations_length: +((element.number_of_messages / element.number_of_chatrooms).toFixed(2)),
+            conversations_length: +((element.messages_count / element.count).toFixed(2)),
             timestamp: element.timestamp,
           }),
       );
     });
   }
-  return knex('metrics_conversations_length').select('*').orderBy('timestamp', 'desc');
+  return knex('metrics_conversations_length')
+    .select('*')
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // minh - logic to update or insert conversations length row

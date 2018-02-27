@@ -38,20 +38,45 @@ export const dbGetRegisteredUser = id =>
 // 3. check if metrics_users_registered table is empty
 // 4. insert collected data from users table if empty, otherwise do nothing
 // 5. return metrics_users_registered table to front-end.
+export const getDates = (startDate, endDate) => {
+  const dates = [];
+  const chosenDate = moment(startDate).startOf('day');
+  while (chosenDate.isBefore(moment(endDate))) {
+    dates.push({
+      timestamp: moment(chosenDate),
+      users_count: 0,
+    });
+    chosenDate.add(1, 'days');
+  }
+  return dates;
+};
 
 export const dbDisplayRegisteredUsersData = async () => {
+  const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  const data = [];
+
   const collectUsersCreatedAt = await knex('users')
     .debug(false)
     .select(knex.raw(`count('*') as users_count, Date(users."createdAt") as timestamp`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  await comparingData.forEach(async (element) => {
+    await collectUsersCreatedAt.forEach((row) => {
+      if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        element.users_count = row.users_count;
+      }
+      return element.users_count;
+    });
+    data.push(element);
+  });
+
   const collectMetricsUsersRegistered = await knex('metrics_users_registered')
     .debug(false)
     .select(registeredUsersFields);
 
   if (collectMetricsUsersRegistered.length === 0) {
-    await collectUsersCreatedAt.forEach(async (element) => {
+    await data.forEach(async (element) => {
       await knex.transaction(trx =>
         trx('metrics_users_registered')
           .debug(false)
@@ -64,7 +89,10 @@ export const dbDisplayRegisteredUsersData = async () => {
       );
     });
   }
-  return knex('metrics_users_registered').select(registeredUsersFields).orderBy('timestamp', 'desc');
+  return knex('metrics_users_registered')
+    .select(registeredUsersFields)
+    .limit(30)
+    .orderBy('timestamp', 'desc');
 };
 
 // minh - logic to insert new row or update the row

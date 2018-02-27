@@ -13,12 +13,12 @@ knex('messages')
     const messages = [];
 
     chatrooms.forEach(chatroom =>
-      [...Array(faker.random.number(19))].forEach(() =>
+      [...Array(faker.random.number(25))].forEach(() =>
         messages.push({
           text_message: faker.lorem.sentences(),
           chatroom_id: chatroom.id,
           user_id: (Math.random() < 0.5) ? chatroom.user_creator_id : chatroom.user_receiver_id,
-          chat_time: momentRandom(moment(), '2018-02-20'),
+          chat_time: momentRandom(moment(), '2018-01-01'),
         }),
       ),
     );

@@ -9,6 +9,4 @@ const tagFields = {
 };
 
 exports.seed = knex =>
-  knex
-    .batchInsert('tags', simpleFixtures.generateFixtures(tagFields, 10))
-    );
+  knex.batchInsert('tags', simpleFixtures.generateFixtures(tagFields, 10));

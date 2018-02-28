@@ -19,33 +19,8 @@ const personalityFields = {
   name: () => personalities[index++],
 };
 
-let userId = 1;
-let personalityId = 0;
-
-const userPersonalityFields = {
-  userId: () => {
-    if (personalityId === 8) {
-      userId += 1;
-      personalityId = 0;
-    }
-    return userId;
-  },
-  personalityId: () => {
-    personalityId += 1;
-    return personalityId;
-  },
-  level: () => faker.random.number({ min: 1, max: 5 }),
-};
-
 exports.seed = knex =>
-  knex
-    .batchInsert(
-      'personalities',
-      simpleFixtures.generateFixtures(personalityFields, 8),
-    )
-    .then(() =>
-      knex.batchInsert(
-        'user_personality',
-        simpleFixtures.generateFixtures(userPersonalityFields, 100),
-      ),
-    );
+  knex.batchInsert(
+    'personalities',
+    simpleFixtures.generateFixtures(personalityFields, 8),
+  );

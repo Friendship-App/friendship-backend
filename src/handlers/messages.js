@@ -3,6 +3,7 @@ import {
     dbGetMessages,
     dbGetMessage,
     dbCreateMessage,
+    dbUpdateReadMessages,
   } from '../models/messages';
 
 export const getMessages = (request, reply) => dbGetMessages().then(reply);
@@ -29,3 +30,17 @@ export const createMessage = function(request, reply) {
       }
     });
 };
+
+export const updateReadMessages = function(request, reply) {
+  return dbUpdateReadMessages(
+    request.payload.messageIdArr
+  )
+  .then(reply)
+  .catch((err) => {
+    if (err.constraint) {
+      reply(Boom.conflict('Constraint Error: ', err));
+    } else {
+      reply(Boom.badImplementation(err));
+    }
+  });
+}

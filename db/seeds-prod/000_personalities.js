@@ -1,5 +1,4 @@
 const simpleFixtures = require('simple-fixtures');
-const faker = require('faker/locale/en');
 
 // Designer decided to have a preset list
 // Using this for the seed data as well

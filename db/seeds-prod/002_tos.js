@@ -8,6 +8,7 @@ const tosFields = {
 };
 
 exports.seed = knex =>
-  knex('terms_of_service').insert({
-    ...simpleFixtures.generateFixtures(tosFields),
-  });
+  knex.batchInsert(
+    'terms_of_service',
+    simpleFixtures.generateFixtures(tosFields, 1),
+  );

@@ -27,10 +27,8 @@ export const getUsers = (request, reply) => {
   return dbGetUsers().then(reply);
 };
 
-export const get30DaysUsers = (request, reply) => {
-  return dbGet30DaysUsers()
-    .then(reply);
-};
+export const get30DaysUsers = (request, reply) =>
+  dbGet30DaysUsers().then(reply);
 export const getUsersBatch = (request, reply) =>
   dbGetUsersBatch(request.params.pageNumber, request.pre.user.id).then(reply);
 
@@ -49,8 +47,13 @@ export const getUserByUsername = (request, reply) =>
   dbGetUserByUsername(request.params.username, request.pre.user.id).then(reply);
 
 export const delUser = (request, reply) => {
-  if (request.pre.user.scope !== 'admin' && request.pre.user.id !== request.params.userId) {
-    return reply(Boom.unauthorized('Unprivileged users can only delete own userId!'));
+  if (
+    request.pre.user.scope !== 'admin' &&
+    request.pre.user.id !== request.params.userId
+  ) {
+    return reply(
+      Boom.unauthorized('Unprivileged users can only delete own userId!'),
+    );
   }
 
   return dbDelUser(request.params.userId).then(reply);
@@ -64,7 +67,11 @@ export const updateUser = async (request, reply) => {
     request.pre.user.scope !== 'admin' &&
     request.pre.user.id !== parseInt(request.params.userId, 10)
   ) {
-    return reply(Boom.unauthorized('Unprivileged users can only perform updates on own userId!'));
+    return reply(
+      Boom.unauthorized(
+        'Unprivileged users can only perform updates on own userId!',
+      ),
+    );
   }
 
   const fields = {};
@@ -83,13 +90,9 @@ export const updateUser = async (request, reply) => {
     const buf = Buffer.from(fields.image, 'base64');
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
-  console.log(fields.password);
   if (fields.password) {
     hashPassword(fields.password).then((hashedPassword) => {
-      console.log(hashedPassword);
-      dbUpdatePassword(request.pre.user.id, hashedPassword).catch((err) => {
-        console.log(err);
-      });
+      dbUpdatePassword(request.pre.user.id, hashedPassword).catch((err) => {});
     });
 
     delete fields.password;
@@ -98,8 +101,13 @@ export const updateUser = async (request, reply) => {
 };
 
 export const banUser = (request, reply) => {
-  if (request.pre.user.scope !== 'admin' && request.pre.user.id !== request.params.userId) {
-    return reply(Boom.unauthorized("You don't have the permissions to do this action"));
+  if (
+    request.pre.user.scope !== 'admin' &&
+    request.pre.user.id !== request.params.userId
+  ) {
+    return reply(
+      Boom.unauthorized("You don't have the permissions to do this action"),
+    );
   }
 
   const fields = {
@@ -110,9 +118,12 @@ export const banUser = (request, reply) => {
       !request.payload.expire || request.payload.expire === 'x'
         ? null
         : moment()
-          .add(request.payload.expire.split(':')[0], request.payload.expire.split(':')[1])
-          .utc()
-          .toISOString(),
+            .add(
+              request.payload.expire.split(':')[0],
+              request.payload.expire.split(':')[1],
+            )
+            .utc()
+            .toISOString(),
   };
 
   return dbFetchUserBan(request.params.userId).then((result) => {
@@ -146,8 +157,6 @@ export const registerUser = async (request, reply) => {
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
 
-  console.log(fields);
-
   return hashPassword(request.payload.password)
     .then(passwordHash =>
       dbCreateUser({
@@ -164,7 +173,7 @@ export const registerUser = async (request, reply) => {
           }),
         );
       }),
-  )
+    )
     .catch((err) => {
       if (err.constraint === 'users_email_unique') {
         reply(Boom.conflict('Email already exists'));

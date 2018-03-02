@@ -406,3 +406,14 @@ export const dbUpdateAverageConversationsLength = async () => {
               .select('*')
               .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
+
+export const dbDisplayAllMetrics = () =>
+  knex('metrics_users_registered')
+    .join('metrics_active_users', knex.raw('??::date', ['metrics_users_registered.timestamp']), knex.raw('??::date', ['metrics_active_users.timestamp']))
+    .join('metrics_active_conversations', knex.raw('??::date', ['metrics_users_registered.timestamp']), knex.raw('??::date', ['metrics_active_conversations.timestamp']))
+    .join('metrics_conversations_length', knex.raw('??::date', ['metrics_users_registered.timestamp']), knex.raw('??::date', ['metrics_conversations_length.timestamp']))
+    .select(knex.raw(`metrics_users_registered."timestamp" as date,
+                      metrics_users_registered."users_count" as number_of_users_registered,
+                      metrics_active_users."users_count" as number_of_active_users,
+                      metrics_active_conversations."conversations_count" as number_of_active_conversations,
+                      metrics_conversations_length."conversations_length" as average_conversations_length`));

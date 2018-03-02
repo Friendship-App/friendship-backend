@@ -416,4 +416,5 @@ export const dbDisplayAllMetrics = () =>
                       metrics_users_registered."users_count" as number_of_users_registered,
                       metrics_active_users."users_count" as number_of_active_users,
                       metrics_active_conversations."conversations_count" as number_of_active_conversations,
-                      metrics_conversations_length."conversations_length" as average_conversations_length`));
+                      metrics_conversations_length."conversations_length" as average_conversations_length`))
+    .orderBy('date', 'desc');

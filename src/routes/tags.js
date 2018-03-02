@@ -33,6 +33,7 @@ const validateTagFields = {
   validate: {
     payload: {
       name: Joi.string(),
+      category: Joi.number().integer(),
     },
   },
 };

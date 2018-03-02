@@ -417,4 +417,5 @@ export const dbDisplayAllMetrics = () =>
                       metrics_active_users."users_count" as number_of_active_users,
                       metrics_active_conversations."conversations_count" as number_of_active_conversations,
                       metrics_conversations_length."conversations_length" as average_conversations_length`))
+    .groupBy('date', 'number_of_users_registered', 'number_of_active_users', 'number_of_active_conversations', 'average_conversations_length')
     .orderBy('date', 'desc');

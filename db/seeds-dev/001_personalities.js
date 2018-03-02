@@ -3,15 +3,20 @@ const faker = require('faker/locale/en');
 
 // Designer decided to have a preset list
 // Using this for the seed data as well
-let personalities = ["relaxed", "ambitious", "traditional", "open-minded", "religion", "free thinker", "going out", "chilling out"];
+const personalities = [
+  'relaxed',
+  'ambitious',
+  'traditional',
+  'open-minded',
+  'religion',
+  'free thinker',
+  'going out',
+  'chilling out',
+];
 let index = 0;
 
 const personalityFields = {
-    name: () => {
-      console.log(personalities)
-      console.log('index' + index)
-      return personalities[index++];
-    },
+  name: () => personalities[index++],
 };
 
 let userId = 1;
@@ -33,13 +38,14 @@ const userPersonalityFields = {
 };
 
 exports.seed = knex =>
-  knex.batchInsert(
-    'personalities',
-    simpleFixtures.generateFixtures(personalityFields, 8),
-  )
-  .then(() =>
-    knex.batchInsert(
-      'user_personality',
-      simpleFixtures.generateFixtures(userPersonalityFields, 100),
-    ),
-  );
+  knex
+    .batchInsert(
+      'personalities',
+      simpleFixtures.generateFixtures(personalityFields, 8),
+    )
+    .then(() =>
+      knex.batchInsert(
+        'user_personality',
+        simpleFixtures.generateFixtures(userPersonalityFields, 100),
+      ),
+    );

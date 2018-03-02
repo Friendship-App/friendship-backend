@@ -3,6 +3,7 @@ import {
     getMessages,
     getMessage,
     createMessage,
+    updateReadMessages,
 } from '../handlers/messages';
 
 const messages = [
@@ -25,6 +26,14 @@ const messages = [
     path: '/messages',
     config: getAuthWithScope('user'),
     handler: createMessage,
+  },
+
+  // Modified messages' "read" field
+  {
+    method: 'PUT',
+    path: '/messages/read',
+    config: getAuthWithScope('user'),
+    handler: updateReadMessages,
   },
 ];
 export default messages;

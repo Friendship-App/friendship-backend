@@ -28,12 +28,17 @@ export const dbGetRegisteredUser = id =>
     .first()
     .where({ id });
 
-// minh - display registered users data on front-end with some logic
-// 1. collect createdAt data from users table
-// 2. collect data from metrics_users_registered table
-// 3. check if metrics_users_registered table is empty
-// 4. insert collected data from users table if empty, otherwise do nothing
-// 5. return metrics_users_registered table to front-end.
+// minh - display emtrics data on front-end with some logic
+// 1. collect data from users table
+// 2. create an array of dates from desired startDate to now
+// 3. collect data from metrics table
+// 4. compare dates from metrics table with the array
+// 5. update counts/average on date array where matched
+// 6. check if metrics table is empty
+// 7. insert updated data from date array if empty, otherwise do nothing
+// 8. return latest 30 rows on metrics table to front-end.
+
+// method to create array of dates between start and end
 export const getDates = (startDate, endDate) => {
   const dates = [];
   const chosenDate = moment(startDate).startOf('day');
@@ -47,26 +52,34 @@ export const getDates = (startDate, endDate) => {
   return dates;
 };
 
+// count registered users by date
 export const dbDisplayRegisteredUsersData = async () => {
+  // generate date arrays
   const comparingData = await getDates('2018-01-01', moment().startOf('day'));
+  // empty array to hold data to be inserted, updated
   const data = [];
 
+  // collect data from users table
   const collectUsersCreatedAt = await knex('users')
     .debug(false)
     .select(knex.raw(`count('*') as users_count, Date(users."createdAt") as timestamp`))
     .groupBy('timestamp')
     .orderBy('timestamp', 'asc');
 
+  // compare to date array
   await comparingData.forEach(async (element) => {
     await collectUsersCreatedAt.forEach((row) => {
       if (moment(element.timestamp).isSame(moment(row.timestamp))) {
+        // update the count on matched dates
         element.count = row.users_count;
       }
       return element.count;
     });
+    // populate data array
     data.push(element);
   });
 
+  // check metrics table to do the inserts
   const collectMetricsUsersRegistered = await knex('metrics_users_registered')
     .debug(false)
     .select('*');
@@ -313,11 +326,21 @@ export const dbDisplayAverageConversationsLength = async () => {
 
   if (collectMetricsConversationsLength.length === 0) {
     await data.forEach(async (element) => {
+      const avgLength = element.messages_count / element.count;
+      (Number.isNaN(avgLength)) ?
       await knex.transaction(trx =>
         trx('metrics_conversations_length')
           .debug(false)
           .insert({
-            conversations_length: +((element.messages_count / element.count).toFixed(2)),
+            conversations_length: 0,
+            timestamp: element.timestamp,
+          }),
+      )
+      : await knex.transaction(trx =>
+        trx('metrics_conversations_length')
+          .debug(false)
+          .insert({
+            conversations_length: avgLength.toFixed(2),
             timestamp: element.timestamp,
           }),
       );
@@ -341,21 +364,39 @@ export const dbUpdateAverageConversationsLength = async () => {
     .groupBy('timestamp', 'number_of_chatrooms')
     .where(knex.raw('??::date = ?', ['chat_time', moment().startOf('day')]));
 
+  const avgLength = dayStats[0].number_of_messages / dayStats[0].number_of_chatrooms;
+
   if (moment(existingData[0].timestamp).startOf('day').isSame(moment().startOf('day'))) {
+    (Number.isNaN(avgLength)) ?
     await knex.transaction(trx =>
       trx('metrics_conversations_length')
       .debug(false)
       .update({
-        conversations_length: +(dayStats[0].number_of_messages / dayStats[0].number_of_chatrooms),
+        conversations_length: 0,
+      })
+      .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')])),
+    ) : await knex.transaction(trx =>
+      trx('metrics_conversations_length')
+      .debug(false)
+      .update({
+        conversations_length: avgLength.toFixed(2),
       })
       .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')])),
     );
   } else {
+    (Number.isNaN(avgLength)) ?
     await knex.transaction(trx =>
       trx('metrics_conversations_length')
         .debug(false)
         .insert({
-          conversations_length: +(dayStats[0].number_of_messages / dayStats[0].number_of_chatrooms),
+          conversations_length: 0,
+          timestamp: moment().startOf('day'),
+        }),
+    ) : await knex.transaction(trx =>
+      trx('metrics_conversations_length')
+        .debug(false)
+        .insert({
+          conversations_length: avgLength.toFixed(2),
           timestamp: moment().startOf('day'),
         }),
     );
@@ -365,3 +406,16 @@ export const dbUpdateAverageConversationsLength = async () => {
               .select('*')
               .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
+
+export const dbDisplayAllMetrics = () =>
+  knex('metrics_users_registered')
+    .join('metrics_active_users', knex.raw('??::date', ['metrics_users_registered.timestamp']), knex.raw('??::date', ['metrics_active_users.timestamp']))
+    .join('metrics_active_conversations', knex.raw('??::date', ['metrics_users_registered.timestamp']), knex.raw('??::date', ['metrics_active_conversations.timestamp']))
+    .join('metrics_conversations_length', knex.raw('??::date', ['metrics_users_registered.timestamp']), knex.raw('??::date', ['metrics_conversations_length.timestamp']))
+    .select(knex.raw(`metrics_users_registered."timestamp" as date,
+                      metrics_users_registered."users_count" as number_of_users_registered,
+                      metrics_active_users."users_count" as number_of_active_users,
+                      metrics_active_conversations."conversations_count" as number_of_active_conversations,
+                      metrics_conversations_length."conversations_length" as average_conversations_length`))
+    .groupBy('date', 'number_of_users_registered', 'number_of_active_users', 'number_of_active_conversations', 'average_conversations_length')
+    .orderBy('date', 'desc');

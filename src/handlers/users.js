@@ -18,6 +18,7 @@ import {
   dbGetFilteredUsers,
   dbGet30DaysUsers,
 } from '../models/users';
+import { updateUserGender } from "../models/genders";
 import moment from 'moment';
 
 export const getUsers = (request, reply) => {
@@ -64,40 +65,57 @@ export const updateUser = async (request, reply) => {
   // console.log('params', request.params.userId);
   // console.log(request.pre.user.id === parseInt(request.params.userId, 10));
   if (
-    request.pre.user.scope !== 'admin' &&
+    request.pre.user.scope !== "admin" &&
     request.pre.user.id !== parseInt(request.params.userId, 10)
   ) {
     return reply(
       Boom.unauthorized(
-        'Unprivileged users can only perform updates on own userId!',
-      ),
+        "Unprivileged users can only perform updates on own userId!"
+      )
     );
   }
 
   const fields = {};
-
+  const genders = {};
+  let genderArr = [];
   for (const field in request.payload) {
-    fields[field] = request.payload[field];
+    if (field !== "genders") {
+      fields[field] = request.payload[field];
+    }
+    if (field === "genders") {
+      genders[field] = request.payload[field];
+    }
   }
+  if (genders.genders) {
+    genders.genders.forEach(gender => {
+      genderArr.push({ userId: request.params.userId, genderId: gender });
+    });
+  }
+  console.log("user array is", genderArr);
+  updateUserGender(genderArr, request.params.userId);
 
   // Only admins are allowed to modify user scope
-  if (request.pre.user.scope === 'admin' && request.payload.scope) {
+  if (request.pre.user.scope === "admin" && request.payload.scope) {
     fields.scope = request.payload.scope;
   }
 
   // If request contains an image, resize it to max 512x512 pixels
   if (fields.image) {
-    const buf = Buffer.from(fields.image, 'base64');
+    const buf = Buffer.from(fields.image, "base64");
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
+  console.log(fields.password);
   if (fields.password) {
-    hashPassword(fields.password).then((hashedPassword) => {
-      dbUpdatePassword(request.pre.user.id, hashedPassword).catch((err) => {});
+    hashPassword(fields.password).then(hashedPassword => {
+      console.log(hashedPassword);
+      dbUpdatePassword(request.pre.user.id, hashedPassword).catch(err => {
+        console.log(err);
+      });
     });
 
     delete fields.password;
   }
-  return dbUpdateUser(request.params.userId, fields).then(reply);
+  return dbUpdateUser(request.params.userId, { ...fields }).then(reply);
 };
 
 export const banUser = (request, reply) => {

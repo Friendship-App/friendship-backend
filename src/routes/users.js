@@ -80,8 +80,9 @@ const validateUserDetails = {
       compatibility: Joi.string(),
       location: Joi.string(),
       enableMatching: Joi.boolean(),
-      birthyear: Joi.date(),
+      birthyear: Joi.number(),
       active: Joi.boolean(),
+      genders:Joi.array(),
     },
   },
 };

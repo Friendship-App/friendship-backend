@@ -1,7 +1,7 @@
-import { merge } from 'lodash';
-import Joi from 'joi';
+import { merge } from "lodash";
+import Joi from "joi";
 
-import { getAuthWithScope, doAuth } from '../utils/auth';
+import { getAuthWithScope, doAuth } from "../utils/auth";
 import {
   getUsers,
   getUsersBatch,
@@ -14,17 +14,17 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
-  get30DaysUsers,
-} from '../handlers/users';
+  get30DaysUsers
+} from "../handlers/users";
 
 const validateUserId = {
   validate: {
     params: {
       userId: Joi.number()
         .integer()
-        .required(),
-    },
-  },
+        .required()
+    }
+  }
 };
 
 const validateRegistrationFields = {
@@ -38,23 +38,23 @@ const validateRegistrationFields = {
       image: Joi.binary(),
       genders: Joi.array(),
       birthyear: Joi.number(),
-      emoji: Joi.string(),
-    },
-  },
+      emoji: Joi.string()
+    }
+  }
 };
 
 const validateBanFields = {
   validate: {
     payload: {
       reason: Joi.string().required(),
-      expire: Joi.string(),
+      expire: Joi.string()
     },
     params: {
       userId: Joi.number()
         .integer()
-        .required(),
-    },
-  },
+        .required()
+    }
+  }
 };
 
 const validatePageNumber = {
@@ -62,9 +62,9 @@ const validatePageNumber = {
     params: {
       pageNumber: Joi.number()
         .integer()
-        .required(),
-    },
-  },
+        .required()
+    }
+  }
 };
 
 const validateUserDetails = {
@@ -82,102 +82,102 @@ const validateUserDetails = {
       enableMatching: Joi.boolean(),
       birthyear: Joi.number(),
       active: Joi.boolean(),
-      genderArr:Joi.array(),
-    },
-  },
+      genderArr: Joi.array()
+    }
+  }
 };
 
 const users = [
   // Get a list of all users
   {
-    method: 'GET',
-    path: '/users',
-    config: getAuthWithScope('user'),
-    handler: getUsers,
+    method: "GET",
+    path: "/users",
+    config: getAuthWithScope("user"),
+    handler: getUsers
   },
   {
-    method:'GET',
-    path:'/users/30days',
-    config:getAuthWithScope('admin'),
-    handler:get30DaysUsers,
+    method: "GET",
+    path: "/users/30days",
+    config: getAuthWithScope("admin"),
+    handler: get30DaysUsers
   },
   {
-    method: 'GET',
-    path: '/users/filter',
-    config: getAuthWithScope('admin'),
-    handler: getUsers,
+    method: "GET",
+    path: "/users/filter",
+    config: getAuthWithScope("admin"),
+    handler: getUsers
   },
 
   // Get a list of users in batches. Used with infinite scroller
   // Starts with page 0 lol
   {
-    method: 'GET',
-    path: '/users/page/{pageNumber}',
-    config: merge({}, validatePageNumber, getAuthWithScope('user')),
-    handler: getUsersBatch,
+    method: "GET",
+    path: "/users/page/{pageNumber}",
+    config: merge({}, validatePageNumber, getAuthWithScope("user")),
+    handler: getUsersBatch
   },
 
   // Get info about a specific user by username
   {
-    method: 'GET',
-    path: '/users/search/{username}',
-    config: merge({}, getAuthWithScope('user')),
-    handler: getUserByUsername,
+    method: "GET",
+    path: "/users/search/{username}",
+    config: merge({}, getAuthWithScope("user")),
+    handler: getUserByUsername
   },
 
   // Get info about a specific user
   {
-    method: 'GET',
-    path: '/users/{userId}',
-    config: merge({}, validateUserId, getAuthWithScope('user')),
-    handler: getUser,
+    method: "GET",
+    path: "/users/{userId}",
+    config: merge({}, validateUserId, getAuthWithScope("user")),
+    handler: getUser
   },
 
   // Update user profile
   {
-    method: 'PATCH',
-    path: '/users/{userId}',
-    config: merge({}, validateUserDetails, getAuthWithScope('user')),
-    handler: updateUser,
+    method: "PATCH",
+    path: "/users/{userId}",
+    config: merge({}, validateUserDetails, getAuthWithScope("user")),
+    handler: updateUser
   },
 
   // Delete a user, admin only
   {
-    method: 'DELETE',
-    path: '/users/{userId}',
-    config: merge({}, validateUserId, getAuthWithScope('admin')),
-    handler: delUser,
+    method: "DELETE",
+    path: "/users/{userId}",
+    config: merge({}, validateUserId, getAuthWithScope("admin")),
+    handler: delUser
   },
 
   {
-    method: 'POST',
-    path: '/users/{userId}/ban',
-    config: merge({}, validateBanFields, getAuthWithScope('admin')),
-    handler: banUser,
+    method: "POST",
+    path: "/users/{userId}/ban",
+    config: merge({}, validateBanFields, getAuthWithScope("admin")),
+    handler: banUser
   },
 
   // Authenticate as user
   {
-    method: 'POST',
-    path: '/users/authenticate',
+    method: "POST",
+    path: "/users/authenticate",
     config: doAuth,
-    handler: authUser,
+    handler: authUser
   },
 
   // Register new user
   {
-    method: 'POST',
-    path: '/users',
+    method: "POST",
+    path: "/users",
     config: validateRegistrationFields,
-    handler: registerUser,
+    handler: registerUser
   },
 
   // Verify a new user using a hash e-mail link
   {
-    method: 'GET',
-    path: '/users/verify/{hash}',
-    handler: verifyUser,
-  },
+    method: "GET",
+    path: "/users/verify/{hash}",
+    handler: verifyUser
+  }
 ];
 
 export default users;

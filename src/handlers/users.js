@@ -1,7 +1,7 @@
-import Boom from 'boom';
+import Boom from "boom";
 
-import { resizeImage } from '../utils/image';
-import { createToken, hashPassword } from '../utils/auth';
+import { resizeImage } from "../utils/image";
+import { createToken, hashPassword } from "../utils/auth";
 import {
   dbGetUsers,
   dbGetUsersBatch,
@@ -16,10 +16,10 @@ import {
   dbGetUserByUsername,
   dbUpdatePassword,
   dbGetFilteredUsers,
-  dbGet30DaysUsers,
-} from '../models/users';
+  dbGet30DaysUsers
+} from "../models/users";
 import { updateUserGender } from "../models/genders";
-import moment from 'moment';
+import moment from "moment";
 
 export const getUsers = (request, reply) => {
   if (request.query.filter) {
@@ -36,7 +36,7 @@ export const getUsersBatch = (request, reply) =>
 export const getUser = (request, reply) => {
   const user = dbGetUser(request.params.userId, request.pre.user.id);
 
-  if (user.isbanned === '1') {
+  if (user.isbanned === "1") {
     user.isBanned = true;
     user.ban = dbFetchUserBan(user.id);
   }
@@ -49,11 +49,11 @@ export const getUserByUsername = (request, reply) =>
 
 export const delUser = (request, reply) => {
   if (
-    request.pre.user.scope !== 'admin' &&
+    request.pre.user.scope !== "admin" &&
     request.pre.user.id !== request.params.userId
   ) {
     return reply(
-      Boom.unauthorized('Unprivileged users can only delete own userId!'),
+      Boom.unauthorized("Unprivileged users can only delete own userId!")
     );
   }
 
@@ -79,20 +79,19 @@ export const updateUser = async (request, reply) => {
   const genders = {};
   let genderArr = [];
   for (const field in request.payload) {
-    if (field !== "genders") {
+    if (field !== "genderArr") {
       fields[field] = request.payload[field];
     }
-    if (field === "genders") {
-      genders[field] = request.payload[field];
+    if (field === "genderArr") {
+      genders["genders"] = request.payload[field];
     }
   }
   if (genders.genders) {
     genders.genders.forEach(gender => {
       genderArr.push({ userId: request.params.userId, genderId: gender });
     });
+    updateUserGender(genderArr, request.params.userId);
   }
-  console.log("user array is", genderArr);
-  updateUserGender(genderArr, request.params.userId);
 
   // Only admins are allowed to modify user scope
   if (request.pre.user.scope === "admin" && request.payload.scope) {
@@ -120,11 +119,11 @@ export const updateUser = async (request, reply) => {
 
 export const banUser = (request, reply) => {
   if (
-    request.pre.user.scope !== 'admin' &&
+    request.pre.user.scope !== "admin" &&
     request.pre.user.id !== request.params.userId
   ) {
     return reply(
-      Boom.unauthorized("You don't have the permissions to do this action"),
+      Boom.unauthorized("You don't have the permissions to do this action")
     );
   }
 
@@ -133,19 +132,19 @@ export const banUser = (request, reply) => {
     banned_by: request.pre.user.id,
     reason: request.payload.reason,
     expire:
-      !request.payload.expire || request.payload.expire === 'x'
+      !request.payload.expire || request.payload.expire === "x"
         ? null
         : moment()
             .add(
-              request.payload.expire.split(':')[0],
-              request.payload.expire.split(':')[1],
+              request.payload.expire.split(":")[0],
+              request.payload.expire.split(":")[1]
             )
             .utc()
-            .toISOString(),
+            .toISOString()
   };
 
-  return dbFetchUserBan(request.params.userId).then((result) => {
-    if (result.length) return reply(Boom.conflict('User is already banned'));
+  return dbFetchUserBan(request.params.userId).then(result => {
+    if (result.length) return reply(Boom.conflict("User is already banned"));
 
     return dbBanUser(request.params.userId, fields).then(reply);
   });
@@ -156,8 +155,8 @@ export const authUser = (request, reply) =>
     createToken({
       id: request.pre.user.id,
       email: request.pre.user.email,
-      scope: request.pre.user.scope,
-    }),
+      scope: request.pre.user.scope
+    })
   );
 
 export const registerUser = async (request, reply) => {
@@ -171,7 +170,7 @@ export const registerUser = async (request, reply) => {
 
   // If request contains an image, resize it to max 512x512 pixels
   if (fields.image) {
-    const buf = Buffer.from(fields.image, 'base64');
+    const buf = Buffer.from(fields.image, "base64");
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
 
@@ -181,22 +180,22 @@ export const registerUser = async (request, reply) => {
         ...fields,
         email: request.payload.email.toLowerCase().trim(),
         password: passwordHash,
-        scope: 'user',
-      }).then((userData) => {
+        scope: "user"
+      }).then(userData => {
         reply(
           createToken({
             id: userData.id,
             email: userData.email,
-            scope: userData.scope,
-          }),
+            scope: userData.scope
+          })
         );
-      }),
+      })
     )
-    .catch((err) => {
-      if (err.constraint === 'users_email_unique') {
-        reply(Boom.conflict('Email already exists'));
-      } else if (err.constraint === 'users_username_unique') {
-        reply(Boom.conflict('Username already exists'));
+    .catch(err => {
+      if (err.constraint === "users_email_unique") {
+        reply(Boom.conflict("Email already exists"));
+      } else if (err.constraint === "users_username_unique") {
+        reply(Boom.conflict("Username already exists"));
       } else {
         reply(Boom.badImplementation(err));
       }
@@ -207,15 +206,15 @@ export const registerUser = async (request, reply) => {
 // and verify the user that matches (active=true)
 export const verifyUser = (request, reply) => {
   dbGetEmailVerification(request.params.hash)
-    .then((data) => {
+    .then(data => {
       const fields = {
-        active: true,
+        active: true
       };
       dbDelVerificationHash(data.ownerId)
         .then(() => dbUpdateUser(data.ownerId, fields).then(reply))
-        .catch(() => reply(Boom.conflict('This verification link is expired')));
+        .catch(() => reply(Boom.conflict("This verification link is expired")));
     })
     .catch(() => {
-      reply(Boom.conflict('This verification link is expired'));
+      reply(Boom.conflict("This verification link is expired"));
     });
 };

@@ -46,7 +46,6 @@ export const dbDelUserGender = (userId, genderId) =>
     .del();
 
 export const updateUserGender = (genders, userId) => {
-  console.log("deleting aaaaa", genders);
   return knex.transaction(trx => {
     return knex("user_gender")
       .transacting(trx)

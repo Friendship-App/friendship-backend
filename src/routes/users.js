@@ -82,7 +82,7 @@ const validateUserDetails = {
       enableMatching: Joi.boolean(),
       birthyear: Joi.number(),
       active: Joi.boolean(),
-      genders:Joi.array(),
+      genderArr:Joi.array(),
     },
   },
 };

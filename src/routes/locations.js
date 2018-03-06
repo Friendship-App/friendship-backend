@@ -52,7 +52,6 @@ const locations = [
   {
     method: 'GET',
     path: '/locations',
-    config: getAuthWithScope('user'),
     handler: getLocations,
   },
 

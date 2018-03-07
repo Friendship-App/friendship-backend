@@ -9,7 +9,8 @@ import {
   dbUpdateEvent,
 } from '../models/events';
 
-export const getEvents = (request, reply) => dbGetEvents().then(reply);
+export const getEvents = (request, reply) =>
+  dbGetEvents(request.params.userId).then(reply);
 
 export const getEvent = (request, reply) =>
   dbGetEvent(request.params.eventId).then(reply);

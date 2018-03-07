@@ -37,7 +37,7 @@ const events = [
   // Get a list of all events
   {
     method: 'GET',
-    path: '/events',
+    path: '/events/{userId}',
     handler: getEvents,
   },
   // Get info about a specific event

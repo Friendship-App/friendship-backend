@@ -1,7 +1,7 @@
-import Boom from "boom";
+import Boom from 'boom';
 
-import { resizeImage } from "../utils/image";
-import { createToken, hashPassword } from "../utils/auth";
+import { resizeImage } from '../utils/image';
+import { createToken, hashPassword } from '../utils/auth';
 import {
   dbGetUsers,
   dbGetUsersBatch,
@@ -17,9 +17,9 @@ import {
   dbUpdatePassword,
   dbGetFilteredUsers,
   dbGet30DaysUsers
-} from "../models/users";
-import { updateUserGender } from "../models/genders";
-import moment from "moment";
+} from '../models/users';
+import { updateUserGender } from '../models/genders';
+import moment from 'moment';
 
 export const getUsers = (request, reply) => {
   if (request.query.filter) {
@@ -36,7 +36,7 @@ export const getUsersBatch = (request, reply) =>
 export const getUser = (request, reply) => {
   const user = dbGetUser(request.params.userId, request.pre.user.id);
 
-  if (user.isbanned === "1") {
+  if (user.isbanned === '1') {
     user.isBanned = true;
     user.ban = dbFetchUserBan(user.id);
   }
@@ -49,11 +49,11 @@ export const getUserByUsername = (request, reply) =>
 
 export const delUser = (request, reply) => {
   if (
-    request.pre.user.scope !== "admin" &&
+    request.pre.user.scope !== 'admin' &&
     request.pre.user.id !== request.params.userId
   ) {
     return reply(
-      Boom.unauthorized("Unprivileged users can only delete own userId!")
+      Boom.unauthorized('Unprivileged users can only delete own userId!')
     );
   }
 
@@ -65,12 +65,12 @@ export const updateUser = async (request, reply) => {
   // console.log('params', request.params.userId);
   // console.log(request.pre.user.id === parseInt(request.params.userId, 10));
   if (
-    request.pre.user.scope !== "admin" &&
+    request.pre.user.scope !== 'admin' &&
     request.pre.user.id !== parseInt(request.params.userId, 10)
   ) {
     return reply(
       Boom.unauthorized(
-        "Unprivileged users can only perform updates on own userId!"
+        'Unprivileged users can only perform updates on own userId!'
       )
     );
   }
@@ -79,11 +79,11 @@ export const updateUser = async (request, reply) => {
   const genders = {};
   let genderArr = [];
   for (const field in request.payload) {
-    if (field !== "genderArr") {
+    if (field !== 'genderArr') {
       fields[field] = request.payload[field];
     }
-    if (field === "genderArr") {
-      genders["genders"] = request.payload[field];
+    if (field === 'genderArr') {
+      genders['genders'] = request.payload[field];
     }
   }
   if (genders.genders) {
@@ -94,19 +94,18 @@ export const updateUser = async (request, reply) => {
   }
 
   // Only admins are allowed to modify user scope
-  if (request.pre.user.scope === "admin" && request.payload.scope) {
+  if (request.pre.user.scope === 'admin' && request.payload.scope) {
     fields.scope = request.payload.scope;
   }
 
   // If request contains an image, resize it to max 512x512 pixels
   if (fields.image) {
-    const buf = Buffer.from(fields.image, "base64");
+    const buf = Buffer.from(fields.image, 'base64');
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
-  console.log(fields.password);
+
   if (fields.password) {
     hashPassword(fields.password).then(hashedPassword => {
-      console.log(hashedPassword);
       dbUpdatePassword(request.pre.user.id, hashedPassword).catch(err => {
         console.log(err);
       });
@@ -119,7 +118,7 @@ export const updateUser = async (request, reply) => {
 
 export const banUser = (request, reply) => {
   if (
-    request.pre.user.scope !== "admin" &&
+    request.pre.user.scope !== 'admin' &&
     request.pre.user.id !== request.params.userId
   ) {
     return reply(
@@ -132,19 +131,19 @@ export const banUser = (request, reply) => {
     banned_by: request.pre.user.id,
     reason: request.payload.reason,
     expire:
-      !request.payload.expire || request.payload.expire === "x"
+      !request.payload.expire || request.payload.expire === 'x'
         ? null
         : moment()
             .add(
-              request.payload.expire.split(":")[0],
-              request.payload.expire.split(":")[1]
+              request.payload.expire.split(':')[0],
+              request.payload.expire.split(':')[1]
             )
             .utc()
             .toISOString()
   };
 
   return dbFetchUserBan(request.params.userId).then(result => {
-    if (result.length) return reply(Boom.conflict("User is already banned"));
+    if (result.length) return reply(Boom.conflict('User is already banned'));
 
     return dbBanUser(request.params.userId, fields).then(reply);
   });
@@ -170,7 +169,7 @@ export const registerUser = async (request, reply) => {
 
   // If request contains an image, resize it to max 512x512 pixels
   if (fields.image) {
-    const buf = Buffer.from(fields.image, "base64");
+    const buf = Buffer.from(fields.image, 'base64');
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
 
@@ -180,7 +179,7 @@ export const registerUser = async (request, reply) => {
         ...fields,
         email: request.payload.email.toLowerCase().trim(),
         password: passwordHash,
-        scope: "user"
+        scope: 'user'
       }).then(userData => {
         reply(
           createToken({
@@ -192,10 +191,10 @@ export const registerUser = async (request, reply) => {
       })
     )
     .catch(err => {
-      if (err.constraint === "users_email_unique") {
-        reply(Boom.conflict("Email already exists"));
-      } else if (err.constraint === "users_username_unique") {
-        reply(Boom.conflict("Username already exists"));
+      if (err.constraint === 'users_email_unique') {
+        reply(Boom.conflict('Email already exists'));
+      } else if (err.constraint === 'users_username_unique') {
+        reply(Boom.conflict('Username already exists'));
       } else {
         reply(Boom.badImplementation(err));
       }
@@ -212,9 +211,9 @@ export const verifyUser = (request, reply) => {
       };
       dbDelVerificationHash(data.ownerId)
         .then(() => dbUpdateUser(data.ownerId, fields).then(reply))
-        .catch(() => reply(Boom.conflict("This verification link is expired")));
+        .catch(() => reply(Boom.conflict('This verification link is expired')));
     })
     .catch(() => {
-      reply(Boom.conflict("This verification link is expired"));
+      reply(Boom.conflict('This verification link is expired'));
     });
 };

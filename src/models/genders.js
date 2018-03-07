@@ -1,60 +1,60 @@
-import knex from "../utils/db";
+import knex from '../utils/db';
 
-const genderFields = ["id", "gender"];
-const userGendersField = ["userId", "gender"];
+const genderFields = ['id', 'gender'];
+const userGendersField = ['userId', 'gender'];
 
-export const dbGetGenders = () => knex("genders").select(genderFields);
+export const dbGetGenders = () => knex('genders').select(genderFields);
 
 export const dbGetGender = id =>
-  knex("genders")
+  knex('genders')
     .first()
     .where({ id });
 
 export const dbCreateGender = ({ ...fields }) =>
   knex.transaction(trx =>
-    knex("genders")
+    knex('genders')
       .transacting(trx)
       .insert(fields)
-      .returning("*")
+      .returning('*')
       .then(results => results[0])
   );
 
 export const dbUpdateGender = (id, fields) =>
-  knex("genders")
+  knex('genders')
     .update({ ...fields })
     .where({ id })
-    .returning("*");
+    .returning('*');
 
 export const dbGetUserGenders = userId =>
-  knex("user_gender")
+  knex('user_gender')
     .select(userGendersField)
-    .join("genders", "user_gender.genderId", "=", "genders.id")
+    .join('genders', 'user_gender.genderId', '=', 'genders.id')
     .where({ userId });
 
 export const dbCreateUserGender = ({ ...fields }) =>
   knex.transaction(trx =>
-    knex("user_gender")
+    knex('user_gender')
       .transacting(trx)
       .insert(fields)
-      .returning("*")
+      .returning('*')
       .then(results => results[0])
   );
 
 export const dbDelUserGender = (userId, genderId) =>
-  knex("user_gender")
+  knex('user_gender')
     .where({ userId, genderId })
     .del();
 
 export const updateUserGender = (genders, userId) => {
   return knex.transaction(trx => {
-    return knex("user_gender")
+    return knex('user_gender')
       .transacting(trx)
       .where({ userId })
       .del()
       .then(() =>
         trx
           .insert(genders)
-          .into("user_gender")
+          .into('user_gender')
           .then()
       );
   });

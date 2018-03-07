@@ -10,6 +10,9 @@ import {
   dbUpDateActiveConversationsData,
   dbDisplayAverageConversationsLength,
   dbUpdateAverageConversationsLength,
+  dbDisplayAllMetrics,
+  dbDisplayWeekMetrics,
+  dbDisplayMonthMetrics,
 } from '../models/metrics';
 
 
@@ -59,6 +62,15 @@ export const displayConversationsLength = (request, reply) => {
 export const updateAverageConversationsLength = (request, reply) => {
   dbUpdateAverageConversationsLength().then(reply);
 };
+
+export const displayAllMetrics = (request, reply) =>
+  dbDisplayAllMetrics().then(reply);
+
+export const displayWeekMetrics = (request, reply) =>
+  dbDisplayWeekMetrics().then(reply);
+
+export const displayMonthMetrics = (request, reply) =>
+  dbDisplayMonthMetrics().then(reply);
 
 // insert active usercount everyday at 23:59
 const cron = require('node-cron');

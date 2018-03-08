@@ -28,12 +28,12 @@ export const dbGetEvents = async userId => {
   );
 
   var newArrayDataOfOjbect = Object.values(events.rows);
-  calculateRecommandationByDate(newArrayDataOfOjbect, userId);
-  calculateRecommandationByNumberOfParticipants(newArrayDataOfOjbect, userId);
+  calculateRecommandationByDate(newArrayDataOfOjbect);
+  calculateRecommandationByNumberOfParticipants(newArrayDataOfOjbect);
   return newArrayDataOfOjbect;
 };
 
-const calculateRecommandationByDate = (events, userId) => {
+const calculateRecommandationByDate = events => {
   events.sort(function(a, b) {
     return new Date(b.eventDate) - new Date(a.eventDate);
   });
@@ -42,19 +42,16 @@ const calculateRecommandationByDate = (events, userId) => {
   });
   //console.log(events);
 };
-
-const calculateRecommandationByNumberOfParticipants = (events, userId) => {
+const calculateRecommandationByNumberOfParticipants = events => {
+  const numbers = [];
   events.map(async event => {
     const participants = await knex.raw(
       `SELECT COUNT(DISTINCT "userId") as NumberOfUsers  FROM "eventParticipants"
             WHERE "eventParticipants"."eventId" = ${event.id}`,
     );
-    console.log('--------------------------- START');
-    console.log(participants.rows[0].numberofusers);
-    event.numberOfParticipants = participants.rows[0].numberofusers;
-    console.log(event);
-    console.log('--------------------------- END');
+    numbers.push(participants.rows[0].numberofusers);
   });
+  console.log('ITS SECOOOOOOOONd', numbers);
 };
 
 export const dbGetEvent = id =>

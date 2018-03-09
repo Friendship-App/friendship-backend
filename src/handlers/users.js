@@ -16,8 +16,9 @@ import {
   dbGetUserByUsername,
   dbUpdatePassword,
   dbGetFilteredUsers,
-  dbGet30DaysUsers,
+  dbGet30DaysUsers
 } from '../models/users';
+import { updateUserGender } from '../models/genders';
 import moment from 'moment';
 
 export const getUsers = (request, reply) => {
@@ -52,7 +53,7 @@ export const delUser = (request, reply) => {
     request.pre.user.id !== request.params.userId
   ) {
     return reply(
-      Boom.unauthorized('Unprivileged users can only delete own userId!'),
+      Boom.unauthorized('Unprivileged users can only delete own userId!')
     );
   }
 
@@ -69,15 +70,27 @@ export const updateUser = async (request, reply) => {
   ) {
     return reply(
       Boom.unauthorized(
-        'Unprivileged users can only perform updates on own userId!',
-      ),
+        'Unprivileged users can only perform updates on own userId!'
+      )
     );
   }
 
   const fields = {};
-
+  const genders = {};
+  let genderArr = [];
   for (const field in request.payload) {
-    fields[field] = request.payload[field];
+    if (field !== 'genderArr') {
+      fields[field] = request.payload[field];
+    }
+    if (field === 'genderArr') {
+      genders['genders'] = request.payload[field];
+    }
+  }
+  if (genders.genders) {
+    genders.genders.forEach(gender => {
+      genderArr.push({ userId: request.params.userId, genderId: gender });
+    });
+    updateUserGender(genderArr, request.params.userId);
   }
 
   // Only admins are allowed to modify user scope
@@ -90,14 +103,17 @@ export const updateUser = async (request, reply) => {
     const buf = Buffer.from(fields.image, 'base64');
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
+
   if (fields.password) {
-    hashPassword(fields.password).then((hashedPassword) => {
-      dbUpdatePassword(request.pre.user.id, hashedPassword).catch((err) => {});
+    hashPassword(fields.password).then(hashedPassword => {
+      dbUpdatePassword(request.pre.user.id, hashedPassword).catch(err => {
+        console.log(err);
+      });
     });
 
     delete fields.password;
   }
-  return dbUpdateUser(request.params.userId, fields).then(reply);
+  return dbUpdateUser(request.params.userId, { ...fields }).then(reply);
 };
 
 export const banUser = (request, reply) => {
@@ -106,7 +122,7 @@ export const banUser = (request, reply) => {
     request.pre.user.id !== request.params.userId
   ) {
     return reply(
-      Boom.unauthorized("You don't have the permissions to do this action"),
+      Boom.unauthorized("You don't have the permissions to do this action")
     );
   }
 
@@ -120,13 +136,13 @@ export const banUser = (request, reply) => {
         : moment()
             .add(
               request.payload.expire.split(':')[0],
-              request.payload.expire.split(':')[1],
+              request.payload.expire.split(':')[1]
             )
             .utc()
-            .toISOString(),
+            .toISOString()
   };
 
-  return dbFetchUserBan(request.params.userId).then((result) => {
+  return dbFetchUserBan(request.params.userId).then(result => {
     if (result.length) return reply(Boom.conflict('User is already banned'));
 
     return dbBanUser(request.params.userId, fields).then(reply);
@@ -138,8 +154,8 @@ export const authUser = (request, reply) =>
     createToken({
       id: request.pre.user.id,
       email: request.pre.user.email,
-      scope: request.pre.user.scope,
-    }),
+      scope: request.pre.user.scope
+    })
   );
 
 export const registerUser = async (request, reply) => {
@@ -163,18 +179,18 @@ export const registerUser = async (request, reply) => {
         ...fields,
         email: request.payload.email.toLowerCase().trim(),
         password: passwordHash,
-        scope: 'user',
-      }).then((userData) => {
+        scope: 'user'
+      }).then(userData => {
         reply(
           createToken({
             id: userData.id,
             email: userData.email,
-            scope: userData.scope,
-          }),
+            scope: userData.scope
+          })
         );
-      }),
+      })
     )
-    .catch((err) => {
+    .catch(err => {
       if (err.constraint === 'users_email_unique') {
         reply(Boom.conflict('Email already exists'));
       } else if (err.constraint === 'users_username_unique') {
@@ -189,9 +205,9 @@ export const registerUser = async (request, reply) => {
 // and verify the user that matches (active=true)
 export const verifyUser = (request, reply) => {
   dbGetEmailVerification(request.params.hash)
-    .then((data) => {
+    .then(data => {
       const fields = {
-        active: true,
+        active: true
       };
       dbDelVerificationHash(data.ownerId)
         .then(() => dbUpdateUser(data.ownerId, fields).then(reply))

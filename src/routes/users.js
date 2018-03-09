@@ -14,7 +14,7 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
-  get30DaysUsers,
+  get30DaysUsers
 } from '../handlers/users';
 
 const validateUserId = {
@@ -22,9 +22,9 @@ const validateUserId = {
     params: {
       userId: Joi.number()
         .integer()
-        .required(),
-    },
-  },
+        .required()
+    }
+  }
 };
 
 const validateRegistrationFields = {
@@ -38,23 +38,23 @@ const validateRegistrationFields = {
       image: Joi.binary(),
       genders: Joi.array(),
       birthyear: Joi.number(),
-      emoji: Joi.string(),
-    },
-  },
+      emoji: Joi.string()
+    }
+  }
 };
 
 const validateBanFields = {
   validate: {
     payload: {
       reason: Joi.string().required(),
-      expire: Joi.string(),
+      expire: Joi.string()
     },
     params: {
       userId: Joi.number()
         .integer()
-        .required(),
-    },
-  },
+        .required()
+    }
+  }
 };
 
 const validatePageNumber = {
@@ -62,9 +62,9 @@ const validatePageNumber = {
     params: {
       pageNumber: Joi.number()
         .integer()
-        .required(),
-    },
-  },
+        .required()
+    }
+  }
 };
 
 const validateUserDetails = {
@@ -74,16 +74,17 @@ const validateUserDetails = {
       password: Joi.string(),
       scope: Joi.string(),
       email: Joi.string().email(),
-      description: Joi.string(),
+      description: Joi.string().allow(''),
       emoji: Joi.string(),
       image: Joi.binary(),
       compatibility: Joi.string(),
       location: Joi.string(),
       enableMatching: Joi.boolean(),
-      birthyear: Joi.date(),
+      birthyear: Joi.number(),
       active: Joi.boolean(),
-    },
-  },
+      genderArr: Joi.array()
+    }
+  }
 };
 
 const users = [
@@ -92,19 +93,19 @@ const users = [
     method: 'GET',
     path: '/users',
     config: getAuthWithScope('user'),
-    handler: getUsers,
+    handler: getUsers
   },
   {
-    method:'GET',
-    path:'/users/30days',
-    config:getAuthWithScope('admin'),
-    handler:get30DaysUsers,
+    method: 'GET',
+    path: '/users/30days',
+    config: getAuthWithScope('admin'),
+    handler: get30DaysUsers
   },
   {
     method: 'GET',
     path: '/users/filter',
     config: getAuthWithScope('admin'),
-    handler: getUsers,
+    handler: getUsers
   },
 
   // Get a list of users in batches. Used with infinite scroller
@@ -113,7 +114,7 @@ const users = [
     method: 'GET',
     path: '/users/page/{pageNumber}',
     config: merge({}, validatePageNumber, getAuthWithScope('user')),
-    handler: getUsersBatch,
+    handler: getUsersBatch
   },
 
   // Get info about a specific user by username
@@ -121,7 +122,7 @@ const users = [
     method: 'GET',
     path: '/users/search/{username}',
     config: merge({}, getAuthWithScope('user')),
-    handler: getUserByUsername,
+    handler: getUserByUsername
   },
 
   // Get info about a specific user
@@ -129,7 +130,7 @@ const users = [
     method: 'GET',
     path: '/users/{userId}',
     config: merge({}, validateUserId, getAuthWithScope('user')),
-    handler: getUser,
+    handler: getUser
   },
 
   // Update user profile
@@ -137,7 +138,7 @@ const users = [
     method: 'PATCH',
     path: '/users/{userId}',
     config: merge({}, validateUserDetails, getAuthWithScope('user')),
-    handler: updateUser,
+    handler: updateUser
   },
 
   // Delete a user, admin only
@@ -145,14 +146,14 @@ const users = [
     method: 'DELETE',
     path: '/users/{userId}',
     config: merge({}, validateUserId, getAuthWithScope('admin')),
-    handler: delUser,
+    handler: delUser
   },
 
   {
     method: 'POST',
     path: '/users/{userId}/ban',
     config: merge({}, validateBanFields, getAuthWithScope('admin')),
-    handler: banUser,
+    handler: banUser
   },
 
   // Authenticate as user
@@ -160,7 +161,7 @@ const users = [
     method: 'POST',
     path: '/users/authenticate',
     config: doAuth,
-    handler: authUser,
+    handler: authUser
   },
 
   // Register new user
@@ -168,15 +169,15 @@ const users = [
     method: 'POST',
     path: '/users',
     config: validateRegistrationFields,
-    handler: registerUser,
+    handler: registerUser
   },
 
   // Verify a new user using a hash e-mail link
   {
     method: 'GET',
     path: '/users/verify/{hash}',
-    handler: verifyUser,
-  },
+    handler: verifyUser
+  }
 ];
 
 export default users;

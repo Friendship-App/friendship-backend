@@ -12,9 +12,8 @@ import {
   dbUpdateAverageConversationsLength,
   dbDisplayAllMetrics,
   dbDisplayWeekMetrics,
-  dbDisplayMonthMetrics,
-} from '../models/metrics';
-
+  dbDisplayMonthMetrics
+} from "../models/metrics";
 
 export const getNbMatchesMessaging = (request, reply) => {
   dbGetNbMatchesMessaging().then(reply);
@@ -28,13 +27,10 @@ export const getNbMessages = (request, reply) => {
   dbGetNbMessages().then(reply);
 };
 
-// danni
-
 export const updateRegisteredUsers = (request, reply) => {
   dbUpdateRegisteredUsersData().then(reply);
 };
 
-// minh
 export const displayRegisteredUsers = (request, reply) => {
   dbDisplayRegisteredUsersData().then(reply);
 };
@@ -73,9 +69,15 @@ export const displayMonthMetrics = (request, reply) =>
   dbDisplayMonthMetrics().then(reply);
 
 // insert active usercount everyday at 23:59
-const cron = require('node-cron');
-cron.schedule('0 0 * * *', function(){
-  console.log(' START --------------------------0:00');
-  //getCountActiveUsers();
-  console.log(' END --------------------------');
+const cron = require("node-cron");
+
+//Cron job runs every minute so metrics are populated and there is smth to show on metrics
+cron.schedule("1 * * * * *", () => {
+  console.log(" START Cron job -----------------1 min");
+  dbUpdateRegisteredUsersData();
+  dbUpdateActiveUsersData();
+  dbUpDateActiveConversationsData();
+  dbUpdateAverageConversationsLength();
+
+  console.log(" END --------------------------");
 });

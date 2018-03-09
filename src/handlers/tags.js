@@ -1,4 +1,5 @@
 import Boom from 'boom';
+import moment from 'moment';
 
 import {
   dbGetTags,
@@ -36,6 +37,8 @@ export const addTag = (request, reply) =>
   dbCreateTag({
     ...request.payload,
     name: request.payload.name,
+    category: request.payload.category,
+    createdAt: moment(),
   }).then(reply);
 
 // delete this will affect FK in user_personality --> ask Futurice?

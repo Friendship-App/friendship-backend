@@ -52,7 +52,8 @@ export const dbGetUsersInTag = tagId =>
     .where({ tagId });
 
 export const dbCreateTag = ({ ...fields }) =>
-  knex.transaction(async (trx) => {
+
+   knex.transaction(async (trx) => {
     const tag = await trx('tags')
       .insert(fields)
       .returning('*')
@@ -60,6 +61,7 @@ export const dbCreateTag = ({ ...fields }) =>
 
     return tag;
   });
+
 
 export const dbDelTag = id =>
   knex('tags')

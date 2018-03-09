@@ -69,15 +69,16 @@ export const displayMonthMetrics = (request, reply) =>
   dbDisplayMonthMetrics().then(reply);
 
 // insert active usercount everyday at 23:59
-const cron = require("node-cron");
+const cron = require('node-cron');
 
-//Cron job runs every minute so metrics are populated and there is smth to show on metrics
-cron.schedule("1 * * * * *", () => {
-  console.log(" START Cron job -----------------1 min");
-  dbUpdateRegisteredUsersData();
-  dbUpdateActiveUsersData();
-  dbUpDateActiveConversationsData();
-  dbUpdateAverageConversationsLength();
+// Cron job runs every minute so metrics are populated and there is smth to show on metrics
+cron.schedule('1 * * * * *', async () => {
+  console.log(' START Cron job -----------------1 min');
 
-  console.log(" END --------------------------");
+  await dbUpdateRegisteredUsersData();
+  await dbUpdateActiveUsersData();
+  await dbUpDateActiveConversationsData();
+  await dbUpdateAverageConversationsLength();
+
+  console.log(' END --------------------------');
 });

@@ -12,8 +12,8 @@ import {
   dbUpdateAverageConversationsLength,
   dbDisplayAllMetrics,
   dbDisplayWeekMetrics,
-  dbDisplayMonthMetrics
-} from "../models/metrics";
+  dbDisplayMonthMetrics,
+} from '../models/metrics';
 
 export const getNbMatchesMessaging = (request, reply) => {
   dbGetNbMatchesMessaging().then(reply);

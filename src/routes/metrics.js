@@ -11,6 +11,9 @@ import {
   updateActiveConversations,
   displayConversationsLength,
   updateAverageConversationsLength,
+  displayAllMetrics,
+  displayWeekMetrics,
+  displayMonthMetrics,
 } from '../handlers/metrics';
 
 const metrics = [
@@ -79,7 +82,25 @@ const metrics = [
     path: '/metrics/conversationslength/update',
     config: getAuthWithScope('admin'),
     handler: updateAverageConversationsLength,
-  }
+  },
+  {
+    method: 'GET',
+    path: '/metrics',
+    config: getAuthWithScope('admin'),
+    handler: displayAllMetrics,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/week',
+    config: getAuthWithScope('admin'),
+    handler: displayWeekMetrics,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/month',
+    config: getAuthWithScope('admin'),
+    handler: displayMonthMetrics,
+  },
 ];
 
 export default metrics;

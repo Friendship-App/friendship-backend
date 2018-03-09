@@ -74,7 +74,7 @@ const validateUserDetails = {
       password: Joi.string(),
       scope: Joi.string(),
       email: Joi.string().email(),
-      description: Joi.string(),
+      description: Joi.string().allow(''),
       emoji: Joi.string(),
       image: Joi.binary(),
       compatibility: Joi.string(),

@@ -3,8 +3,7 @@ import knex from '../utils/db';
 const genderFields = ['id', 'gender'];
 const userGendersField = ['userId', 'gender'];
 
-export const dbGetGenders = () =>
-  knex('genders').select(genderFields);
+export const dbGetGenders = () => knex('genders').select(genderFields);
 
 export const dbGetGender = id =>
   knex('genders')
@@ -17,7 +16,7 @@ export const dbCreateGender = ({ ...fields }) =>
       .transacting(trx)
       .insert(fields)
       .returning('*')
-      .then(results => results[0]),
+      .then(results => results[0])
   );
 
 export const dbUpdateGender = (id, fields) =>
@@ -38,10 +37,25 @@ export const dbCreateUserGender = ({ ...fields }) =>
       .transacting(trx)
       .insert(fields)
       .returning('*')
-      .then(results => results[0]),
+      .then(results => results[0])
   );
 
 export const dbDelUserGender = (userId, genderId) =>
   knex('user_gender')
     .where({ userId, genderId })
     .del();
+
+export const updateUserGender = (genders, userId) => {
+  return knex.transaction(trx => {
+    return knex('user_gender')
+      .transacting(trx)
+      .where({ userId })
+      .del()
+      .then(() =>
+        trx
+          .insert(genders)
+          .into('user_gender')
+          .then()
+      );
+  });
+};

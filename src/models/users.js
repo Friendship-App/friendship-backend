@@ -17,7 +17,7 @@ const userListFields = [
   'active',
   'birthyear',
   'status',
-  'image',
+  'image'
 ];
 
 export const dbGetUsers = () =>
@@ -43,7 +43,9 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
   //   .offset(pageNumber * pageLimit)
   //   .where('id', '!=', userId);
 
-  const users = await knex.raw(`
+  const users = await knex
+    .raw(
+      `
     WITH "Users"
     AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
     "username","description","emoji","active","birthyear","status",
@@ -120,9 +122,11 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
     ON "Users"."id" = "UserHateCommon"."userHateId"
     left join "UserLocation"
     ON "Users"."id" = "UserLocation"."userId"
-    `).then(results => results.rows);
+    `
+    )
+    .then(results => results.rows);
 
-  return users.map((user) => {
+  return users.map(user => {
     if (user.image) {
       user.image = user.image.toString('base64');
     }
@@ -144,7 +148,9 @@ export const dbGetUser = async (userId, currentUserId) => {
   //   .first()
   //   .where('users.id', '=', id);
 
-  const user = await knex.raw(`
+  const user = await knex
+    .raw(
+      `
     WITH "Users"
     AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
     "username","description","emoji","active","birthyear","status",
@@ -211,7 +217,9 @@ export const dbGetUser = async (userId, currentUserId) => {
     ON "Users"."id" = "UserHateCommon"."userHateId"
     left join "UserLocation"
     ON "Users"."id" = "UserLocation"."userId"
-    `).then(results => results.rows);
+    `
+    )
+    .then(results => results.rows);
 
   // we convert the image in base 64 so we can display it in our app
   if (user[0].image) {
@@ -236,18 +244,19 @@ export const dbGetUserByUsername = (username, userId) =>
     .where('id', '!=', userId)
     .andWhere('username', 'like', `%${username}%`);
 
-export const dbUpdateUser = (id, fields) =>
+export const dbUpdateUser = (id, { ...fields }) =>
   knex('users')
-    .update({ ...fields })
+    .update(fields)
     .where({ id })
     .returning('*');
 
-export const dbFetchUserBan = id => knex('banned_users').where('user_id', '=', id);
+export const dbFetchUserBan = id =>
+  knex('banned_users').where('user_id', '=', id);
 
 export const dbBanUser = (id, fields) => {
   fields = {
     ...fields,
-    user_id: id,
+    user_id: id
   };
 
   return knex('banned_users')
@@ -261,8 +270,7 @@ export const dbDelUser = id =>
     .del();
 
 export const dbGet30DaysUsers = async () => {
-  const users30Days = await
-    knex('users')
+  const users30Days = await knex('users')
     .where('lastActive', '<', moment())
     .andWhere('lastActive', '>', moment().subtract(30, 'days'));
   console.log(users30Days);
@@ -274,7 +282,7 @@ export const dbDelVerificationHash = ownerId =>
     .del();
 
 export const dbCreateUser = ({ password, genders, ...fields }) =>
-  knex.transaction(async (trx) => {
+  knex.transaction(async trx => {
     const user = await trx('users')
       .insert(fields)
       .returning('*')
@@ -283,13 +291,13 @@ export const dbCreateUser = ({ password, genders, ...fields }) =>
     await trx('secrets')
       .insert({
         ownerId: user.id,
-        password,
+        password
       })
       .then();
 
     const genderArray = [];
     if (genders) {
-      genders.forEach((gender) => {
+      genders.forEach(gender => {
         genderArray.push({ userId: user.id, genderId: gender });
       });
     }
@@ -304,7 +312,7 @@ export const dbCreateUser = ({ password, genders, ...fields }) =>
     await trx('email_verification')
       .insert({
         ownerId: user.id,
-        hash,
+        hash
       })
       .then();
 

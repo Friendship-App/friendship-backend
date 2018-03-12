@@ -1,8 +1,5 @@
 import { getAuthWithScope } from '../utils/auth';
 import {
-  getNbMatchesMessaging,
-  getNbMessagesByConversation,
-  getNbMessages,
   displayRegisteredUsers,
   updateRegisteredUsers,
   displayActiveUsers,
@@ -14,15 +11,10 @@ import {
   displayAllMetrics,
   displayWeekMetrics,
   displayMonthMetrics,
+  testMetrics,
 } from '../handlers/metrics';
 
 const metrics = [
-  {
-    method: 'GET',
-    path: '/metrics/messages',
-    config: getAuthWithScope('admin'),
-    handler: getNbMessages,
-  },
   {
     method: 'GET',
     path: '/metrics/activeusers',
@@ -34,18 +26,6 @@ const metrics = [
     path: '/metrics/activeusers/update',
     config: getAuthWithScope('admin'),
     handler: updateActiveUsers,
-  },
-  {
-    method: 'GET',
-    path: '/metrics/messagesbyconversation',
-    config: getAuthWithScope('admin'),
-    handler: getNbMessagesByConversation,
-  },
-  {
-    method: 'GET',
-    path: '/metrics/messagesmessaging',
-    config: getAuthWithScope('admin'),
-    handler: getNbMatchesMessaging,
   },
   {
     method: 'GET',
@@ -100,6 +80,12 @@ const metrics = [
     path: '/metrics/month',
     config: getAuthWithScope('admin'),
     handler: displayMonthMetrics,
+  },
+  {
+    method: 'GET',
+    path: '/metrics/cron',
+    config: getAuthWithScope('admin'),
+    handler: testMetrics,
   },
 ];
 

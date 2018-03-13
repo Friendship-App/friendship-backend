@@ -1,6 +1,6 @@
 import knex from '../utils/db';
 
-const tagListFields = ['id', 'name', 'category', 'createdAt'];
+const tagListFields = ['id', 'user_id', 'name', 'category', 'createdAt'];
 const userTagListFields = ['userId', 'tagId', 'love'];
 const tagsForUser = ['id', 'name', 'category', 'love'];
 const tagUserListFields = [
@@ -65,7 +65,7 @@ export const dbGetUsersInTag = tagId =>
     .where({ tagId });
 
 export const dbCreateTag = ({ ...fields }) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     const tag = await trx('tags')
       .insert(fields)
       .returning('*')
@@ -91,15 +91,9 @@ export const dbGetTagsUser = tagId =>
     .select(userTagListFields)
     .where({ tagId });
 
-export const dbGetCountLikes = tagId =>
-  knex('user_tag')
-    .where({ tagId })
-    .groupBy('love')
-    .countDistinct('userId');
-
 // Add a new tag that a user loves/hates
 export const dbCreateUserTag = ({ ...fields }) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     const tag = await trx('user_tag')
       .insert(fields)
       .returning('*')
@@ -109,7 +103,7 @@ export const dbCreateUserTag = ({ ...fields }) =>
   });
 
 export const dbCreateUserTags = (userId, tagArray) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     await trx('user_tag')
       .where({ userId })
       .returning('*')

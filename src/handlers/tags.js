@@ -9,9 +9,7 @@ import {
   dbUpdateTag,
   dbCreateUserTag,
   dbCreateUserTags,
-  dbGetUserTags,
   dbGetTagsUser,
-  dbGetCountLikes,
   dbDelUserTag,
   dbGetTagsForUser,
   dbGetTagList,
@@ -117,9 +115,6 @@ export const getUsersInTag = (request, reply) =>
 // get all users of tags
 export const getTagsUser = (request, reply) =>
   dbGetTagsUser(request.params.tagId).then(reply);
-
-export const countTagLikes = (request, reply) =>
-  dbGetCountLikes(request.params.tagId).then(reply);
 
 // Delete a tag that is connected to a user
 export const delUserTag = (request, reply) => {

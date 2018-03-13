@@ -8,9 +8,7 @@ import {
   addTag,
   delTag,
   updateTag,
-  getUserTags,
   getTagsUser,
-  countTagLikes,
   createUserTag,
   createUserTags,
   delUserTag,
@@ -91,7 +89,7 @@ const tags = [
     handler: getTag,
   },
 
-  // Register new tag
+  // Add a new tag
   {
     method: 'POST',
     path: '/tags',
@@ -120,12 +118,6 @@ const tags = [
     path: '/tag_user/tag/{tagId}',
     config: getAuthWithScope('user'),
     handler: getUsersInTag,
-  },
-  {
-    method: 'GET',
-    path: '/tags_user/likes/{tagId}',
-    config: getAuthWithScope('user'),
-    handler: countTagLikes,
   },
   {
     method: 'GET',
@@ -158,7 +150,7 @@ const tags = [
   },
   //  Delete a tag that is connected to a user
   // @todo check if the OWNER is deleting this,
-  // and not another user (somehow we can't to get details of authenticated user, ask rasmus
+  // and not another user (somehow we can't to get details of authenticated user
   {
     method: 'DELETE',
     path: '/user_tag',
@@ -169,5 +161,4 @@ const tags = [
 
 export default tags;
 
-// Here we register the routes
 export const routes = server => server.route(tags);

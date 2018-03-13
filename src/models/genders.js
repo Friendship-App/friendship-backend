@@ -16,7 +16,7 @@ export const dbCreateGender = ({ ...fields }) =>
       .transacting(trx)
       .insert(fields)
       .returning('*')
-      .then(results => results[0])
+      .then(results => results[0]),
   );
 
 export const dbUpdateGender = (id, fields) =>
@@ -37,7 +37,7 @@ export const dbCreateUserGender = ({ ...fields }) =>
       .transacting(trx)
       .insert(fields)
       .returning('*')
-      .then(results => results[0])
+      .then(results => results[0]),
   );
 
 export const dbDelUserGender = (userId, genderId) =>
@@ -55,7 +55,7 @@ export const updateUserGender = (genders, userId) => {
         trx
           .insert(genders)
           .into('user_gender')
-          .then()
+          .then(),
       );
   });
 };

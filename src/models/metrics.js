@@ -380,22 +380,27 @@ export const dbDisplayAverageConversationsLength = async () => {
 // minh - logic to update or insert conversations length row
 export const dbUpdateAverageConversationsLength = async () => {
   const existingData = await dbDisplayAverageConversationsLength();
-  console.log(existingData[0]);
-  const dayStats = await knex.raw(
-    `SELECT timestamp::date AS "timestamp", conversations_count AS "number_of_chatroom", Mes.count
-    FROM metrics_active_conversations
-    JOIN (SELECT messages.chat_time::date AS "chatDate", count(id) FROM messages
-          GROUP BY "chatDate") as Mes
-      ON "timestamp" = Mes."chatDate"
-    GROUP BY timestamp, number_of_chatroom, Mes.count`,
-  );
-    console.log(dayStats.results.rows);
-  const avgLength =
-    dayStats[0].count / dayStats[0].number_of_chatrooms;
-  
-  
-  
-  console.log(avgLength);
+  const dayStats = await knex('metrics_active_conversations')
+    .join(
+      knex('messages')
+    .select(knex.raw(`chat_time::date AS "chatDate", count(id) AS "chatCount"`))
+    .groupBy('chatDate')
+    .orderBy('chatDate', 'asc')
+    .as('t1'),
+      'metrics_active_conversations.timestamp', 'chatDate',
+    )
+    .select(
+      knex.raw(`timestamp::date AS "Date", 
+                conversations_count AS "Rooms", 
+                t1."chatCount"`),
+    )
+    .groupBy('Date', 'Rooms', 't1.chatCount')
+    .orderBy('Date', 'desc');
+
+  const avgLength = moment(dayStats[0].Date).startOf('day').isSame(moment().startOf('day'))
+    ? dayStats[0].chatCount / dayStats[0].Rooms
+    : 0;
+
   if (
     moment(existingData[0].timestamp)
       .startOf('day')

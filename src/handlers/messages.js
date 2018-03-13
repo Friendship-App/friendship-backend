@@ -11,8 +11,8 @@ export const getMessages = (request, reply) => dbGetMessages().then(reply);
 export const getMessageForUser = (request, reply) =>
   dbGetMessage(request.params.messageId).then(reply);
 
-export const createMessage = (request, reply) =>
-  dbCreateMessage({
+export const createMessage = function (request, reply) {
+  return dbCreateMessage({
     chat_time: new Date(),
     user_id: request.payload.userId,
     text_message: request.payload.textMessage,
@@ -30,6 +30,7 @@ export const createMessage = (request, reply) =>
         reply(Boom.badImplementation(err));
       }
     });
+};
 
 export const updateReadMessages = (request, reply) =>
   dbUpdateReadMessages(request.payload.messageIdArr)

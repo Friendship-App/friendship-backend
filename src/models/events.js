@@ -19,11 +19,11 @@ export const dbGetEvent = id =>
     .where({ id });
 
 export const dbCreateEvent = ({ ...fields }) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     const report = await trx('events')
       .insert(fields)
       .returning('*')
-      .then(results => results[0]); // return only first result
+      .then(results => results[0]);
 
     return report;
   });

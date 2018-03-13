@@ -45,6 +45,5 @@ export const UpdateEvent = async (request, reply) => {
 };
 
 // Delete a Event that is connected to a user
-export const delEvent = (request, reply) => {
-  return dbDelEvent(request.payload.eventId).then(reply);
-};
+export const delEvent = (request, reply) =>
+  dbDelEvent(request.payload.eventId).then(reply);

@@ -1,8 +1,5 @@
 import { getAuthWithScope } from '../utils/auth';
 import {
-  getNbMatchesMessaging,
-  getNbMessagesByConversation,
-  getNbMessages,
   displayRegisteredUsers,
   updateRegisteredUsers,
   displayActiveUsers,
@@ -19,12 +16,6 @@ import {
 const metrics = [
   {
     method: 'GET',
-    path: '/metrics/messages',
-    config: getAuthWithScope('admin'),
-    handler: getNbMessages,
-  },
-  {
-    method: 'GET',
     path: '/metrics/activeusers',
     config: getAuthWithScope('admin'),
     handler: displayActiveUsers,
@@ -34,18 +25,6 @@ const metrics = [
     path: '/metrics/activeusers/update',
     config: getAuthWithScope('admin'),
     handler: updateActiveUsers,
-  },
-  {
-    method: 'GET',
-    path: '/metrics/messagesbyconversation',
-    config: getAuthWithScope('admin'),
-    handler: getNbMessagesByConversation,
-  },
-  {
-    method: 'GET',
-    path: '/metrics/messagesmessaging',
-    config: getAuthWithScope('admin'),
-    handler: getNbMatchesMessaging,
   },
   {
     method: 'GET',

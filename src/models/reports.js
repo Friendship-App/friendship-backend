@@ -1,6 +1,12 @@
 import knex from '../utils/db';
 
-const reportFields = ['id', 'userId', 'createdAt', 'description', 'reported_by'];
+const reportFields = [
+  'id',
+  'userId',
+  'createdAt',
+  'description',
+  'reported_by',
+];
 
 export const dbGetReports = () => knex('reports').select(reportFields);
 
@@ -10,11 +16,11 @@ export const dbGetReport = id =>
     .where({ id });
 
 export const dbCreateReport = ({ ...fields }) =>
-  knex.transaction(async (trx) => {
+  knex.transaction(async trx => {
     const report = await trx('reports')
       .insert(fields)
       .returning('*')
-      .then(results => results[0]); // return only first result
+      .then(results => results[0]);
 
     return report;
   });
@@ -29,6 +35,3 @@ export const dbUpdateReport = (id, fields) =>
     .update({ ...fields })
     .where({ id })
     .returning('*');
-
-
-

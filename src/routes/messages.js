@@ -1,26 +1,30 @@
 import { getAuthWithScope } from '../utils/auth';
 import {
-    getMessages,
-    getMessage,
-    createMessage,
-    updateReadMessages,
+  getMessages,
+  getMessageForUser,
+  createMessage,
+  updateReadMessages,
 } from '../handlers/messages';
 
 const messages = [
-    // Get a list of all users
+  // Get all the messages
   {
     method: 'GET',
     path: '/messages',
+    config: getAuthWithScope('admin'),
     handler: getMessages,
   },
-   // Get info about a specific user
+
+  // Get all the messages from a specific user
   {
     method: 'GET',
+    config: getAuthWithScope('user'),
     path: '/messages/{messageId}',
-    handler: getMessage,
+    handler: getMessageForUser,
   },
 
   // Register new messages
+  // we use the route /chatrooms/{chatroomId} to send message
   {
     method: 'POST',
     path: '/messages',
@@ -37,5 +41,5 @@ const messages = [
   },
 ];
 export default messages;
-  // Here we register the routes
+
 export const routes = server => server.route(messages);

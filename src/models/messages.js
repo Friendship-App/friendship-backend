@@ -9,26 +9,30 @@ const messageFields = [
   'read',
 ];
 
+// select all the messages
 export const dbGetMessages = () =>
   knex('messages')
     .select(messageFields)
     .orderBy('id', 'asc');
-// get all ms by a userId
-export const dbGetMessage = user_id =>
+
+// select all the message for a user
+export const dbGetMessage = userId =>
   knex('messages')
     .select()
-    .where({ user_id });
+    .where({ userId });
+
+// insert a new message
 export const dbCreateMessage = ({ ...fields }) =>
   knex('messages')
     .insert(fields)
     .returning('*')
-    .then(results => results[0]); // return only first result
+    .then(results => results[0]);
 
-export const dbUpdateReadMessages = async (message_id_arr) => {
-  message_id_arr.forEach(async (message_id) => {
-    const req = await knex('messages')
-      .where({ id: message_id })
+// change the read status of multiple messages
+export const dbUpdateReadMessages = async (messageIdArr) => {
+  messageIdArr.forEach(async (messageId) => {
+    await knex('messages')
+      .where({ id: messageId })
       .update({ read: true });
-    return req;
   });
 };

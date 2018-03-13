@@ -74,19 +74,23 @@ const tags = [
     config: getAuthWithScope('admin'),
     handler: getTags,
   },
-  // Get info about a specific tag
+
+  // Get all the tags of a user
   {
     method: 'GET',
     path: '/tagsForUser/{userId}',
     config: getAuthWithScope('user'),
     handler: getTagsForUser,
   },
+
+  // Get info about a specific tag
   {
     method: 'GET',
     path: '/tags/{tagId}',
     config: merge({}, validateTagId),
     handler: getTag,
   },
+
   // Register new tag
   {
     method: 'POST',
@@ -94,6 +98,7 @@ const tags = [
     config: merge({}, validateTagFields, getAuthWithScope('user')),
     handler: addTag,
   },
+
   // Delete a tag, admin only
   {
     method: 'DELETE',
@@ -101,18 +106,13 @@ const tags = [
     config: merge({}, validateTagId, getAuthWithScope('admin')),
     handler: delTag,
   },
+
   // Update tag, admin only
   {
     method: 'PATCH',
     path: '/tags/{tagId}',
     config: merge({}, validateTagId, getAuthWithScope('admin')),
     handler: updateTag,
-  },
-  {
-    method: 'GET',
-    path: '/user_tag/{userId}',
-    config: getAuthWithScope('user'),
-    handler: getUserTags,
   },
   // Get all usernames of a tag
   {

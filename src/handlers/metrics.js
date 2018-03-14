@@ -64,21 +64,3 @@ export const testMetrics = async (request, reply) => {
     reply(`Error: ${e}`);
   }
 };
-
-// insert active usercount everyday at 23:59
-const cron = require('node-cron');
-
-// Cron job runs every minute so metrics are populated and there is smth to show on metrics
-// cron.schedule('1 * * * * *', async () => {
-//   console.log(' START Cron job -----------------1 min');
-//   try {
-//     await dbUpdateRegisteredUsersData();
-//     await dbUpdateActiveUsersData();
-//     await dbUpDateActiveConversationsData();
-//     await dbUpdateAverageConversationsLength();
-//   } catch (e) {
-//     console.log('--------- error with Cron: ', e);
-//   }
-
-//   console.log(' END --------------------------');
-// });

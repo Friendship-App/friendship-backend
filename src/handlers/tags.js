@@ -9,9 +9,7 @@ import {
   dbUpdateTag,
   dbCreateUserTag,
   dbCreateUserTags,
-  dbGetUserTags,
   dbGetTagsUser,
-  dbGetCountLikes,
   dbDelUserTag,
   dbGetTagsForUser,
   dbGetTagList,
@@ -20,15 +18,18 @@ import {
 } from '../models/tags';
 
 export const getTagList = (request, reply) => {
-    if(request.query.filter) {
-        return dbGetFilteredTags(request.query.filter).then(reply)
-    }
-    return dbGetTagList().then(reply);
-}
+  if (request.query.filter) {
+    return dbGetFilteredTags(request.query.filter).then(reply);
+  }
+  return dbGetTagList().then(reply);
+};
 
-export const getTags = (request, reply) => {dbGetTags().then(reply);}
+export const getTags = (request, reply) => {
+  dbGetTags().then(reply);
+};
 
-export const getTag = (request, reply) => dbGetTag(request.params.tagId).then(reply);
+export const getTag = (request, reply) =>
+  dbGetTag(request.params.tagId).then(reply);
 
 export const getTagsForUser = (request, reply) =>
   dbGetTagsForUser(request.params.userId).then(reply);
@@ -41,8 +42,9 @@ export const addTag = (request, reply) =>
     createdAt: moment(),
   }).then(reply);
 
-// delete this will affect FK in user_personality --> ask Futurice?
-export const delTag = (request, reply) => dbDelTag(request.params.tagId).then(reply);
+// delete this will affect FK in user_personality
+export const delTag = (request, reply) =>
+  dbDelTag(request.params.tagId).then(reply);
 
 export const updateTag = async (request, reply) => {
   if (request.pre.user.scope !== 'admin') {
@@ -107,13 +109,12 @@ export const createUserTags = (request, reply) => {
     });
 };
 
-export const getUsersInTag = (request, reply) => dbGetUsersInTag(request.params.tagId).then(reply);
-// Get all tags of a user
-export const getUserTags = (request, reply) => dbGetUserTags(request.params.userId).then(reply);
-// get all users of tags
-export const getTagsUser = (request, reply) => dbGetTagsUser(request.params.tagId).then(reply);
+export const getUsersInTag = (request, reply) =>
+  dbGetUsersInTag(request.params.tagId).then(reply);
 
-export const countTagLikes = (request, reply) => dbGetCountLikes(request.params.tagId).then(reply);
+// get all users of tags
+export const getTagsUser = (request, reply) =>
+  dbGetTagsUser(request.params.tagId).then(reply);
 
 // Delete a tag that is connected to a user
 export const delUserTag = (request, reply) => {
@@ -121,5 +122,7 @@ export const delUserTag = (request, reply) => {
     return reply(Boom.unauthorized('Cannot update other users!'));
   }
 
-  return dbDelUserTag(request.payload.userId, request.payload.tagId).then(reply);
+  return dbDelUserTag(request.payload.userId, request.payload.tagId).then(
+    reply,
+  );
 };

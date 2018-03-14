@@ -18,7 +18,7 @@ export const getPersonalities = (request, reply) =>
 export const getPersonality = (request, reply) =>
   dbGetPersonality(request.params.personalityId).then(reply);
 
-// delete this will affect FK in user_personality --> ask Futurice?
+// delete this will affect FK in user_personality
 // cannot use at the moment --> need to drop cascade
 export const delPersonality = (request, reply) => {
   if (
@@ -72,7 +72,7 @@ export const updateUserPersonality = async (request, reply) => {
     fields,
   )
     .then(reply)
-    .catch(err => {
+    .catch((err) => {
       if (err.constraint) {
         reply(Boom.conflict('Constraint Error: ', err));
       } else {
@@ -81,29 +81,28 @@ export const updateUserPersonality = async (request, reply) => {
     });
 };
 
-export const createUserPersonality = (request, reply) => {
-  return dbCreateUserPersonality({
+export const createUserPersonality = (request, reply) =>
+  dbCreateUserPersonality({
     ...request.payload,
     userId: request.pre.user.id,
     personalityId: request.payload.personalityId,
     level: request.payload.level,
   })
     .then(reply)
-    .catch(err => {
+    .catch((err) => {
       if (err.constraint) {
         reply(Boom.conflict('Constraint Error: ', err));
       } else {
         reply(Boom.badImplementation(err));
       }
     });
-};
 
 // Batch add an array of personalities to a user
 // Format payload
 // personalities: [{"personalityId": 1, "level":5}, {"personalityId": 1, "level":5}]
 export const createUserPersonalities = (request, reply) => {
-  var personalities = [];
-  for (var i = 0; i < request.payload.personalities.length; i++) {
+  const personalities = [];
+  for (let i = 0; i < request.payload.personalities.length; i++) {
     personalities.push({
       personalityId: request.payload.personalities[i].personalityId,
       userId: request.pre.user.id,
@@ -112,7 +111,7 @@ export const createUserPersonalities = (request, reply) => {
   }
   return dbCreateUserPersonalities(request.pre.user.id, personalities)
     .then(reply)
-    .catch(err => {
+    .catch((err) => {
       // console.log(err)
       reply(
         Boom.conflict(

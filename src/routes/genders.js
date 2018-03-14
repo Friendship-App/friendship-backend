@@ -43,19 +43,25 @@ const validateGenderFields = {
 const validateUserGenderFields = {
   validate: {
     payload: {
-      userId: Joi.number().integer().required(),
-      genderId: Joi.number().integer().required(),
+      userId: Joi.number()
+        .integer()
+        .required(),
+      genderId: Joi.number()
+        .integer()
+        .required(),
     },
   },
 };
 
 const genders = [
+  // Get all the genders
   {
     method: 'GET',
     path: '/genders',
     config: getAuthWithScope('user'),
     handler: getGenders,
   },
+  // Get a specific gender
   {
     method: 'GET',
     path: '/genders/{genderId}',
@@ -73,7 +79,12 @@ const genders = [
   {
     method: 'PATCH',
     path: '/genders/{genderId}',
-    config: merge({}, validateGenderId, validateGenderFields, getAuthWithScope('admin')),
+    config: merge(
+      {},
+      validateGenderId,
+      validateGenderFields,
+      getAuthWithScope('admin'),
+    ),
     handler: updateGender,
   },
   // Get all user genders
@@ -90,6 +101,7 @@ const genders = [
     config: merge({}, validateUserGenderFields, getAuthWithScope('user')),
     handler: createUserGender,
   },
+  // delete record in user_gender table
   {
     method: 'DELETE',
     path: '/user_gender',

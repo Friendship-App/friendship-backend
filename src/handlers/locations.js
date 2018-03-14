@@ -17,8 +17,7 @@ export const addLocation = (request, reply) =>
     name: request.payload.name,
   })
     .then(reply)
-    .catch(err => reply(Boom.badImplementation(err)),
-  );
+    .catch(err => reply(Boom.badImplementation(err)));
 
 export const delLocation = (request, reply) => {
   if (
@@ -40,7 +39,10 @@ export const delUserLocation = (request, reply) => {
     return reply(Boom.unauthorized('Cannot update other users!'));
   }
 
-  return dbDelUserLocation(request.pre.user.id, request.payload.locationId).then(reply);
+  return dbDelUserLocation(
+    request.pre.user.id,
+    request.payload.locationId,
+  ).then(reply);
 };
 
 export const createUserLocations = (request, reply) => {
@@ -51,7 +53,5 @@ export const createUserLocations = (request, reply) => {
       userId: request.pre.user.id,
     });
   });
-  return dbCreateUserLocations(request.pre.user.id, locations)
-    .then(reply);
+  return dbCreateUserLocations(request.pre.user.id, locations).then(reply);
 };
-

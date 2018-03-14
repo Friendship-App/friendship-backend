@@ -17,7 +17,7 @@ const userListFields = [
   'active',
   'birthyear',
   'status',
-  'image'
+  'image',
 ];
 
 export const dbGetUsers = () =>
@@ -122,11 +122,11 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
     ON "Users"."id" = "UserHateCommon"."userHateId"
     left join "UserLocation"
     ON "Users"."id" = "UserLocation"."userId"
-    `
+    `,
     )
     .then(results => results.rows);
 
-  return users.map(user => {
+  return users.map((user) => {
     if (user.image) {
       user.image = user.image.toString('base64');
     }
@@ -217,7 +217,7 @@ export const dbGetUser = async (userId, currentUserId) => {
     ON "Users"."id" = "UserHateCommon"."userHateId"
     left join "UserLocation"
     ON "Users"."id" = "UserLocation"."userId"
-    `
+    `,
     )
     .then(results => results.rows);
 
@@ -256,7 +256,7 @@ export const dbFetchUserBan = id =>
 export const dbBanUser = (id, fields) => {
   fields = {
     ...fields,
-    user_id: id
+    user_id: id,
   };
 
   return knex('banned_users')
@@ -282,7 +282,7 @@ export const dbDelVerificationHash = ownerId =>
     .del();
 
 export const dbCreateUser = ({ password, genders, ...fields }) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     const user = await trx('users')
       .insert(fields)
       .returning('*')
@@ -291,13 +291,13 @@ export const dbCreateUser = ({ password, genders, ...fields }) =>
     await trx('secrets')
       .insert({
         ownerId: user.id,
-        password
+        password,
       })
       .then();
 
     const genderArray = [];
     if (genders) {
-      genders.forEach(gender => {
+      genders.forEach((gender) => {
         genderArray.push({ userId: user.id, genderId: gender });
       });
     }
@@ -312,7 +312,7 @@ export const dbCreateUser = ({ password, genders, ...fields }) =>
     await trx('email_verification')
       .insert({
         ownerId: user.id,
-        hash
+        hash,
       })
       .then();
 

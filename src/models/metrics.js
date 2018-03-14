@@ -191,12 +191,6 @@ export const dbUpdateActiveUsersData = async () => {
 
   // check if there is a row with today's date in the table
   // if yes update the row, if no insert a new row
-  console.log(dayActiveUsers);
-  console.log(
-    moment(existingData[0].timestamp)
-      .startOf('day')
-      .isSame(moment().startOf('day'))
-  );
   if (
     moment(existingData[0].timestamp)
       .startOf('day')
@@ -383,11 +377,14 @@ export const dbUpdateAverageConversationsLength = async () => {
   const dayStats = await knex('metrics_active_conversations')
     .join(
       knex('messages')
-    .select(knex.raw(`chat_time::date AS "chatDate", count(id) AS "chatCount"`))
-    .groupBy('chatDate')
-    .orderBy('chatDate', 'asc')
-    .as('t1'),
-      'metrics_active_conversations.timestamp', 'chatDate',
+        .select(
+          knex.raw(`chat_time::date AS "chatDate", count(id) AS "chatCount"`),
+        )
+        .groupBy('chatDate')
+        .orderBy('chatDate', 'asc')
+        .as('t1'),
+      'metrics_active_conversations.timestamp',
+      'chatDate',
     )
     .select(
       knex.raw(`timestamp::date AS "Date", 
@@ -397,7 +394,9 @@ export const dbUpdateAverageConversationsLength = async () => {
     .groupBy('Date', 'Rooms', 't1.chatCount')
     .orderBy('Date', 'desc');
 
-  const avgLength = moment(dayStats[0].Date).startOf('day').isSame(moment().startOf('day'))
+  const avgLength = moment(dayStats[0].Date)
+    .startOf('day')
+    .isSame(moment().startOf('day'))
     ? dayStats[0].chatCount / dayStats[0].Rooms
     : 0;
 

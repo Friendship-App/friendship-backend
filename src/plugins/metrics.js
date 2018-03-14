@@ -9,7 +9,6 @@ import {
 
 // Cron job runs every minute so metrics are populated and there is smth to show on metrics
 cron.schedule('1 * * * * *', async () => {
-  console.log(' START Cron job -----------------1 min');
   try {
     await dbUpdateRegisteredUsersData();
     await dbUpdateActiveUsersData();
@@ -18,8 +17,6 @@ cron.schedule('1 * * * * *', async () => {
   } catch (e) {
     console.log('error with Cron: ', e);
   }
-
-  console.log(' END --------------------------');
 });
 
 exports.register = (server, options, next) => {

@@ -24,34 +24,81 @@ const eventFields = [
 
 export const dbGetEvents = async userId => {
   const events = await knex.raw(
-    `SELECT   "id","createdAt", "title", "eventImage", "description", "city", "address", "eventDate" FROM "events" `,
+    `SELECT   "id","createdAt", "title", "eventImage", "description", "city", "address", "eventDate" FROM "events" ORDER BY "eventDate" DESC`,
   );
 
-  var newArrayDataOfOjbect = Object.values(events.rows);
-  calculateRecommandationByDate(newArrayDataOfOjbect);
-  calculateRecommandationByNumberOfParticipants(newArrayDataOfOjbect);
+  const newArrayDataOfOjbect = Object.values(events.rows);
+  calculateTheIndexForDateRecommandation(newArrayDataOfOjbect);
+  await calculateRecommandationByNumberOfParticipants(newArrayDataOfOjbect);
+  calculateTheIndexForSortByParticipants(newArrayDataOfOjbect);
+  await calculateRecommandationByCommonPersonalityNaahsYeahs(
+    newArrayDataOfOjbect,
+    userId,
+  );
   return newArrayDataOfOjbect;
 };
 
-const calculateRecommandationByDate = events => {
-  events.sort(function(a, b) {
-    return new Date(b.eventDate) - new Date(a.eventDate);
+const calculateRecommandationByCommonPersonalityNaahsYeahs = async (
+  events,
+  userId,
+) => {
+  const array = events.map(async event => {
+    const participantsWithFeaturesPromises = await knex.raw(
+      `SELECT "users"."id","users"."emoji","users"."username",
+        count(DISTINCT "tags"."name") AS "hateCommon"
+        FROM "users"
+        left join "user_tag"
+        ON "user_tag"."userId" = "users"."id"
+        left join "tags"
+        ON "tags"."id" = "user_tag"."tagId"
+        WHERE "user_tag"."love" = ${false}
+        AND "users"."id" != ${userId}
+        AND "users"."id" IN (SELECT "users"."id"  FROM "users"
+              left join "eventParticipants"
+              ON "eventParticipants"."userId" = "users"."id"
+              left join "events"
+              ON "events"."id" = "eventParticipants"."eventId"
+              WHERE "eventParticipants"."eventId" = ${event.Id})
+        AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
+                          left join "tags" ON "tags"."id" = "user_tag"."tagId"
+                          WHERE "user_tag"."userId" = ${userId}
+                          AND "user_tag"."love" = ${false})
+        GROUP BY "users"."id"`,
+    );
+    return event;
+    const participantsWithFeatures = await Promise.all(
+      participantsWithFeaturesPromises,
+    );
   });
+};
+
+const calculateTheIndexForDateRecommandation = events => {
   events.map((event, index) => {
     event.dateSortIndex = index + 1;
   });
-  //console.log(events);
 };
-const calculateRecommandationByNumberOfParticipants = events => {
-  const numbers = [];
-  events.map(async event => {
+
+const calculateRecommandationByNumberOfParticipants = async events => {
+  const array = events.map(async event => {
     const participants = await knex.raw(
       `SELECT COUNT(DISTINCT "userId") as NumberOfUsers  FROM "eventParticipants"
             WHERE "eventParticipants"."eventId" = ${event.id}`,
     );
-    numbers.push(participants.rows[0].numberofusers);
+    event.numberOfParticipants = participants.rows[0].numberofusers;
+    return event;
   });
-  console.log('ITS SECOOOOOOOONd', numbers);
+  const eventsArray = await Promise.all(array);
+  return eventsArray;
+};
+
+const calculateTheIndexForSortByParticipants = events => {
+  events.sort(function(a, b) {
+    return b.numberOfParticipants - a.numberOfParticipants;
+  });
+  events.map((event, index) => {
+    event.numberParticipantsIndex = index + 1;
+    delete event['numberOfParticipants'];
+  });
 };
 
 export const dbGetEvent = id =>

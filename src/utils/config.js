@@ -35,8 +35,8 @@ const config = {
     connection: env.DATABASE_URL || {
       host: '127.0.0.1',
       user: 'postgres',
-      password: 'a1234',
-      database: 'postgres',
+      password: '',
+      database: 'friendship',
       ssl: false,
     },
     pool: {

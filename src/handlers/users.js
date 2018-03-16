@@ -9,6 +9,7 @@ import {
   dbGetUser,
   dbDelUser,
   dbBanUser,
+  dbUnbanUser,
   dbFetchUserBan,
   dbUpdateUser,
   dbCreateUser,
@@ -142,11 +143,26 @@ export const banUser = (request, reply) => {
             .toISOString(),
   };
 
+
   return dbFetchUserBan(request.params.userId).then((result) => {
     if (result.length) return reply(Boom.conflict('User is already banned'));
 
     return dbBanUser(request.params.userId, fields).then(reply);
   });
+};
+
+
+export const unbanUser = (request, reply) => {
+  if (
+    request.pre.user.scope !== 'admin' &&
+    request.pre.user.id !== request.params.userId
+  ) {
+    return reply(
+      Boom.unauthorized('Unprivileged users cannot do this!'),
+    );
+  }
+
+  return dbUnbanUser(request.params.userId).then(reply);
 };
 
 export const authUser = (request, reply) =>

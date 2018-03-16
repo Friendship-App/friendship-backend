@@ -8,9 +8,9 @@ knex.schema
     table.increments('id').primary();
     table.integer('given_by').references('id').inTable('users').onDelete('SET NULL');
     table.text('suggestion');
-    table.text('easy');
-    table.text('hard');
-    table.text('improve');
+    table.text('findFriendEasy');
+    table.text('findFriendHard');
+    table.text('suggestImprovement');
     table.text('checkBoxs');
     table.integer('rating');
     table.integer('goalRate');

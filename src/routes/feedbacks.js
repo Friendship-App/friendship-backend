@@ -8,9 +8,9 @@ const validateFeedbackFields = {
   validate: {
     payload: {
       suggestion: Joi.string().allow(''),
-      easy: Joi.string().allow(''),
-      hard: Joi.string().allow(''),
-      improve: Joi.string().allow(''),
+      findFriendEasy: Joi.string().allow(''),
+      findFriendHard: Joi.string().allow(''),
+      suggestImprovement: Joi.string().allow(''),
       suggestion: Joi.string().allow(''),
       rating: Joi.number().allow(''),
       goalRate: Joi.number().allow(''),

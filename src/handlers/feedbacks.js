@@ -9,9 +9,9 @@ export const CreateFeedback = (request, reply) =>
     createdAt: moment(),
     suggestion: request.payload.suggestion,
     checkBoxs:request.payload.checkBoxs,
-    easy: request.payload.easy,
-    hard: request.payload.hard,
-    improve: request.payload.improve,
+    findFriendEasy: request.payload.findFriendEasy,
+    findFriendHard: request.payload.findFriendHard,
+    suggestImprovement: request.payload.suggestImprovement,
     rating: request.payload.rating,
     goalRate: request.payload.goalRate,
     given_by: request.payload.given_by

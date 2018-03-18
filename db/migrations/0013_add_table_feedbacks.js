@@ -11,7 +11,7 @@ knex.schema
     table.text('findFriendEasy');
     table.text('findFriendHard');
     table.text('suggestImprovement');
-    table.text('checkBoxs');
+    table.text('OtherReason');
     table.integer('rating');
     table.integer('goalRate');
     table.timestamp('createdAt').notNullable();

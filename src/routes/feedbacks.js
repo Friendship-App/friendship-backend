@@ -1,20 +1,21 @@
-import { merge } from 'lodash';
-import Joi from 'joi';
+import { merge } from "lodash";
+import Joi from "joi";
 
-import { getAuthWithScope } from '../utils/auth';
-import { CreateFeedback } from '../handlers/feedbacks';
+import { getAuthWithScope } from "../utils/auth";
+import { CreateFeedback } from "../handlers/feedbacks";
 
 const validateFeedbackFields = {
   validate: {
     payload: {
-      suggestion: Joi.string().allow(''),
-      findFriendEasy: Joi.string().allow(''),
-      findFriendHard: Joi.string().allow(''),
-      suggestImprovement: Joi.string().allow(''),
-      suggestion: Joi.string().allow(''),
-      rating: Joi.number().allow(''),
-      goalRate: Joi.number().allow(''),
-      checkBoxs: Joi.string().allow(''),
+      suggestion: Joi.string().allow(""),
+      findFriendEasy: Joi.string().allow(""),
+      findFriendHard: Joi.string().allow(""),
+      suggestImprovement: Joi.string().allow(""),
+      suggestion: Joi.string().allow(""),
+      rating: Joi.number().allow(""),
+      goalRate: Joi.number().allow(""),
+      OtherReason: Joi.string().allow(""),
+      checkBoxs: Joi.array(),
       given_by: Joi.number()
         .integer()
         .required()
@@ -23,11 +24,11 @@ const validateFeedbackFields = {
 };
 
 const feedbacks = [
-  // Register new reports
+  // Register new feedback
   {
-    method: 'POST',
-    path: '/feedbacks',
-    config: merge({}, validateFeedbackFields, getAuthWithScope('user')),
+    method: "POST",
+    path: "/feedbacks",
+    config: merge({}, validateFeedbackFields, getAuthWithScope("user")),
     handler: CreateFeedback
   }
 ];

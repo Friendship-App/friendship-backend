@@ -15,6 +15,7 @@ import {
   getTagsForUser,
   getTagList,
   getUsersInTag,
+  activateTag,
 } from '../handlers/tags';
 
 const validateTagId = {
@@ -23,6 +24,19 @@ const validateTagId = {
       tagId: Joi.number()
         .integer()
         .required(),
+    }
+  },
+};
+
+const validateTagState = {
+  validate: {
+    params: {
+      tagId: Joi.number()
+        .integer()
+        .required(),
+    },
+    payload: {
+      checked: Joi.boolean().required(),
     },
   },
 };
@@ -157,6 +171,14 @@ const tags = [
     config: merge({}, validateUserTagFields, getAuthWithScope('user')),
     handler: delUserTag,
   },
+  //Activate and deactivate tag
+  {
+    method: 'PATCH',
+    path: '/tags/activate/{tagId}',
+    config: merge({}, validateTagState, getAuthWithScope('admin')),
+    handler: activateTag,
+  },
+
 ];
 
 export default tags;

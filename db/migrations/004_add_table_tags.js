@@ -15,6 +15,7 @@ exports.up = knex =>
       table.text('name').unique();
       table.integer('category'); // 1: activities 2: interests
       table.timestamp('createdAt').notNullable();
+      table.boolean('active');
     })
 
     .createTableIfNotExists('user_tag', (table) => {
@@ -32,6 +33,7 @@ exports.up = knex =>
         .onDelete('CASCADE');
       table.boolean('love');
       table.primary(['userId', 'tagId']);
+      table.boolean('active');
     });
 
 /**

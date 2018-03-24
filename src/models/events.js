@@ -186,6 +186,7 @@ const calculateRecommandationByNumberOfParticipants = async events => {
             WHERE "eventParticipants"."eventId" = ${event.id}`,
     );
     event.numberOfParticipants = participants.rows[0].numberofusers;
+
     return event;
   });
   const eventsArray = await Promise.all(array);
@@ -198,7 +199,7 @@ const calculateTheIndexForSortByParticipants = events => {
   });
   events.map((event, index) => {
     event.numberParticipantsIndex = index + 1;
-    delete event['numberOfParticipants'];
+    //delete event['numberOfParticipants'];
   });
 };
 

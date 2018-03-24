@@ -52,7 +52,7 @@ const events = [
   {
     method: 'POST',
     path: '/events',
-    config: merge({}, validateEventFields),
+    //config: merge({}, validateEventFields),
     handler: CreateEvent,
   },
   {
@@ -63,7 +63,7 @@ const events = [
   },
   {
     method: 'DELETE',
-    path: '/events/{eventid}',
+    path: '/events/{id}',
     //config: merge({}, validateEventFields, getAuthWithScope('admin')),
     handler: delEvent,
   },

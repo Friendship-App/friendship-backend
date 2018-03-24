@@ -49,7 +49,7 @@ const events = [
   {
     method: 'POST',
     path: '/events',
-    config: merge({}, validateEventFields, getAuthWithScope('user')),
+    config: merge({}, validateEventFields),
     handler: CreateEvent,
   },
   {

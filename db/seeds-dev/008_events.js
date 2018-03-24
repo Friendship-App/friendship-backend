@@ -3,7 +3,7 @@ import { getDates } from '../../src/models/metrics';
 const simpleFixtures = require('simple-fixtures');
 const faker = require('faker/locale/en');
 const moment = require('moment');
-const randomDates = getDates('2018-01-01', moment().startOf('day'));
+const randomDates = getDates('2018-03-20', moment().startOf('day'));
 
 const eventFields = {
   createdAt: () =>

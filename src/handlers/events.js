@@ -25,13 +25,12 @@ export const CreateEvent = (request, reply) =>
     address: request.payload.address,
     city: request.payload.city,
     eventDate: request.payload.eventDate,
+    minParticipants: request.payload.minParticipants,
+    maxParticipants: request.payload.maxParticipants,
+    participantsMix: request.payload.participantsMix,
   }).then(reply);
 
 export const UpdateEvent = async (request, reply) => {
-  if (request.pre.user.scope !== 'admin') {
-    return reply(Boom.unauthorized('Unprivileged users cannot update events'));
-  }
-
   const fields = {
     createdAt: moment(),
     title: request.payload.title,
@@ -40,9 +39,12 @@ export const UpdateEvent = async (request, reply) => {
     address: request.payload.address,
     city: request.payload.city,
     eventDate: request.payload.eventDate,
+    minParticipants: request.payload.minParticipants,
+    maxParticipants: request.payload.maxParticipants,
+    participantsMix: request.payload.participantsMix,
   };
 
-  return dbUpdateEvent(request.params.reportId, fields).then(reply);
+  return dbUpdateEvent(request.params.eventId, fields).then(reply);
 };
 
 // Delete a Event that is connected to a user

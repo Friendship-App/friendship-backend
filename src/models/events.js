@@ -18,6 +18,9 @@ const eventFields = [
   'city',
   'address',
   'eventDate',
+  'minParticipants',
+  'maxParticipants',
+  'participantsMix',
 ];
 
 const userListFields = [
@@ -33,7 +36,7 @@ const userListFields = [
 
 export const dbGetEvents = async userId => {
   const events = await knex.raw(
-    `SELECT   "id","createdAt", "title", "eventImage", "description", "city", "address", "eventDate" FROM "events"  ORDER BY "eventDate" ASC`,
+    `SELECT   "id","createdAt", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events"  ORDER BY "eventDate" ASC`,
   );
   console.log('EVENTS', events);
 

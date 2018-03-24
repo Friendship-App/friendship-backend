@@ -13,6 +13,9 @@ exports.up = knex =>
       table.text('description');
       table.text('address');
       table.text('city');
+      table.text('minParticipants');
+      table.text('maxParticipants');
+      table.text('participantsMix');
       table.timestamp('eventDate');
     });
 exports.down = knex => knex.schema.dropTableIfExists('events');

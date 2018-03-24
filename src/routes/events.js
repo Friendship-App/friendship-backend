@@ -28,6 +28,9 @@ const validateEventFields = {
       city: Joi.string(),
       address: Joi.string(),
       eventDate: Joi.date().timestamp(),
+      minParticipants: Joi.string(),
+      maxParticipants: Joi.string(),
+      participantsMix: Joi.string(),
       createdAt: Joi.date().timestamp(),
     },
   },
@@ -51,6 +54,12 @@ const events = [
     path: '/events',
     config: merge({}, validateEventFields),
     handler: CreateEvent,
+  },
+  {
+    method: 'PATCH',
+    path: '/events/{eventId}',
+    config: merge({}, validateEventFields),
+    handler: UpdateEvent,
   },
   {
     method: 'DELETE',

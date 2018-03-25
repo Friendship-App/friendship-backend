@@ -87,12 +87,12 @@ const calculateRecommandationByEventUserLocation = async (events, userId) => {
         origin: 'Helsinki',
         destination: 'Kiev',
       },
-      // function(err, data) {
-      //   if (err) return console.log(err);
-      //   event.durationValue = data.durationValue;
-      //   console.log(data.durationValue);
-      //   return event
-      // },
+      function(err, data) {
+        if (err) return console.log(err);
+        event.durationValue = data.durationValue;
+        console.log(data.durationValue);
+        return event;
+      },
     );
     console.log('distance  ________', distance12);
   });

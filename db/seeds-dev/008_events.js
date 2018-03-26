@@ -4,6 +4,7 @@ const simpleFixtures = require('simple-fixtures');
 const faker = require('faker/locale/en');
 const moment = require('moment');
 const randomDates = getDates('2018-03-20', moment().startOf('day'));
+let userId = 1;
 
 const eventFields = {
   createdAt: () =>
@@ -12,8 +13,10 @@ const eventFields = {
   description: faker.lorem.sentences,
   city: faker.address.city,
   address: faker.address.streetAddress,
+  hostId: (userId += 1),
   eventDate: () =>
     randomDates[Math.floor(Math.random() * randomDates.length)].timestamp,
 };
+
 exports.seed = knex =>
   knex.batchInsert('events', simpleFixtures.generateFixtures(eventFields, 8));

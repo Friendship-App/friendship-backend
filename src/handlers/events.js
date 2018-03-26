@@ -1,5 +1,6 @@
 import Boom from 'boom';
 import moment from 'moment';
+import { resizeImage } from '../utils/image';
 
 import {
   dbGetEvents,
@@ -15,12 +16,24 @@ export const getEvents = (request, reply) =>
 export const getEvent = (request, reply) =>
   dbGetEvent(request.params.eventId).then(reply);
 
-export const CreateEvent = (request, reply) =>
+export const CreateEvent = async (request, reply) => {
+  const fields = {};
+
+  // request.payload.forEach((field) => { fields[field] = request.payload[field]; });
+
+  for (const field in request.payload) {
+    fields[field] = request.payload[field];
+  }
+
+  // If request contains an image, resize it to max 512x512 pixels
+  if (fields.eventImage) {
+    const buf = Buffer.from(fields.eventImage, 'base64');
+    await resizeImage(buf).then(resized => (fields.eventImage = resized));
+  }
   dbCreateEvent({
-    ...request.payload,
+    ...fields,
     createdAt: moment(),
     title: request.payload.title,
-    eventImage: request.payload.eventImage,
     description: request.payload.description,
     address: request.payload.address,
     city: request.payload.city,
@@ -29,6 +42,7 @@ export const CreateEvent = (request, reply) =>
     maxParticipants: request.payload.maxParticipants,
     participantsMix: request.payload.participantsMix,
   }).then(reply);
+};
 
 export const UpdateEvent = async (request, reply) => {
   const fields = {

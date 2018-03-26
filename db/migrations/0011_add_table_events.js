@@ -12,6 +12,12 @@ exports.up = knex =>
       table.binary('eventImage');
       table.text('description');
       table.text('address');
+      table
+        .integer('hostId')
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE');
+      table;
       table.text('city');
       table.text('minParticipants');
       table.text('maxParticipants');

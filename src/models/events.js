@@ -38,7 +38,6 @@ export const dbGetEvents = async userId => {
   const events = await knex.raw(
     `SELECT   "id","createdAt", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events"  ORDER BY "eventDate" ASC`,
   );
-  console.log('EVENTS', events);
 
   const newArrayDataOfOjbect = Object.values(events.rows);
   await calculateRecommandationByNumberOfParticipants(newArrayDataOfOjbect);
@@ -48,14 +47,17 @@ export const dbGetEvents = async userId => {
     userId,
   );
   calculateTheIndexForSortByYeahsNaahs(newArrayDataOfOjbect);
-  //calculateRecommandationByEventUserLocation(newArrayDataOfOjbect, userId);
-  const eventsArray = calculateTheIndexForDateRecommandation(
+  await calculateRecommandationByEventUserLocation(
     newArrayDataOfOjbect,
+    userId,
   );
+  calculateTheIndexRecommandationByEventUserLocation(newArrayDataOfOjbect);
 
-  calculateFinalSortRate(eventsArray);
+  calculateTheIndexForDateRecommandation(newArrayDataOfOjbect);
 
-  return eventsArray;
+  calculateFinalSortRate(newArrayDataOfOjbect);
+
+  return newArrayDataOfOjbect;
 };
 
 const calculateFinalSortRate = events => {
@@ -63,11 +65,22 @@ const calculateFinalSortRate = events => {
     event.reccomendationIndex =
       event.dateIndex * 3 +
       event.commonNaahYeahsForUserIndex * 4 +
-      event.numberParticipantsIndex * 1;
+      event.numberParticipantsIndex * 1 +
+      event.locationSortIndex * 2;
   });
   events.sort(function(a, b) {
     return b.reccomendationIndex - a.reccomendationIndex;
   });
+};
+const calculateTheIndexRecommandationByEventUserLocation = events => {
+  events.sort(function(a, b) {
+    return a.durationValue - b.durationValue;
+  });
+  events.map((event, index) => {
+    event.locationSortIndex = index + 1;
+    delete event['durationValue'];
+  });
+  return events;
 };
 
 const calculateRecommandationByEventUserLocation = async (events, userId) => {
@@ -77,45 +90,34 @@ const calculateRecommandationByEventUserLocation = async (events, userId) => {
       left join "locations"
       ON "locations"."id" = "user_location"."locationId"
       WHERE "users"."id" = ${userId}`);
-  console.log('USEr ------ ', user.rows[0].location);
   var origins = [user.rows[0].location];
 
   var distance = require('google-distance');
   const array = events.map(async event => {
-    const distance12 = await distance.get(
-      {
-        origin: 'Helsinki',
-        destination: 'Kiev',
-      },
-      function(err, data) {
-        if (err) return console.log(err);
-        event.durationValue = data.durationValue;
-        console.log(data.durationValue);
-        return event;
-      },
-    );
-    console.log('distance  ________', distance12);
-  });
-  console.log('EVENTS PROMISE ________', array);
-
-  const eventsArray = await Promise.all(array);
-  console.log('EVENTS ________', eventsArray);
-
-  /*  const GoogleDistanceApi = require('google-distance-api');
-  const options = {
-    key: 'AIzaSyAtoAQP13gnBjzrdFja9Nvb9blo-meL_j8',
-    origins: ['Helsinki'],
-    destinations: ['Kiev'],
-  };
-  const array = events.map(async event => {
-    const data = GoogleDistanceApi.distance(options, (err, data) => {
-      if (err) {
-        return console.log(err);
-      }
-      console.log('DISTANCE', data);
+    const testPromise = new Promise((resolve, reject) => {
+      distance.get(
+        {
+          origin: user.rows[0].location,
+          destination: event.city,
+          //origin: 'Helsinki',
+          //destination: 'Berlin',
+        },
+        (err, data) => {
+          if (err) {
+            event.durationValue = 0;
+            resolve(event);
+          } else {
+            event.durationValue = data.durationValue;
+            resolve(event);
+          }
+        },
+      );
     });
+
+    return testPromise;
   });
-  console.log('HAPPENS BEFORE');*/
+  const eventsArray = await Promise.all(array);
+  return eventsArray;
 };
 
 const calculateRecommandationByCommonPersonalityNaahsYeahs = async (
@@ -199,14 +201,19 @@ const calculateTheIndexForSortByParticipants = events => {
   });
   events.map((event, index) => {
     event.numberParticipantsIndex = index + 1;
-    //delete event['numberOfParticipants'];
+    delete event['numberOfParticipants'];
   });
 };
 
-export const dbGetEvent = id =>
-  knex('events')
+export const dbGetEvent = id => {
+  const event = knex('events')
     .first()
     .where({ id });
+  if (event.eventImage) {
+    event.eventImage = event.eventImage.toString('base64');
+  }
+  return event;
+};
 
 export const dbCreateEvent = ({ ...fields }) =>
   knex.transaction(async trx => {

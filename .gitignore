@@ -3,9 +3,6 @@ logs
 *.log
 npm-debug.log*
 
-# npm lock file (usually doesn't need to be ignored but because of Heroku it is more convenient )
-package-lock.json
-
 # Runtime data
 pids
 *.pid

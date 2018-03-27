@@ -9,6 +9,7 @@ import {
   updateUser,
   delUser,
   banUser,
+  unbanUser,
   authUser,
   registerUser,
   verifyUser,
@@ -154,6 +155,13 @@ const users = [
     path: '/users/{userId}/ban',
     config: merge({}, validateBanFields, getAuthWithScope('admin')),
     handler: banUser,
+  },
+
+  {
+    method: 'DELETE',
+    path: '/users/unban/{userId}',
+    config: merge({}, validateUserId, getAuthWithScope('admin')),
+    handler: unbanUser,
   },
 
   // Authenticate as user

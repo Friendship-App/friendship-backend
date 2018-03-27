@@ -264,6 +264,12 @@ export const dbBanUser = (id, fields) => {
     .insert(fields);
 };
 
+export const dbUnbanUser = id =>
+  knex('banned_users')
+    .where('user_id', id)
+    .del();
+
+
 export const dbDelUser = id =>
   knex('users')
     .where({ id })

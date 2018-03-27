@@ -38,7 +38,7 @@ const userListFields = [
 
 export const dbGetEvents = async userId => {
   const events = await knex.raw(
-    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events"  WHERE DATE("eventDate") >= DATE'today' ORDER BY "eventDate" ASC`,
+    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events" ORDER BY "eventDate" ASC`,
   );
 
   const newArrayDataOfOjbect = Object.values(events.rows);

@@ -17,7 +17,6 @@ exports.up = knex =>
         .references('id')
         .inTable('users')
         .onDelete('CASCADE');
-      table;
       table.text('city');
       table.text('minParticipants');
       table.text('maxParticipants');

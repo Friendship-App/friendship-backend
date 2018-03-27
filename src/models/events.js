@@ -1,4 +1,5 @@
 import knex from '../utils/db';
+import moment from 'moment';
 
 import {
   dbGetEventParticipants,
@@ -21,6 +22,7 @@ const eventFields = [
   'minParticipants',
   'maxParticipants',
   'participantsMix',
+  'hostId',
 ];
 
 const userListFields = [
@@ -36,7 +38,7 @@ const userListFields = [
 
 export const dbGetEvents = async userId => {
   const events = await knex.raw(
-    `SELECT   "id","createdAt", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events"  ORDER BY "eventDate" ASC`,
+    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events"  WHERE DATE("eventDate") >= DATE'today' ORDER BY "eventDate" ASC`,
   );
 
   const newArrayDataOfOjbect = Object.values(events.rows);
@@ -142,7 +144,7 @@ const calculateRecommandationByCommonPersonalityNaahsYeahs = async (
 };
 
 const calculateTheIndexForDateRecommandation = events => {
-  let currentDate = new Date(2018, 2, 22);
+  let currentDate = new Date();
   let eventsInPast = [];
   let eventsInFuture = [];
   events.map((event, index) => {
@@ -230,7 +232,16 @@ export const dbCreateEvent = ({ ...fields }) =>
     const report = await trx('events')
       .insert(fields)
       .returning('*')
-      .then(results => results[0]); // return only first result
+      .then(results => results[0]);
+    console.log('REPORT ID', report.id);
+    console.log('EVENTSHOST ID', report.hostId);
+    await trx('eventParticipants')
+      .insert({
+        userId: report.hostId,
+        eventId: report.id,
+        createdAt: moment(),
+      })
+      .then();
     return report;
   });
 

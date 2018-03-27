@@ -13,7 +13,7 @@ const eventFields = {
   description: faker.lorem.sentences,
   city: faker.address.city,
   address: faker.address.streetAddress,
-  hostId: (userId += 1),
+  hostId: (userId += 5),
   eventDate: () =>
     randomDates[Math.floor(Math.random() * randomDates.length)].timestamp,
 };

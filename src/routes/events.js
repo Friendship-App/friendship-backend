@@ -58,7 +58,7 @@ const events = [
   {
     method: 'PATCH',
     path: '/events/{eventId}',
-    config: merge({}, validateEventFields),
+    //config: merge({}, validateEventFields),
     handler: UpdateEvent,
   },
   {

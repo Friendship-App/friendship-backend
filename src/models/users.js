@@ -126,7 +126,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
     )
     .then(results => results.rows);
 
-  return users.map((user) => {
+  return users.map(user => {
     if (user.image) {
       user.image = user.image.toString('base64');
     }
@@ -288,7 +288,7 @@ export const dbDelVerificationHash = ownerId =>
     .del();
 
 export const dbCreateUser = ({ password, genders, ...fields }) =>
-  knex.transaction(async (trx) => {
+  knex.transaction(async trx => {
     const user = await trx('users')
       .insert(fields)
       .returning('*')
@@ -303,7 +303,7 @@ export const dbCreateUser = ({ password, genders, ...fields }) =>
 
     const genderArray = [];
     if (genders) {
-      genders.forEach((gender) => {
+      genders.forEach(gender => {
         genderArray.push({ userId: user.id, genderId: gender });
       });
     }

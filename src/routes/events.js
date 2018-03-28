@@ -22,6 +22,9 @@ const validateEventFields = {
       city: Joi.string(),
       address: Joi.string(),
       eventDate: Joi.date().timestamp(),
+      minParticipants: Joi.string(),
+      maxParticipants: Joi.string(),
+      participantsMix: Joi.string(),
       createdAt: Joi.date().timestamp(),
     },
   },
@@ -31,22 +34,28 @@ const events = [
   // Get a list of all events
   {
     method: 'GET',
-    path: '/events',
-    config: getAuthWithScope('user'),
+    path: '/events/{userId}',
     handler: getEvents,
   },
   // Create a new event
   {
     method: 'POST',
     path: '/events',
-    config: merge({}, validateEventFields, getAuthWithScope('user')),
+    //config: merge({}, validateEventFields),
     handler: CreateEvent,
   },
   // Delete event
   {
+    method: 'PATCH',
+    path: '/events/{eventId}',
+    //config: merge({}, validateEventFields),
+    handler: UpdateEvent,
+  },
+  {
     method: 'DELETE',
-    path: '/events/{eventid}',
-    config: merge({}, validateEventId, getAuthWithScope('user')),
+    path: '/events/{id}',
+    //config: merge({}, validateEventFields, getAuthWithScope('admin')),
+
     handler: delEvent,
   },
   // Get info about a specific event

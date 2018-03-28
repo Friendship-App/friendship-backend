@@ -9,7 +9,6 @@ export const dbGetEventParticipants = async (eventId, userId) => {
     left join "tags"
     ON "tags"."id" = "user_tag"."tagId"
     WHERE "user_tag"."love" = ${false}
-    AND "users"."id" != ${userId}
     AND "users"."id" IN (SELECT "users"."id"  FROM "users"
           left join "eventParticipants"
           ON "eventParticipants"."userId" = "users"."id"

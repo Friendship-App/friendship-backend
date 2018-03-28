@@ -4,7 +4,7 @@ const simpleFixtures = require('simple-fixtures');
 const faker = require('faker/locale/en');
 const moment = require('moment');
 const randomDates = getDates('2018-03-20', moment().startOf('day'));
-let userId = 1;
+let userId = 4;
 
 const eventFields = {
   createdAt: () =>

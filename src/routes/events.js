@@ -2,13 +2,7 @@ import { merge } from 'lodash';
 import Joi from 'joi';
 import { getAuthWithScope } from '../utils/auth';
 
-import {
-  getEvents,
-  getEvent,
-  CreateEvent,
-  UpdateEvent,
-  delEvent,
-} from '../handlers/events';
+import { getEvents, getEvent, CreateEvent, delEvent } from '../handlers/events';
 
 const validateEventId = {
   validate: {
@@ -43,18 +37,14 @@ const events = [
     path: '/events/{userId}',
     handler: getEvents,
   },
-  // Get info about a specific event
-  {
-    method: 'GET',
-    path: '/event/{eventId}',
-    handler: getEvent,
-  },
+  // Create a new event
   {
     method: 'POST',
     path: '/events',
     //config: merge({}, validateEventFields),
     handler: CreateEvent,
   },
+  // Delete event
   {
     method: 'PATCH',
     path: '/events/{eventId}',
@@ -65,11 +55,18 @@ const events = [
     method: 'DELETE',
     path: '/events/{id}',
     //config: merge({}, validateEventFields, getAuthWithScope('admin')),
+
     handler: delEvent,
+  },
+  // Get info about a specific event
+  {
+    method: 'GET',
+    path: '/event/{eventId}',
+    config: merge({}, validateEventId, getAuthWithScope('user')),
+    handler: getEvent,
   },
 ];
 
 export default events;
 
-// Here we register the routes
 export const routes = server => server.route(events);

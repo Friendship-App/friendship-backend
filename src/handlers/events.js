@@ -61,7 +61,9 @@ export const UpdateEvent = async (request, reply) => {
   return dbUpdateEvent(request.params.eventId, fields).then(reply);
 };
 
+// TODO: only the creator of the event can delete it
 // Delete a Event that is connected to a user
 export const delEvent = (request, reply) => {
   return dbDelEvent(request.params.id).then(reply);
 };
+

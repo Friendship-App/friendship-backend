@@ -228,7 +228,7 @@ export const dbGetEvent = async id => {
 };
 
 export const dbCreateEvent = ({ ...fields }) =>
-  knex.transaction(async trx => {
+  knex.transaction(async (trx) => {
     const report = await trx('events')
       .insert(fields)
       .returning('*')
@@ -242,6 +242,8 @@ export const dbCreateEvent = ({ ...fields }) =>
         createdAt: moment(),
       })
       .then();
+
+
     return report;
   });
 

@@ -1,7 +1,5 @@
 import knex from '../utils/db';
 
-const eventParticipantFields = ['id', 'createdAt', 'userId', 'eventId'];
-
 export const dbGetEventParticipants = async (eventId, userId) => {
   const hateCommonLoveCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
     count(DISTINCT "tags"."name") AS "hateCommon"
@@ -44,17 +42,18 @@ export const dbGetEventParticipants = async (eventId, userId) => {
                         AND "user_tag"."love" = ${true})
       GROUP BY "users"."id"`);
 
-  hateCommonLoveCommon.rows.map(hate => {
-    loveCommon.rows.map(love => {
+  hateCommonLoveCommon.rows.map((hate) => {
+    loveCommon.rows.map((love) => {
       if (love.id === hate.id) {
         hate.loveCommon = love.loveCommon;
       }
     });
   });
+
   return hateCommonLoveCommon;
 };
 
-export const dbGetEventPerssonality = async eventId => {
+export const dbGetEventPerssonality = async (eventId) => {
   const topEventPersonalities = await knex.raw(`SELECT "name", COUNT("eventParticipants"."userId")  as "Number_of_Personalities"   FROM events
   JOIN "eventParticipants" ON events.id = "eventParticipants"."eventId"
   JOIN "user_personality"  ON "user_personality"."userId" =  "eventParticipants"."userId"
@@ -66,7 +65,7 @@ export const dbGetEventPerssonality = async eventId => {
   return topEventPersonalities;
 };
 
-export const dbGetEventTopYeahsNahs = async eventId => {
+export const dbGetEventTopYeahsNahs = async (eventId) => {
   const topEventYeahs = await knex.raw(`SELECT "tags"."name", COUNT("eventParticipants"."userId")  FROM events
     JOIN "eventParticipants" ON events.id = "eventParticipants"."eventId"
     JOIN "user_tag"  ON "user_tag"."userId" =  "eventParticipants"."userId"
@@ -86,12 +85,15 @@ export const dbGetEventTopYeahsNahs = async eventId => {
     GROUP BY "tags"."name"
     ORDER BY COUNT DESC
     LIMIT 3`);
-  topEventYeahs.rows.map(yeah => {
+
+  topEventYeahs.rows.map((yeah) => {
     yeah.love = true;
   });
-  topEventNahs.rows.map(nah => {
+
+  topEventNahs.rows.map((nah) => {
     nah.love = false;
   });
+
   const topYeahsNahs = topEventYeahs.rows.concat(topEventNahs.rows);
 
   return topYeahsNahs;
@@ -112,9 +114,8 @@ export const dbGetEventParticipation = async (eventId, userId) => {
   );
   if (eventParticipanion.rows.length >= 1) {
     return true;
-  } else {
-    return false;
   }
+  return false;
 };
 
 export const dbDelEventParticipation = (eventId, userId) =>

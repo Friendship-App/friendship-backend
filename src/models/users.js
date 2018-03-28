@@ -244,9 +244,9 @@ export const dbGetUserByUsername = (username, userId) =>
     .where('id', '!=', userId)
     .andWhere('username', 'like', `%${username}%`);
 
-export const dbUpdateUser = (id, fields) =>
+export const dbUpdateUser = (id, { ...fields }) =>
   knex('users')
-    .update({ ...fields })
+    .update(fields)
     .where({ id })
     .returning('*');
 
@@ -263,6 +263,12 @@ export const dbBanUser = (id, fields) => {
     .returning('*')
     .insert(fields);
 };
+
+export const dbUnbanUser = id =>
+  knex('banned_users')
+    .where('user_id', id)
+    .del();
+
 
 export const dbDelUser = id =>
   knex('users')

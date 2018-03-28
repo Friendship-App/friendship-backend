@@ -8,15 +8,14 @@ import {
   addTag,
   delTag,
   updateTag,
-  getUserTags,
   getTagsUser,
-  countTagLikes,
   createUserTag,
   createUserTags,
   delUserTag,
   getTagsForUser,
   getTagList,
   getUsersInTag,
+  activateTag,
 } from '../handlers/tags';
 
 const validateTagId = {
@@ -25,6 +24,19 @@ const validateTagId = {
       tagId: Joi.number()
         .integer()
         .required(),
+    }
+  },
+};
+
+const validateTagState = {
+  validate: {
+    params: {
+      tagId: Joi.number()
+        .integer()
+        .required(),
+    },
+    payload: {
+      checked: Joi.boolean().required(),
     },
   },
 };
@@ -33,6 +45,7 @@ const validateTagFields = {
   validate: {
     payload: {
       name: Joi.string(),
+      category: Joi.number().integer(),
     },
   },
 };
@@ -73,26 +86,31 @@ const tags = [
     config: getAuthWithScope('admin'),
     handler: getTags,
   },
-  // Get info about a specific tag
+
+  // Get all the tags of a user
   {
     method: 'GET',
     path: '/tagsForUser/{userId}',
     config: getAuthWithScope('user'),
     handler: getTagsForUser,
   },
+
+  // Get info about a specific tag
   {
     method: 'GET',
     path: '/tags/{tagId}',
     config: merge({}, validateTagId),
     handler: getTag,
   },
-  // Register new tag
+
+  // Add a new tag
   {
     method: 'POST',
     path: '/tags',
     config: merge({}, validateTagFields, getAuthWithScope('user')),
     handler: addTag,
   },
+
   // Delete a tag, admin only
   {
     method: 'DELETE',
@@ -100,6 +118,7 @@ const tags = [
     config: merge({}, validateTagId, getAuthWithScope('admin')),
     handler: delTag,
   },
+
   // Update tag, admin only
   {
     method: 'PATCH',
@@ -107,24 +126,12 @@ const tags = [
     config: merge({}, validateTagId, getAuthWithScope('admin')),
     handler: updateTag,
   },
-  {
-    method: 'GET',
-    path: '/user_tag/{userId}',
-    config: getAuthWithScope('user'),
-    handler: getUserTags,
-  },
   // Get all usernames of a tag
   {
     method: 'GET',
     path: '/tag_user/tag/{tagId}',
     config: getAuthWithScope('user'),
     handler: getUsersInTag,
-  },
-  {
-    method: 'GET',
-    path: '/tags_user/likes/{tagId}',
-    config: getAuthWithScope('user'),
-    handler: countTagLikes,
   },
   {
     method: 'GET',
@@ -157,16 +164,23 @@ const tags = [
   },
   //  Delete a tag that is connected to a user
   // @todo check if the OWNER is deleting this,
-  // and not another user (somehow we can't to get details of authenticated user, ask rasmus
+  // and not another user (somehow we can't to get details of authenticated user
   {
     method: 'DELETE',
     path: '/user_tag',
     config: merge({}, validateUserTagFields, getAuthWithScope('user')),
     handler: delUserTag,
   },
+  //Activate and deactivate tag
+  {
+    method: 'PATCH',
+    path: '/tags/activate/{tagId}',
+    config: merge({}, validateTagState, getAuthWithScope('admin')),
+    handler: activateTag,
+  },
+
 ];
 
 export default tags;
 
-// Here we register the routes
 export const routes = server => server.route(tags);

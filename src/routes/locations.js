@@ -48,7 +48,7 @@ const validateUserLocationArray = {
 };
 
 const locations = [
-  // get all personalities
+  // get all locations
   {
     method: 'GET',
     path: '/locations',
@@ -64,7 +64,7 @@ const locations = [
     handler: delLocation,
   },
 
-  // Create new personality
+  // Add a new location
   {
     method: 'POST',
     path: '/locations',
@@ -88,18 +88,18 @@ const locations = [
     handler: delUserLocation,
   },
 
-
   // Add multiple locations to user
   // Always add all of the locations that the user chooses
-  // Sample payload:
-  // {
-  //   "locations": [
-  //     {"locationId" : 7 },
-  //     {"locationId" : 8 },
-  //     {"locationId" : 6 },
-  //     {"locationId" : 9 }
-  //   ]
-  // }
+  /* Sample payload:
+  {
+    "locations": [
+      {"locationId" : 7 },
+      {"locationId" : 8 },
+      {"locationId" : 6 },
+      {"locationId" : 9 }
+    ]
+  }
+  */
   {
     method: 'POST',
     path: '/user_locations',

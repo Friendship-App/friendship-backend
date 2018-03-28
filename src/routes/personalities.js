@@ -10,7 +10,7 @@ import {
   getUserPersonalities,
   updateUserPersonality,
   createUserPersonality,
-  createUserPersonalities
+  createUserPersonalities,
 } from '../handlers/personalities';
 import { getAuthWithScope } from '../utils/auth';
 
@@ -45,7 +45,9 @@ const validatePersonalityFields = {
 const validateUserPersonalityFields = {
   validate: {
     payload: {
-      personalityId: Joi.number().integer().required(),
+      personalityId: Joi.number()
+        .integer()
+        .required(),
       level: Joi.number()
         .integer()
         .min(1)
@@ -58,7 +60,7 @@ const validateUserPersonalityFields = {
 const validateUserPersonalityArray = {
   validate: {
     payload: {
-      personalities: Joi.array()
+      personalities: Joi.array(),
     },
   },
 };
@@ -92,7 +94,12 @@ const personalities = [
   {
     method: 'PATCH',
     path: '/personalities/{personalityId}',
-    config: merge({}, validatePersonalityId, validatePersonalityFields, getAuthWithScope('admin')),
+    config: merge(
+      {},
+      validatePersonalityId,
+      validatePersonalityFields,
+      getAuthWithScope('admin'),
+    ),
     handler: updatePersonality,
   },
 
@@ -104,7 +111,6 @@ const personalities = [
     handler: createPersonality,
   },
 
-
   // Get all user personalities
   {
     method: 'GET',
@@ -113,12 +119,14 @@ const personalities = [
     handler: getUserPersonalities,
   },
 
+  // update user personalities
   {
     method: 'PATCH',
     path: '/user_personality',
     config: getAuthWithScope('user'),
     handler: updateUserPersonality,
   },
+
   // create new record in user_personality table
   // example payload: { personalityId: 4, level: 3 }
   {
@@ -127,6 +135,7 @@ const personalities = [
     config: merge({}, validateUserPersonalityFields, getAuthWithScope('user')),
     handler: createUserPersonality,
   },
+
   // add multiple personalities at once to a user
   // example payload: { personalities: [ personalityId: 1, level: 3 ] }
   {

@@ -212,23 +212,15 @@ export const dbGetEvent = async id => {
     .first()
     .where({ id });
 
-  console.log('- - - - - - - - - - - - - - - - - START 1');
-  console.log(event.eventImage);
-  console.log('- - - - - - - - - - - - - - - - - END 1');
-
   if (event.eventImage) {
     event.eventImage = event.eventImage.toString('base64');
   }
-
-  console.log('- - - - - - - - - - - - - - - - - START 2');
-  console.log(event.eventImage);
-  console.log('- - - - - - - - - - - - - - - - - END 2');
 
   return event;
 };
 
 export const dbCreateEvent = ({ ...fields }) =>
-  knex.transaction(async (trx) => {
+  knex.transaction(async trx => {
     const report = await trx('events')
       .insert(fields)
       .returning('*')
@@ -242,7 +234,6 @@ export const dbCreateEvent = ({ ...fields }) =>
         createdAt: moment(),
       })
       .then();
-
 
     return report;
   });

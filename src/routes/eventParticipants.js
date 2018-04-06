@@ -41,7 +41,7 @@ const eventParticipants = [
       {},
       validateEventId,
       validateUserId,
-      getAuthWithScope('user'),
+      //getAuthWithScope('user'),
     ),
     handler: getEventParticipants,
   },

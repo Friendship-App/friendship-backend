@@ -14,6 +14,8 @@ const feedbackFields = [
   "OtherReason"
 ];
 
+export const dbGetFeedbacks = () => knex("feedbacks").select();
+
 export const dbCreateFeedback = ({ checkBoxs, ...fields }) => {
   return knex("feedbacks")
     .insert(fields)

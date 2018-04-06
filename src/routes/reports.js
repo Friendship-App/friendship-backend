@@ -37,8 +37,8 @@ const validateReportFields = {
 const reports = [
   // Get a list of all reports
   {
-    method: 'GET',
-    path: '/reports',
+    method: 'POST',
+    path: '/reports/{pageNumber}',
     config: getAuthWithScope('admin'),
     handler: getReports,
   },

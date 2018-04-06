@@ -1,15 +1,20 @@
-import Boom from 'boom';
-import moment from 'moment';
+import Boom from "boom";
+import moment from "moment";
 
 import {
   dbGetReports,
   dbGetReport,
   dbCreateReport,
   dbUpdateReport,
-  dbDelReport,
-} from '../models/reports';
+  dbDelReport
+} from "../models/reports";
 
-export const getReports = (request, reply) => dbGetReports().then(reply);
+export const getReports = (request, reply) =>
+  dbGetReports()
+    .limit(10)
+    .offset(request.params.pageNumber - 1)
+    .orderBy("id")
+    .then(reply);
 
 export const getReport = (request, reply) =>
   dbGetReport(request.params.reportId).then(reply);
@@ -20,13 +25,13 @@ export const CreateReport = (request, reply) =>
     userId: request.payload.userId,
     createdAt: moment(),
     description: request.payload.description,
-    reported_by: request.payload.reported_by,
+    reported_by: request.payload.reported_by
   }).then(reply);
 
 export const UpdateReport = async (request, reply) => {
-  if (request.pre.user.scope !== 'admin') {
+  if (request.pre.user.scope !== "admin") {
     return reply(
-      Boom.unauthorized('Unprivileged users cannot update personality'),
+      Boom.unauthorized("Unprivileged users cannot update personality")
     );
   }
 
@@ -34,7 +39,7 @@ export const UpdateReport = async (request, reply) => {
     userId: request.payload.userId,
     createdAt: moment(),
     description: request.payload.description,
-    reported_by: request.payload.reported_by,
+    reported_by: request.payload.reported_by
   };
 
   return dbUpdateReport(request.params.reportId, fields).then(reply);

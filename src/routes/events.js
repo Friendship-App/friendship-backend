@@ -2,7 +2,7 @@ import { merge } from 'lodash';
 import Joi from 'joi';
 import { getAuthWithScope } from '../utils/auth';
 
-import { getEvents, getEvent, CreateEvent, delEvent } from '../handlers/events';
+import { getEvents, getEvent, UpdateEvent, CreateEvent, delEvent } from '../handlers/events';
 
 const validateEventId = {
   validate: {

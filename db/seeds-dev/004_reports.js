@@ -1,17 +1,17 @@
-const simpleFixtures = require('simple-fixtures');
-const faker = require('faker/locale/en');
-const moment = require('moment');
+const simpleFixtures = require("simple-fixtures");
+const faker = require("faker/locale/en");
+const moment = require("moment");
 
-const reportFields = {
-  userId: 1,
+const feedbackFields = {
   createdAt: moment(),
-  description: faker.lorem.sentences,
-  reported_by: faker.random.number({ min: 1, max: 5 }),
+  suggestion: faker.lorem.sentences,
+  given_by: () => faker.random.number({ min: 1, max: 150 }),
+  rating: () => faker.random.number({ min: 1, max: 30 }),
+  goalRate: () => faker.random.number({ min: 1, max: 30 })
 };
 
-
 exports.seed = knex =>
-knex.batchInsert(
-  'reports',
-  simpleFixtures.generateFixtures(reportFields, 10),
-);
+  knex.batchInsert(
+    "feedbacks",
+    simpleFixtures.generateFixtures(feedbackFields, 100)
+  );

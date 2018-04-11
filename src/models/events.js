@@ -180,6 +180,9 @@ const calculateTheIndexRecommandationByEventUserLocation = events => {
     return a.durationValue - b.durationValue;
   });
   events.map((event, index) => {
+    if (event.eventImage) {
+      event.eventImage = event.eventImage.toString('base64');
+    }
     event.locationSortIndex = index + 1;
     delete event['durationValue'];
   });

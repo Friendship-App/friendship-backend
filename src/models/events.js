@@ -79,6 +79,9 @@ const calculateTheIndexRecommandationByEventUserLocation = events => {
     return a.durationValue - b.durationValue;
   });
   events.map((event, index) => {
+    if (event.eventImage) {
+      event.eventImage = event.eventImage.toString('base64');
+    }
     event.locationSortIndex = index + 1;
     delete event['durationValue'];
   });
@@ -212,17 +215,9 @@ export const dbGetEvent = async id => {
     .first()
     .where({ id });
 
-  console.log('- - - - - - - - - - - - - - - - - START 1');
-  console.log(event.eventImage);
-  console.log('- - - - - - - - - - - - - - - - - END 1');
-
   if (event.eventImage) {
     event.eventImage = event.eventImage.toString('base64');
   }
-
-  console.log('- - - - - - - - - - - - - - - - - START 2');
-  console.log(event.eventImage);
-  console.log('- - - - - - - - - - - - - - - - - END 2');
 
   return event;
 };

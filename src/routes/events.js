@@ -2,7 +2,14 @@ import { merge } from 'lodash';
 import Joi from 'joi';
 import { getAuthWithScope } from '../utils/auth';
 
-import {getEvents, getEvent, CreateEvent, delEvent, UpdateEvent} from '../handlers/events';
+import {
+  getEvents,
+  getEvent,
+  CreateEvent,
+  delEvent,
+  UpdateEvent,
+  getEventParticipantsNum,
+} from '../handlers/events';
 
 const validateEventId = {
   validate: {
@@ -41,8 +48,14 @@ const events = [
   {
     method: 'POST',
     path: '/events',
-    //config: merge({}, validateEventFields),
+    //config: merge({}, getAuthWithScope('user')),
     handler: CreateEvent,
+  },
+  {
+    method: 'GET',
+    path: '/eventParticipantsNum',
+    //config: merge({}, getAuthWithScope('user')),
+    handler: getEventParticipantsNum,
   },
   // Delete event
   {
@@ -54,7 +67,7 @@ const events = [
   {
     method: 'DELETE',
     path: '/events/{id}',
-    //config: merge({}, validateEventFields, getAuthWithScope('admin')),
+    config: merge({}, getAuthWithScope('user')),
 
     handler: delEvent,
   },
@@ -62,7 +75,7 @@ const events = [
   {
     method: 'GET',
     path: '/event/{eventId}',
-    config: merge({}, validateEventId, getAuthWithScope('user')),
+    //config: merge({}, validateEventId, getAuthWithScope('user')),
     handler: getEvent,
   },
 ];

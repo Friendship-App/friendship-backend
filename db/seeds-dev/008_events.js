@@ -12,6 +12,7 @@ const eventFields = {
   title: faker.lorem.word,
   description: faker.lorem.sentences,
   city: faker.address.city,
+  participantsMix: 60,
   address: faker.address.streetAddress,
   hostId: userId,
   eventDate: () =>

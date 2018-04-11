@@ -8,10 +8,14 @@ import {
   dbCreateEvent,
   dbDelEvent,
   dbUpdateEvent,
+  dbGetEventParticipantsNum,
 } from '../models/events';
 
 export const getEvents = (request, reply) =>
   dbGetEvents(request.params.userId).then(reply);
+
+export const getEventParticipantsNum = (request, reply) =>
+  dbGetEventParticipantsNum().then(reply);
 
 export const getEvent = (request, reply) =>
   dbGetEvent(request.params.eventId).then(reply);
@@ -30,6 +34,10 @@ export const CreateEvent = async (request, reply) => {
     const buf = Buffer.from(fields.eventImage, 'base64');
     await resizeImage(buf).then(resized => (fields.eventImage = resized));
   }
+  console.log(
+    'request.payload.participantsMix!!!!!!!!!!',
+    request.payload.participantsMix,
+  );
   dbCreateEvent({
     ...fields,
     createdAt: moment(),
@@ -66,4 +74,3 @@ export const UpdateEvent = async (request, reply) => {
 export const delEvent = (request, reply) => {
   return dbDelEvent(request.params.id).then(reply);
 };
-

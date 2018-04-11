@@ -38,7 +38,7 @@ const userListFields = [
 
 export const dbGetEvents = async userId => {
   const events = await knex.raw(
-    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events" ORDER BY "eventDate" ASC`,
+    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address","minParticipants","maxParticipants","participantsMix", "eventDate" FROM "events" ORDER BY "eventDate" ASC`,
   );
 
   const newArrayDataOfOjbect = Object.values(events.rows);
@@ -59,7 +59,108 @@ export const dbGetEvents = async userId => {
 
   calculateFinalSortRate(newArrayDataOfOjbect);
 
+  await calculateCompatibilityScore(newArrayDataOfOjbect, userId);
+
   return newArrayDataOfOjbect;
+};
+
+const calculateCompatibilityScore = async (events, userId) => {
+  const totalScore = await calcTotalYeahsNahs();
+  const indexesToRemove = [];
+  const array = events.map(async (event, index) => {
+    const hateCommon = await checkHateCommon(event.hostId, userId);
+    const loveCommon = await checkloveCommon(event.hostId, userId);
+    const personalitiesCommon = await checkPersonalitiesCommon(
+      event.hostId,
+      userId,
+    );
+    const compatibilityScoreLong =
+      (+hateCommon.hateCommon +
+        +loveCommon.loveCommon +
+        +personalitiesCommon.personalitiesCommon) /
+      totalScore *
+      100;
+
+    const compatibilityScore = compatibilityScoreLong.toFixed(0);
+    event.compatibilityScore = compatibilityScore;
+    console.log(
+      'MIX COMPARE',
+      parseInt(event.participantsMix) > event.compatibilityScore,
+    );
+    console.log('DELETE EVENTS BEFORE', events);
+    if (parseInt(event.participantsMix) > event.compatibilityScore) {
+      //events.splice(index, 1);
+    }
+  });
+  const eventsArray = await Promise.all(array);
+  return eventsArray;
+};
+
+const calcTotalYeahsNahs = async () => {
+  const totalPersonalities = await knex.raw(
+    `SELECT count(id) as "totalPersonalities"  FROM personalities`,
+  );
+  const totalYeahsNahs = await knex.raw(
+    `SELECT count(id) as "totalYeahsNahs"  FROM tags`,
+  );
+  const totalScore =
+    +totalPersonalities.rows[0].totalPersonalities +
+    +totalYeahsNahs.rows[0].totalYeahsNahs;
+  return totalScore;
+};
+const checkPersonalitiesCommon = async (hostId, userId) => {
+  const personalitiesCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+    count(DISTINCT "personalities"."id") AS "personalitiesCommon"
+    FROM "users"
+    left join "user_personality"
+    ON "user_personality"."userId" = "users"."id"
+    left join "personalities"
+    ON "personalities"."id" = "user_personality"."personalityId"
+    WHERE "users"."id" IN (SELECT "users"."id"  FROM "users"
+          WHERE "users"."id"  = ${userId})
+    AND "personalities"."name" IN (SELECT "personalities"."name" FROM "user_personality"
+                      left join "personalities" ON "personalities"."id" = "user_personality"."personalityId"
+                      WHERE "user_personality"."userId" = ${hostId})
+    GROUP BY "users"."id"`);
+  return personalitiesCommon.rows[0];
+};
+
+const checkHateCommon = async (hostId, userId) => {
+  const hateCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+    count(DISTINCT "tags"."name") AS "hateCommon"
+    FROM "users"
+    left join "user_tag"
+    ON "user_tag"."userId" = "users"."id"
+    left join "tags"
+    ON "tags"."id" = "user_tag"."tagId"
+    WHERE "user_tag"."love" = false
+    AND "users"."id" IN (SELECT "users"."id"  FROM "users"
+          WHERE "users"."id"  = ${userId})
+    AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
+                      left join "tags" ON "tags"."id" = "user_tag"."tagId"
+                      WHERE "user_tag"."userId" = ${hostId}
+                      AND "user_tag"."love" = false)
+    GROUP BY "users"."id"`);
+  return hateCommon.rows[0];
+};
+
+const checkloveCommon = async (hostId, userId) => {
+  const loveCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+    count(DISTINCT "tags"."name") AS "loveCommon"
+    FROM "users"
+    left join "user_tag"
+    ON "user_tag"."userId" = "users"."id"
+    left join "tags"
+    ON "tags"."id" = "user_tag"."tagId"
+    WHERE "user_tag"."love" = true
+    AND "users"."id" IN (SELECT "users"."id"  FROM "users"
+          WHERE "users"."id"  = ${userId})
+    AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
+                      left join "tags" ON "tags"."id" = "user_tag"."tagId"
+                      WHERE "user_tag"."userId" = ${hostId}
+                      AND "user_tag"."love" = true)
+    GROUP BY "users"."id"`);
+  return loveCommon.rows[0];
 };
 
 const calculateFinalSortRate = events => {
@@ -148,6 +249,9 @@ const calculateTheIndexForDateRecommandation = events => {
   let eventsInPast = [];
   let eventsInFuture = [];
   events.map((event, index) => {
+    if (event.eventImage) {
+      event.eventImage = event.eventImage.toString('base64');
+    }
     let eventDate = new Date(event.eventDate);
     if (currentDate > eventDate) {
       eventsInPast.push(event);
@@ -219,14 +323,21 @@ export const dbGetEvent = async id => {
   return event;
 };
 
+export const dbGetEventParticipantsNum = async () => {
+  const participants = await knex.raw(
+    `SELECT  "eventParticipants"."eventId","users"."emoji" from "users"
+      LEFT JOIN "eventParticipants" ON "users"."id" = "eventParticipants"."userId"
+      WHERE "eventParticipants"."eventId" NOTNULL`,
+  );
+  return participants.rows;
+};
+
 export const dbCreateEvent = ({ ...fields }) =>
   knex.transaction(async trx => {
     const report = await trx('events')
       .insert(fields)
       .returning('*')
       .then(results => results[0]);
-    console.log('REPORT ID', report.id);
-    console.log('EVENTSHOST ID', report.hostId);
     await trx('eventParticipants')
       .insert({
         userId: report.hostId,

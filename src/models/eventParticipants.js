@@ -43,7 +43,6 @@ export const dbGetEventParticipants = async (eventId, userId) => {
       GROUP BY "users"."id"`);
 
   const event = await dbGetEvent(eventId);
-  console.log('EVENT ONE', event.hostId);
   hateCommonLoveCommon.rows.map(hate => {
     loveCommon.rows.map(love => {
       if (love.id === hate.id) {
@@ -53,22 +52,18 @@ export const dbGetEventParticipants = async (eventId, userId) => {
   });
   hateCommonLoveCommon.rows.map((user, index) => {
     if (user.id == event.hostId) {
+      console.log('USER ID IS HOST_____', user.id);
       const hostUser = user;
-      console.log('BEFORE SPLICE', hateCommonLoveCommon.rows);
+      console.log('hateCommonLoveCommon_____', hateCommonLoveCommon);
+
       hateCommonLoveCommon.rows.splice(index, index + 1);
-      console.log('AFTER SPLICE', hateCommonLoveCommon.rows);
 
       hateCommonLoveCommon.rows.unshift(hostUser);
-      console.log('AFTER SHIFT', hateCommonLoveCommon.rows);
+
+      console.log('hateCommonLoveCommon___AFTER SHIFT__', hateCommonLoveCommon);
     }
   });
   return hateCommonLoveCommon;
-};
-
-export const move = (arr, pos1, pos2) => {
-  let temp = arr.splice(pos1, 1)[0];
-  arr.splice(pos2, 0, temp);
-  return arr;
 };
 
 export const dbGetEventPerssonality = async eventId => {

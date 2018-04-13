@@ -61,6 +61,14 @@ export const dbGetEvents = async userId => {
 
   await calculateCompatibilityScore(newArrayDataOfOjbect, userId);
 
+  for (let i = 0; i < newArrayDataOfOjbect.length; i++) {
+    if (
+      newArrayDataOfOjbect[i].participantsMix >
+      newArrayDataOfOjbect[i].compatibilityScore
+    ) {
+      newArrayDataOfOjbect.slice(i, i + 1);
+    }
+  }
   return newArrayDataOfOjbect;
 };
 
@@ -74,25 +82,25 @@ const calculateCompatibilityScore = async (events, userId) => {
       event.hostId,
       userId,
     );
+    console.log('hateCommon!!!!!!!!!!!!!!!', hateCommon);
+    console.log('loveCommon!!!!!!!!!!!!!!!', loveCommon);
+    console.log('personalitiesCommon!!!!!!!!!!!!!!!', personalitiesCommon);
+
+    console.log('totalScore!!!!!!!!!!!!!!!', totalScore);
+
     const compatibilityScoreLong =
-      (+hateCommon.hateCommon +
-        +loveCommon.loveCommon +
-        +personalitiesCommon.personalitiesCommon) /
-      totalScore *
-      100;
+      (loveCommon + personalitiesCommon + hateCommon) / totalScore * 100;
+
+    console.log(
+      'compatibilityScoreLong!!!!!!!!!!!!!!!',
+      compatibilityScoreLong,
+    );
 
     const compatibilityScore = compatibilityScoreLong.toFixed(0);
     event.compatibilityScore = compatibilityScore;
-    console.log(
-      'MIX COMPARE',
-      parseInt(event.participantsMix) > event.compatibilityScore,
-    );
-    console.log('DELETE EVENTS BEFORE', events);
-    if (parseInt(event.participantsMix) > event.compatibilityScore) {
-      //events.splice(index, 1);
-    }
   });
   const eventsArray = await Promise.all(array);
+
   return eventsArray;
 };
 
@@ -122,7 +130,9 @@ const checkPersonalitiesCommon = async (hostId, userId) => {
                       left join "personalities" ON "personalities"."id" = "user_personality"."personalityId"
                       WHERE "user_personality"."userId" = ${hostId})
     GROUP BY "users"."id"`);
-  return personalitiesCommon.rows[0];
+  return personalitiesCommon.rows[0]
+    ? parseInt(personalitiesCommon.rows[0].personalitiesCommon)
+    : 0;
 };
 
 const checkHateCommon = async (hostId, userId) => {
@@ -141,7 +151,8 @@ const checkHateCommon = async (hostId, userId) => {
                       WHERE "user_tag"."userId" = ${hostId}
                       AND "user_tag"."love" = false)
     GROUP BY "users"."id"`);
-  return hateCommon.rows[0];
+
+  return hateCommon.rows[0] ? parseInt(hateCommon.rows[0].hateCommon) : 0;
 };
 
 const checkloveCommon = async (hostId, userId) => {
@@ -160,7 +171,7 @@ const checkloveCommon = async (hostId, userId) => {
                       WHERE "user_tag"."userId" = ${hostId}
                       AND "user_tag"."love" = true)
     GROUP BY "users"."id"`);
-  return loveCommon.rows[0];
+  return loveCommon.rows[0] ? parseInt(loveCommon.rows[0].loveCommon) : 0;
 };
 
 const calculateFinalSortRate = events => {
@@ -191,38 +202,50 @@ const calculateTheIndexRecommandationByEventUserLocation = events => {
 
 const calculateRecommandationByEventUserLocation = async (events, userId) => {
   const user = await knex.raw(`SELECT "users"."id","users"."username", "locations"."name" as location FROM "users"
-      left join "user_location"
-      ON "user_location"."userId" = "users"."id"
-      left join "locations"
-      ON "locations"."id" = "user_location"."locationId"
-      WHERE "users"."id" = ${userId}`);
-  var origins = [user.rows[0].location];
+        left join "user_location"
+        ON "user_location"."userId" = "users"."id"
+        left join "locations"
+        ON "locations"."id" = "user_location"."locationId"
+        WHERE "users"."id" = ${userId}`);
+  const array = [];
+  try {
+    var origins = [user.rows[0].location];
 
-  var distance = require('google-distance');
-  const array = events.map(async event => {
-    const testPromise = new Promise((resolve, reject) => {
-      distance.get(
-        {
-          origin: user.rows[0].location,
-          destination: event.city,
-          //origin: 'Helsinki',
-          //destination: 'Berlin',
-        },
-        (err, data) => {
-          if (err) {
-            event.durationValue = 0;
-            resolve(event);
-          } else {
-            event.durationValue = data.durationValue;
-            resolve(event);
-          }
-        },
-      );
+    var distance = require('google-distance');
+    const array = events.map(async event => {
+      const testPromise = new Promise((resolve, reject) => {
+        distance.get(
+          {
+            origin: user.rows[0].location,
+            destination: event.city,
+            //origin: 'Helsinki',
+            //destination: 'Berlin',
+          },
+          (err, data) => {
+            if (err) {
+              event.durationValue = 0;
+              resolve(event);
+            } else {
+              event.durationValue = data.durationValue;
+              resolve(event);
+            }
+          },
+        );
+      });
+      return testPromise;
     });
+  } catch (error) {
+    console.log('I AM CATCHING ERRORS ', error);
+  }
+  let eventsArray = [];
+  if (array.length > 0) {
+    eventsArray = await Promise.all(array);
+  } else {
+    eventsArray = events.map(event => {
+      event.durationValue = 0;
+    });
+  }
 
-    return testPromise;
-  });
-  const eventsArray = await Promise.all(array);
   return eventsArray;
 };
 

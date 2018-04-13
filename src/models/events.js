@@ -60,16 +60,16 @@ export const dbGetEvents = async userId => {
   calculateFinalSortRate(newArrayDataOfOjbect);
 
   await calculateCompatibilityScore(newArrayDataOfOjbect, userId);
-
+  const eventsToReturn = [];
   for (let i = 0; i < newArrayDataOfOjbect.length; i++) {
     if (
-      newArrayDataOfOjbect[i].participantsMix >
+      newArrayDataOfOjbect[i].participantsMix <
       newArrayDataOfOjbect[i].compatibilityScore
     ) {
-      newArrayDataOfOjbect.slice(i, i + 1);
+      eventsToReturn.push(newArrayDataOfOjbect[i]);
     }
   }
-  return newArrayDataOfOjbect;
+  return eventsToReturn;
 };
 
 const calculateCompatibilityScore = async (events, userId) => {
@@ -82,19 +82,9 @@ const calculateCompatibilityScore = async (events, userId) => {
       event.hostId,
       userId,
     );
-    console.log('hateCommon!!!!!!!!!!!!!!!', hateCommon);
-    console.log('loveCommon!!!!!!!!!!!!!!!', loveCommon);
-    console.log('personalitiesCommon!!!!!!!!!!!!!!!', personalitiesCommon);
-
-    console.log('totalScore!!!!!!!!!!!!!!!', totalScore);
 
     const compatibilityScoreLong =
       (loveCommon + personalitiesCommon + hateCommon) / totalScore * 100;
-
-    console.log(
-      'compatibilityScoreLong!!!!!!!!!!!!!!!',
-      compatibilityScoreLong,
-    );
 
     const compatibilityScore = compatibilityScoreLong.toFixed(0);
     event.compatibilityScore = compatibilityScore;

@@ -2,7 +2,13 @@ import { merge } from "lodash";
 import Joi from "joi";
 
 import { getAuthWithScope } from "../utils/auth";
-import { CreateFeedback } from "../handlers/feedbacks";
+import {
+  CreateFeedback,
+  getFeedbacks,
+  getFeedback,
+  getTotalFeedbacks,
+  delFeedback,
+} from "../handlers/feedbacks";
 
 const validateFeedbackFields = {
   validate: {
@@ -30,6 +36,30 @@ const feedbacks = [
     path: "/feedbacks",
     config: merge({}, validateFeedbackFields, getAuthWithScope("user")),
     handler: CreateFeedback
+  },
+  {
+    method: "GET",
+    path: "/feedback/{startIndex}",
+    config: getAuthWithScope("admin"),
+    handler: getFeedbacks
+  },
+  {
+    method: "GET",
+    path: "/getTotalFeedbacks",
+    config: getAuthWithScope("admin"),
+    handler: getTotalFeedbacks
+  },
+  {
+    method: "GET",
+    path: "/feedbacks/{feedbackId}",
+    config: merge({}, getAuthWithScope("admin")),
+    handler: getFeedback
+  },
+  {
+    method: "DELETE",
+    path: "/feedbacks/{feedbackId}",
+    config: merge({}, getAuthWithScope("admin")),
+    handler: delFeedback
   }
 ];
 

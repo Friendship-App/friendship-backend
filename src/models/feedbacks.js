@@ -10,7 +10,6 @@ const feedbackFields = [
   "rating",
   "goalRate",
   "given_by",
-  "checkBoxs",
   "OtherReason"
 ];
 
@@ -21,6 +20,11 @@ export const dbCreateFeedback = ({ checkBoxs, ...fields }) => {
     .then(res => dbCreateFeedbackOptions(res[0], checkBoxs))
     .then();
 };
+
+export const dbGetFeedback = id =>
+  knex("feedbacks")
+    .first()
+    .where({ id });
 
 export const dbCreateFeedbackOptions = (feedbackId, options) => {
   let optionArray = [];
@@ -34,3 +38,12 @@ export const dbCreateFeedbackOptions = (feedbackId, options) => {
   }
   return;
 };
+
+export const dbGetFeedbacks = () => knex("feedbacks").select(feedbackFields);
+
+export const dbGetTotalFeedbacks = () => knex("feedbacks").count(`id`);
+
+export const dbDelFeedback = id =>
+  knex("feedbacks")
+    .where({ id })
+    .del();

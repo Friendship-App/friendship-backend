@@ -61,11 +61,14 @@ export const dbGetEvents = async userId => {
 
   await calculateCompatibilityScore(newArrayDataOfOjbect, userId);
   const eventsToReturn = [];
+  console.log('EVENTS BEFORE REMOVE', newArrayDataOfOjbect);
   for (let i = 0; i < newArrayDataOfOjbect.length; i++) {
     if (
-      newArrayDataOfOjbect[i].participantsMix <
-      newArrayDataOfOjbect[i].compatibilityScore
+      parseInt(newArrayDataOfOjbect[i].compatibilityScore) >=
+      parseInt(newArrayDataOfOjbect[i].participantsMix)
     ) {
+      eventsToReturn.push(newArrayDataOfOjbect[i]);
+    } else if (newArrayDataOfOjbect[i].participantsMix == null) {
       eventsToReturn.push(newArrayDataOfOjbect[i]);
     }
   }
@@ -265,6 +268,7 @@ const calculateTheIndexForDateRecommandation = events => {
   let eventsInPast = [];
   let eventsInFuture = [];
   events.map((event, index) => {
+    // Small eventImage change to have the correct format
     if (event.eventImage) {
       event.eventImage = event.eventImage.toString('base64');
     }
@@ -287,10 +291,13 @@ const calculateTheIndexForDateRecommandation = events => {
   eventsInFuture.sort(function(a, b) {
     return b.eventDate - a.eventDate;
   });
+
   const eventsToReturn = eventsInPast.concat(eventsInFuture);
+
   eventsToReturn.map((event, index) => {
     event.dateIndex = index + 1;
   });
+
   return eventsToReturn;
 };
 const calculateTheIndexForSortByYeahsNaahs = events => {

@@ -38,7 +38,7 @@ const userListFields = [
 
 export const dbGetEvents = async userId => {
   const events = await knex.raw(
-    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address",'minParticipants','maxParticipants','participantsMix', "eventDate" FROM "events" ORDER BY "eventDate" ASC`,
+    `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address","minParticipants","maxParticipants","participantsMix", "eventDate" FROM "events" ORDER BY "eventDate" ASC`,
   );
 
   const newArrayDataOfOjbect = Object.values(events.rows);
@@ -59,7 +59,112 @@ export const dbGetEvents = async userId => {
 
   calculateFinalSortRate(newArrayDataOfOjbect);
 
-  return newArrayDataOfOjbect;
+  await calculateCompatibilityScore(newArrayDataOfOjbect, userId);
+  const eventsToReturn = [];
+  console.log('EVENTS BEFORE REMOVE', newArrayDataOfOjbect);
+  for (let i = 0; i < newArrayDataOfOjbect.length; i++) {
+    if (
+      parseInt(newArrayDataOfOjbect[i].compatibilityScore) >=
+      parseInt(newArrayDataOfOjbect[i].participantsMix)
+    ) {
+      eventsToReturn.push(newArrayDataOfOjbect[i]);
+    } else if (newArrayDataOfOjbect[i].participantsMix == null) {
+      eventsToReturn.push(newArrayDataOfOjbect[i]);
+    }
+  }
+  return eventsToReturn;
+};
+
+const calculateCompatibilityScore = async (events, userId) => {
+  const totalScore = await calcTotalYeahsNahs();
+  const indexesToRemove = [];
+  const array = events.map(async (event, index) => {
+    const hateCommon = await checkHateCommon(event.hostId, userId);
+    const loveCommon = await checkloveCommon(event.hostId, userId);
+    const personalitiesCommon = await checkPersonalitiesCommon(
+      event.hostId,
+      userId,
+    );
+
+    const compatibilityScoreLong =
+      (loveCommon + personalitiesCommon + hateCommon) / totalScore * 100;
+
+    const compatibilityScore = compatibilityScoreLong.toFixed(0);
+    event.compatibilityScore = compatibilityScore;
+  });
+  const eventsArray = await Promise.all(array);
+
+  return eventsArray;
+};
+
+const calcTotalYeahsNahs = async () => {
+  const totalPersonalities = await knex.raw(
+    `SELECT count(id) as "totalPersonalities"  FROM personalities`,
+  );
+  const totalYeahsNahs = await knex.raw(
+    `SELECT count(id) as "totalYeahsNahs"  FROM tags`,
+  );
+  const totalScore =
+    +totalPersonalities.rows[0].totalPersonalities +
+    +totalYeahsNahs.rows[0].totalYeahsNahs;
+  return totalScore;
+};
+const checkPersonalitiesCommon = async (hostId, userId) => {
+  const personalitiesCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+    count(DISTINCT "personalities"."id") AS "personalitiesCommon"
+    FROM "users"
+    left join "user_personality"
+    ON "user_personality"."userId" = "users"."id"
+    left join "personalities"
+    ON "personalities"."id" = "user_personality"."personalityId"
+    WHERE "users"."id" IN (SELECT "users"."id"  FROM "users"
+          WHERE "users"."id"  = ${userId})
+    AND "personalities"."name" IN (SELECT "personalities"."name" FROM "user_personality"
+                      left join "personalities" ON "personalities"."id" = "user_personality"."personalityId"
+                      WHERE "user_personality"."userId" = ${hostId})
+    GROUP BY "users"."id"`);
+  return personalitiesCommon.rows[0]
+    ? parseInt(personalitiesCommon.rows[0].personalitiesCommon)
+    : 0;
+};
+
+const checkHateCommon = async (hostId, userId) => {
+  const hateCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+    count(DISTINCT "tags"."name") AS "hateCommon"
+    FROM "users"
+    left join "user_tag"
+    ON "user_tag"."userId" = "users"."id"
+    left join "tags"
+    ON "tags"."id" = "user_tag"."tagId"
+    WHERE "user_tag"."love" = false
+    AND "users"."id" IN (SELECT "users"."id"  FROM "users"
+          WHERE "users"."id"  = ${userId})
+    AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
+                      left join "tags" ON "tags"."id" = "user_tag"."tagId"
+                      WHERE "user_tag"."userId" = ${hostId}
+                      AND "user_tag"."love" = false)
+    GROUP BY "users"."id"`);
+
+  return hateCommon.rows[0] ? parseInt(hateCommon.rows[0].hateCommon) : 0;
+};
+
+const checkloveCommon = async (hostId, userId) => {
+  const loveCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+    count(DISTINCT "tags"."name") AS "loveCommon"
+    FROM "users"
+    left join "user_tag"
+    ON "user_tag"."userId" = "users"."id"
+    left join "tags"
+    ON "tags"."id" = "user_tag"."tagId"
+    WHERE "user_tag"."love" = true
+    AND "users"."id" IN (SELECT "users"."id"  FROM "users"
+          WHERE "users"."id"  = ${userId})
+    AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
+                      left join "tags" ON "tags"."id" = "user_tag"."tagId"
+                      WHERE "user_tag"."userId" = ${hostId}
+                      AND "user_tag"."love" = true)
+    GROUP BY "users"."id"`);
+  return loveCommon.rows[0] ? parseInt(loveCommon.rows[0].loveCommon) : 0;
 };
 
 const calculateFinalSortRate = events => {
@@ -79,6 +184,9 @@ const calculateTheIndexRecommandationByEventUserLocation = events => {
     return a.durationValue - b.durationValue;
   });
   events.map((event, index) => {
+    if (event.eventImage) {
+      event.eventImage = event.eventImage.toString('base64');
+    }
     event.locationSortIndex = index + 1;
     delete event['durationValue'];
   });
@@ -87,38 +195,50 @@ const calculateTheIndexRecommandationByEventUserLocation = events => {
 
 const calculateRecommandationByEventUserLocation = async (events, userId) => {
   const user = await knex.raw(`SELECT "users"."id","users"."username", "locations"."name" as location FROM "users"
-      left join "user_location"
-      ON "user_location"."userId" = "users"."id"
-      left join "locations"
-      ON "locations"."id" = "user_location"."locationId"
-      WHERE "users"."id" = ${userId}`);
-  var origins = [user.rows[0].location];
+        left join "user_location"
+        ON "user_location"."userId" = "users"."id"
+        left join "locations"
+        ON "locations"."id" = "user_location"."locationId"
+        WHERE "users"."id" = ${userId}`);
+  const array = [];
+  try {
+    var origins = [user.rows[0].location];
 
-  var distance = require('google-distance');
-  const array = events.map(async event => {
-    const testPromise = new Promise((resolve, reject) => {
-      distance.get(
-        {
-          origin: user.rows[0].location,
-          destination: event.city,
-          //origin: 'Helsinki',
-          //destination: 'Berlin',
-        },
-        (err, data) => {
-          if (err) {
-            event.durationValue = 0;
-            resolve(event);
-          } else {
-            event.durationValue = data.durationValue;
-            resolve(event);
-          }
-        },
-      );
+    var distance = require('google-distance');
+    const array = events.map(async event => {
+      const testPromise = new Promise((resolve, reject) => {
+        distance.get(
+          {
+            origin: user.rows[0].location,
+            destination: event.city,
+            //origin: 'Helsinki',
+            //destination: 'Berlin',
+          },
+          (err, data) => {
+            if (err) {
+              event.durationValue = 0;
+              resolve(event);
+            } else {
+              event.durationValue = data.durationValue;
+              resolve(event);
+            }
+          },
+        );
+      });
+      return testPromise;
     });
+  } catch (error) {
+    console.log('I AM CATCHING ERRORS ', error);
+  }
+  let eventsArray = [];
+  if (array.length > 0) {
+    eventsArray = await Promise.all(array);
+  } else {
+    eventsArray = events.map(event => {
+      event.durationValue = 0;
+    });
+  }
 
-    return testPromise;
-  });
-  const eventsArray = await Promise.all(array);
   return eventsArray;
 };
 
@@ -148,6 +268,10 @@ const calculateTheIndexForDateRecommandation = events => {
   let eventsInPast = [];
   let eventsInFuture = [];
   events.map((event, index) => {
+    // Small eventImage change to have the correct format
+    if (event.eventImage) {
+      event.eventImage = event.eventImage.toString('base64');
+    }
     let eventDate = new Date(event.eventDate);
     if (currentDate > eventDate) {
       eventsInPast.push(event);
@@ -167,10 +291,13 @@ const calculateTheIndexForDateRecommandation = events => {
   eventsInFuture.sort(function(a, b) {
     return b.eventDate - a.eventDate;
   });
+
   const eventsToReturn = eventsInPast.concat(eventsInFuture);
+
   eventsToReturn.map((event, index) => {
     event.dateIndex = index + 1;
   });
+
   return eventsToReturn;
 };
 const calculateTheIndexForSortByYeahsNaahs = events => {
@@ -212,29 +339,28 @@ export const dbGetEvent = async id => {
     .first()
     .where({ id });
 
-  console.log('- - - - - - - - - - - - - - - - - START 1');
-  console.log(event.eventImage);
-  console.log('- - - - - - - - - - - - - - - - - END 1');
-
   if (event.eventImage) {
     event.eventImage = event.eventImage.toString('base64');
   }
 
-  console.log('- - - - - - - - - - - - - - - - - START 2');
-  console.log(event.eventImage);
-  console.log('- - - - - - - - - - - - - - - - - END 2');
-
   return event;
 };
 
+export const dbGetEventParticipantsNum = async () => {
+  const participants = await knex.raw(
+    `SELECT  "eventParticipants"."eventId","users"."emoji" from "users"
+      LEFT JOIN "eventParticipants" ON "users"."id" = "eventParticipants"."userId"
+      WHERE "eventParticipants"."eventId" NOTNULL`,
+  );
+  return participants.rows;
+};
+
 export const dbCreateEvent = ({ ...fields }) =>
-  knex.transaction(async (trx) => {
+  knex.transaction(async trx => {
     const report = await trx('events')
       .insert(fields)
       .returning('*')
       .then(results => results[0]);
-    console.log('REPORT ID', report.id);
-    console.log('EVENTSHOST ID', report.hostId);
     await trx('eventParticipants')
       .insert({
         userId: report.hostId,
@@ -242,7 +368,6 @@ export const dbCreateEvent = ({ ...fields }) =>
         createdAt: moment(),
       })
       .then();
-
 
     return report;
   });

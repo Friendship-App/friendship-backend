@@ -8,6 +8,7 @@ import {
   CreateReport,
   UpdateReport,
   delReport,
+  getTotalReports
 } from '../handlers/reports';
 
 const validateReportId = {
@@ -38,9 +39,15 @@ const reports = [
   // Get a list of all reports
   {
     method: 'GET',
-    path: '/reports',
+    path: '/report/{startIndex}',
     config: getAuthWithScope('admin'),
     handler: getReports,
+  },
+  {
+    method: 'GET',
+    path: '/getTotalReports',
+    config: getAuthWithScope('admin'),
+    handler: getTotalReports,
   },
   // Get info about a specific reports
   {

@@ -34,7 +34,7 @@ export const getFeedbacks = (request, reply) =>
     export const getFeedback = (request, reply) =>
       dbGetFeedback(request.params.feedbackId).then(reply);
 
-export const getTotalFeedbacks = () => dbGetTotalFeedbacks().then(reply);
+export const getTotalFeedbacks = (request, reply) => dbGetTotalFeedbacks().then(reply);
 
 export const delFeedback = (request, reply) =>
   dbDelFeedback(request.params.feedbackId).then(reply);

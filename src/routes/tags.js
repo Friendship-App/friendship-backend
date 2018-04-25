@@ -16,7 +16,7 @@ import {
   delUserTag,
   getTagsForUser,
   getTagList,
-  getUsersInTag,
+  getUsersInTag, getActivities, getInterests,
 } from '../handlers/tags';
 
 const validateTagId = {
@@ -64,8 +64,15 @@ const tags = [
   {
     method: 'GET',
     path: '/tags',
-    config: getAuthWithScope('user'),
     handler: getTags,
+  },{
+    method: 'GET',
+    path: '/activities',
+    handler: getActivities,
+  },{
+    method: 'GET',
+    path: '/interests',
+    handler: getInterests,
   },
   {
     method: 'GET',

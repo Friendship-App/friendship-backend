@@ -15,7 +15,7 @@ import {
   dbGetTagsForUser,
   dbGetTagList,
   dbGetUsersInTag,
-  dbGetFilteredTags,
+  dbGetFilteredTags, dbGetActivities, dbGetInterests,
 } from '../models/tags';
 
 export const getTagList = (request, reply) => {
@@ -25,7 +25,11 @@ export const getTagList = (request, reply) => {
     return dbGetTagList().then(reply);
 }
 
-export const getTags = (request, reply) => {dbGetTags().then(reply);}
+export const getTags = (request, reply) => {dbGetTags().then(reply);};
+
+export const getActivities = (request, reply) => {dbGetActivities().then(reply);};
+
+export const getInterests = (request, reply) => {dbGetInterests().then(reply);};
 
 export const getTag = (request, reply) => dbGetTag(request.params.tagId).then(reply);
 

@@ -7,10 +7,10 @@ export const dbGetLocations = () => knex('locations').select(locationFields);
 
 export const dbDelLocation = id =>
   knex('locations')
-    .where({ id })
+    .where({id})
     .del();
 
-export const dbAddLocation = ({ ...fields }) =>
+export const dbAddLocation = ({...fields}) =>
   knex('locations')
     .insert(fields)
     .returning('*')
@@ -19,25 +19,25 @@ export const dbAddLocation = ({ ...fields }) =>
 export const dbGetUserLocations = userId =>
   knex('user_location')
     .select(userLocationFields)
-    .where({ userId });
+    .where({userId});
 
 export const dbDelUserLocation = userId =>
   knex('user_location')
-    .where({ userId })
+    .where({userId})
     .del();
 
 export const dbCreateUserLocations = (userId, locationArray) =>
   knex.transaction(async (trx) => {
     await trx('user_location')
-      .where({ userId })
-      .returning('*')
-      .del()
+      .where({userId})
+      .del();
+
+    const locations = [];
+    locationArray.forEach((location) => {
+      locations.push({userId, locationId: location});
+    });
+
+    await trx('user_location')
+      .insert(locations)
       .then();
-
-    const userLocations = await trx('user_location')
-      .insert(locationArray)
-      .returning('*')
-      .then(results => results);
-
-    return userLocations;
   });

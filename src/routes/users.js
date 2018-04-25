@@ -30,14 +30,18 @@ const validateUserId = {
 const validateRegistrationFields = {
   validate: {
     payload: {
-      email: Joi.string()
-        .email()
-        .required(),
-      password: Joi.string().required(),
       username: Joi.string().required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+      birthyear: Joi.number().required(),
+      enableMatching: Joi.boolean().required(),
+      description: Joi.string().required(),
       image: Joi.binary(),
-      genders: Joi.array(),
-      birthyear: Joi.number(),
+      genders: Joi.array().required(),
+      locations: Joi.array().required(),
+      personalities: Joi.array().required(),
+      yeahs: Joi.array(),
+      nahs: Joi.array(),
       emoji: Joi.string(),
     },
   },

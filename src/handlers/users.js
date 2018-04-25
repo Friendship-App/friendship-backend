@@ -1,27 +1,29 @@
 import Boom from 'boom';
+import moment from 'moment';
 
 import {resizeImage} from '../utils/image';
 import {createToken, hashPassword} from '../utils/auth';
 import {
+  dbBanUser,
+  dbCreateUser,
+  dbDelUser,
+  dbDelVerificationHash,
+  dbFetchUserBan,
+  dbGet30DaysUsers,
+  dbGetEmailVerification,
+  dbGetFilteredUsers,
+  dbGetUser,
+  dbGetUserByUsername,
   dbGetUsers,
   dbGetUsersBatch,
-  dbGetUser,
-  dbDelUser,
-  dbBanUser,
-  dbFetchUserBan,
-  dbUpdateUser,
-  dbCreateUser,
-  dbGetEmailVerification,
-  dbDelVerificationHash,
-  dbGetUserByUsername,
+  dbUnbanUser,
   dbUpdatePassword,
-  dbGetFilteredUsers,
-  dbGet30DaysUsers,
+  dbUpdateUser,
 } from '../models/users';
-import moment from 'moment';
 import {dbCreateUserLocations} from "../models/locations";
 import {dbCreateUserPersonalities} from "../models/personalities";
 import {dbCreateUserTags} from "../models/tags";
+import {updateUserGender} from '../models/genders';
 
 export const getUsers = (request, reply) => {
   if (request.query.filter) {
@@ -78,9 +80,21 @@ export const updateUser = async (request, reply) => {
   }
 
   const fields = {};
-
+  const genders = {};
+  const genderArr = [];
   for (const field in request.payload) {
-    fields[field] = request.payload[field];
+    if (field !== 'genderArr') {
+      fields[field] = request.payload[field];
+    }
+    if (field === 'genderArr') {
+      genders.genders = request.payload[field];
+    }
+  }
+  if (genders.genders) {
+    genders.genders.forEach((gender) => {
+      genderArr.push({ userId: request.params.userId, genderId: gender });
+    });
+    updateUserGender(genderArr, request.params.userId);
   }
 
   // Only admins are allowed to modify user scope
@@ -93,15 +107,17 @@ export const updateUser = async (request, reply) => {
     const buf = Buffer.from(fields.image, 'base64');
     await resizeImage(buf).then(resized => (fields.image = resized));
   }
+
   if (fields.password) {
     hashPassword(fields.password).then((hashedPassword) => {
       dbUpdatePassword(request.pre.user.id, hashedPassword).catch((err) => {
+        console.log(err);
       });
     });
 
     delete fields.password;
   }
-  return dbUpdateUser(request.params.userId, fields).then(reply);
+  return dbUpdateUser(request.params.userId, { ...fields }).then(reply);
 };
 
 export const banUser = (request, reply) => {
@@ -130,11 +146,26 @@ export const banUser = (request, reply) => {
           .toISOString(),
   };
 
+
   return dbFetchUserBan(request.params.userId).then((result) => {
     if (result.length) return reply(Boom.conflict('User is already banned'));
 
     return dbBanUser(request.params.userId, fields).then(reply);
   });
+};
+
+
+export const unbanUser = (request, reply) => {
+  if (
+    request.pre.user.scope !== 'admin' &&
+    request.pre.user.id !== request.params.userId
+  ) {
+    return reply(
+      Boom.unauthorized('Unprivileged users cannot do this!'),
+    );
+  }
+
+  return dbUnbanUser(request.params.userId).then(reply);
 };
 
 export const authUser = (request, reply) =>

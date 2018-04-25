@@ -1,12 +1,6 @@
 import knex from '../utils/db';
-
-const eventParticipantFields = ['id', 'createdAt', 'userId', 'eventId'];
-
+import { dbGetEvent } from './events.js';
 export const dbGetEventParticipants = async (eventId, userId) => {
-  const groupPersonality = await knex.raw(`
-
-  `);
-
   const hateCommonLoveCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
     count(DISTINCT "tags"."name") AS "hateCommon"
     FROM "users"
@@ -15,7 +9,6 @@ export const dbGetEventParticipants = async (eventId, userId) => {
     left join "tags"
     ON "tags"."id" = "user_tag"."tagId"
     WHERE "user_tag"."love" = ${false}
-    AND "users"."id" != ${userId}
     AND "users"."id" IN (SELECT "users"."id"  FROM "users"
           left join "eventParticipants"
           ON "eventParticipants"."userId" = "users"."id"
@@ -49,12 +42,26 @@ export const dbGetEventParticipants = async (eventId, userId) => {
                         AND "user_tag"."love" = ${true})
       GROUP BY "users"."id"`);
 
+  const event = await dbGetEvent(eventId);
   hateCommonLoveCommon.rows.map(hate => {
     loveCommon.rows.map(love => {
       if (love.id === hate.id) {
         hate.loveCommon = love.loveCommon;
       }
     });
+  });
+  hateCommonLoveCommon.rows.map((user, index) => {
+    if (user.id == event.hostId) {
+      console.log('USER ID IS HOST_____', user.id);
+      const hostUser = user;
+      console.log('hateCommonLoveCommon_____', hateCommonLoveCommon);
+
+      hateCommonLoveCommon.rows.splice(index, index + 1);
+
+      hateCommonLoveCommon.rows.unshift(hostUser);
+
+      console.log('hateCommonLoveCommon___AFTER SHIFT__', hateCommonLoveCommon);
+    }
   });
   return hateCommonLoveCommon;
 };
@@ -91,12 +98,15 @@ export const dbGetEventTopYeahsNahs = async eventId => {
     GROUP BY "tags"."name"
     ORDER BY COUNT DESC
     LIMIT 3`);
+
   topEventYeahs.rows.map(yeah => {
     yeah.love = true;
   });
+
   topEventNahs.rows.map(nah => {
     nah.love = false;
   });
+
   const topYeahsNahs = topEventYeahs.rows.concat(topEventNahs.rows);
 
   return topYeahsNahs;
@@ -117,9 +127,8 @@ export const dbGetEventParticipation = async (eventId, userId) => {
   );
   if (eventParticipanion.rows.length >= 1) {
     return true;
-  } else {
-    return false;
   }
+  return false;
 };
 
 export const dbDelEventParticipation = (eventId, userId) =>

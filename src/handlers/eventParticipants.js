@@ -21,27 +21,25 @@ export const createEventParticipation = (request, reply) =>
     createdAt: moment(),
     userId: request.params.userId,
     eventId: request.params.eventId,
-  }).then(reply);
+  })
+    .then(reply)
+    .catch(() => {
+      reply(Boom.notFound('There is no user or event with this id'));
+    });
 
-export const getEventParticipation = (request, reply) => {
-  return dbGetEventParticipation(
-    request.params.eventId,
-    request.params.userId,
-  ).then(reply);
-};
+export const getEventParticipation = (request, reply) =>
+  dbGetEventParticipation(request.params.eventId, request.params.userId).then(
+    reply,
+  );
 
-export const getEventPerssonality = (request, reply) => {
-  return dbGetEventPerssonality(request.params.eventId).then(reply);
-};
+export const getEventPerssonality = (request, reply) =>
+  dbGetEventPerssonality(request.params.eventId).then(reply);
 
-export const getEventTopYeahsNahs = (request, reply) => {
-  return dbGetEventTopYeahsNahs(request.params.eventId).then(reply);
-};
+export const getEventTopYeahsNahs = (request, reply) =>
+  dbGetEventTopYeahsNahs(request.params.eventId).then(reply);
 
 // Delete an EventParticipation that is connected to a user
-export const delEventParticipation = (request, reply) => {
-  return dbDelEventParticipation(
-    request.params.eventId,
-    request.params.userId,
-  ).then(reply);
-};
+export const delEventParticipation = (request, reply) =>
+  dbDelEventParticipation(request.params.eventId, request.params.userId).then(
+    reply,
+  );

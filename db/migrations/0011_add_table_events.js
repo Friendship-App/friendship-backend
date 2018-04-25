@@ -12,7 +12,15 @@ exports.up = knex =>
       table.binary('eventImage');
       table.text('description');
       table.text('address');
+      table
+        .integer('hostId')
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE');
       table.text('city');
+      table.text('minParticipants');
+      table.text('maxParticipants');
+      table.text('participantsMix');
       table.timestamp('eventDate');
     });
 exports.down = knex => knex.schema.dropTableIfExists('events');

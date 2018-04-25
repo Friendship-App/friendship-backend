@@ -9,6 +9,7 @@ import {
   updateUser,
   delUser,
   banUser,
+  unbanUser,
   authUser,
   registerUser,
   verifyUser,
@@ -78,14 +79,15 @@ const validateUserDetails = {
       password: Joi.string(),
       scope: Joi.string(),
       email: Joi.string().email(),
-      description: Joi.string(),
+      description: Joi.string().allow(''),
       emoji: Joi.string(),
       image: Joi.binary(),
       compatibility: Joi.string(),
       location: Joi.string(),
       enableMatching: Joi.boolean(),
-      birthyear: Joi.date(),
+      birthyear: Joi.number(),
       active: Joi.boolean(),
+      genderArr: Joi.array(),
     },
   },
 };
@@ -99,10 +101,10 @@ const users = [
     handler: getUsers,
   },
   {
-    method:'GET',
-    path:'/users/30days',
-    config:getAuthWithScope('admin'),
-    handler:get30DaysUsers,
+    method: 'GET',
+    path: '/users/30days',
+    config: getAuthWithScope('admin'),
+    handler: get30DaysUsers,
   },
   {
     method: 'GET',
@@ -157,6 +159,13 @@ const users = [
     path: '/users/{userId}/ban',
     config: merge({}, validateBanFields, getAuthWithScope('admin')),
     handler: banUser,
+  },
+
+  {
+    method: 'DELETE',
+    path: '/users/unban/{userId}',
+    config: merge({}, validateUserId, getAuthWithScope('admin')),
+    handler: unbanUser,
   },
 
   // Authenticate as user

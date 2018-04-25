@@ -6,8 +6,9 @@ import {
   getEvents,
   getEvent,
   CreateEvent,
-  UpdateEvent,
   delEvent,
+  UpdateEvent,
+  getEventParticipantsNum,
 } from '../handlers/events';
 
 const validateEventId = {
@@ -28,6 +29,9 @@ const validateEventFields = {
       city: Joi.string(),
       address: Joi.string(),
       eventDate: Joi.date().timestamp(),
+      minParticipants: Joi.string(),
+      maxParticipants: Joi.string(),
+      participantsMix: Joi.string(),
       createdAt: Joi.date().timestamp(),
     },
   },
@@ -37,30 +41,45 @@ const events = [
   // Get a list of all events
   {
     method: 'GET',
-    path: '/events',
+    path: '/events/{userId}',
     handler: getEvents,
+  },
+  // Create a new event
+  {
+    method: 'POST',
+    path: '/events',
+    //config: merge({}, getAuthWithScope('user')),
+    handler: CreateEvent,
+  },
+  {
+    method: 'GET',
+    path: '/eventParticipantsNum',
+    //config: merge({}, getAuthWithScope('user')),
+    handler: getEventParticipantsNum,
+  },
+  // Delete event
+  {
+    method: 'PATCH',
+    path: '/events/{eventId}',
+    //config: merge({}, validateEventFields),
+    handler: UpdateEvent,
+  },
+  {
+    method: 'DELETE',
+    path: '/events/{id}',
+    config: merge({}, getAuthWithScope('user')),
+
+    handler: delEvent,
   },
   // Get info about a specific event
   {
     method: 'GET',
     path: '/event/{eventId}',
+    //config: merge({}, validateEventId, getAuthWithScope('user')),
     handler: getEvent,
-  },
-  {
-    method: 'POST',
-    path: '/events',
-    config: merge({}, validateEventFields, getAuthWithScope('user')),
-    handler: CreateEvent,
-  },
-  {
-    method: 'DELETE',
-    path: '/events/{eventid}',
-    //config: merge({}, validateEventFields, getAuthWithScope('admin')),
-    handler: delEvent,
   },
 ];
 
 export default events;
 
-// Here we register the routes
 export const routes = server => server.route(events);

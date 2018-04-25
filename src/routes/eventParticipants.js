@@ -1,4 +1,5 @@
 import { merge } from 'lodash';
+
 import Joi from 'joi';
 import { getAuthWithScope } from '../utils/auth';
 
@@ -11,10 +12,20 @@ import {
   getEventTopYeahsNahs,
 } from '../handlers/eventParticipants';
 
-const validateEventPaticipationId = {
+const validateEventId = {
   validate: {
     params: {
-      id: Joi.number()
+      eventId: Joi.number()
+        .integer()
+        .required(),
+    },
+  },
+};
+
+const validateUserId = {
+  validate: {
+    params: {
+      userId: Joi.number()
         .integer()
         .required(),
     },
@@ -22,42 +33,70 @@ const validateEventPaticipationId = {
 };
 
 const eventParticipants = [
-  // Get a list of all events
+  // Get a list of users with hate and love in common for a specific event
   {
     method: 'GET',
     path: '/eventParticipants/{eventId}/{userId}',
+    config: merge(
+      {},
+      validateEventId,
+      validateUserId,
+      //getAuthWithScope('user'),
+    ),
     handler: getEventParticipants,
   },
-  // Get info about a specific reports
+  // Get true or false depending if the user participate to the event
   {
     method: 'GET',
     path: '/eventParticipation/{eventId}/{userId}',
+    config: merge(
+      {},
+      validateEventId,
+      validateUserId,
+      getAuthWithScope('user'),
+    ),
     handler: getEventParticipation,
   },
+  // The user join the event
   {
     method: 'POST',
     path: '/eventParticipation/{eventId}/{userId}',
+    config: merge(
+      {},
+      validateEventId,
+      validateUserId,
+      getAuthWithScope('user'),
+    ),
     handler: createEventParticipation,
   },
+  // The user leave the event
   {
     method: 'DELETE',
     path: '/eventParticipation/{eventId}/{userId}',
-    //config: merge({}, validateEventFields, getAuthWithScope('admin')),
+    config: merge(
+      {},
+      validateEventId,
+      validateUserId,
+      getAuthWithScope('user'),
+    ),
     handler: delEventParticipation,
   },
+  // Get the personalities for the event
   {
     method: 'GET',
     path: '/eventPersonalities/{eventId}',
+    config: merge({}, validateEventId, getAuthWithScope('user')),
     handler: getEventPerssonality,
   },
+  // Get the top tags for the event
   {
     method: 'GET',
     path: '/eventTopYeahsNahs/{eventId}',
+    config: merge({}, validateEventId, getAuthWithScope('user')),
     handler: getEventTopYeahsNahs,
   },
 ];
 
 export default eventParticipants;
 
-// Here we register the routes
 export const routes = server => server.route(eventParticipants);

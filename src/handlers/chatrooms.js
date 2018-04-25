@@ -1,13 +1,9 @@
 import Boom from 'boom';
 import {
-    dbGetChatrooms,
-    dbGetAllMsWithChatroomId,
-    dbCreateChatroom,
-    dbGetAllMsFromChatrooms,
-    dbGetChatroomsByUserId,
-  } from '../models/chatrooms';
-
-export const getChatrooms = (request, reply) => dbGetChatrooms().then(reply);
+  dbGetAllMsWithChatroomId,
+  dbCreateChatroom,
+  dbGetChatroomsByUserId,
+} from '../models/chatrooms';
 
 export const getChatroom = (request, reply) =>
   dbGetAllMsWithChatroomId(request.params.chatroomId).then(reply);
@@ -15,8 +11,8 @@ export const getChatroom = (request, reply) =>
 export const getChatroomsByUserId = (request, reply) =>
   dbGetChatroomsByUserId(request.params.userId).then(reply);
 
-export const createChatroom = (request, reply) => {
-  return dbCreateChatroom({
+export const createChatroom = (request, reply) =>
+  dbCreateChatroom({
     user_creator_id: request.payload.userCreatorId,
     user_receiver_id: request.payload.userReceiverId,
   })
@@ -28,7 +24,3 @@ export const createChatroom = (request, reply) => {
         reply(Boom.badImplementation(err));
       }
     });
-};
-export const getAllMsFromChatrooms = (request, reply) =>
-dbGetAllMsFromChatrooms().then(reply);
-

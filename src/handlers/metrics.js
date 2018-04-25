@@ -1,7 +1,4 @@
 import {
-  dbGetNbMatchesMessaging,
-  dbGetNbMessagesByConversation,
-  dbGetNbMessages,
   dbDisplayRegisteredUsersData,
   dbUpdateRegisteredUsersData,
   dbDisplayActiveUsersData,
@@ -10,28 +7,15 @@ import {
   dbUpDateActiveConversationsData,
   dbDisplayAverageConversationsLength,
   dbUpdateAverageConversationsLength,
+  dbDisplayAllMetrics,
+  dbDisplayWeekMetrics,
+  dbDisplayMonthMetrics,
 } from '../models/metrics';
-
-
-export const getNbMatchesMessaging = (request, reply) => {
-  dbGetNbMatchesMessaging().then(reply);
-};
-
-export const getNbMessagesByConversation = (request, reply) => {
-  dbGetNbMessagesByConversation().then(reply);
-};
-
-export const getNbMessages = (request, reply) => {
-  dbGetNbMessages().then(reply);
-};
-
-// danni
 
 export const updateRegisteredUsers = (request, reply) => {
   dbUpdateRegisteredUsersData().then(reply);
 };
 
-// minh
 export const displayRegisteredUsers = (request, reply) => {
   dbDisplayRegisteredUsersData().then(reply);
 };
@@ -60,10 +44,23 @@ export const updateAverageConversationsLength = (request, reply) => {
   dbUpdateAverageConversationsLength().then(reply);
 };
 
-// insert active usercount everyday at 23:59
-const cron = require('node-cron');
-cron.schedule('0 0 * * *', function(){
-  console.log(' START --------------------------0:00');
-  //getCountActiveUsers();
-  console.log(' END --------------------------');
-});
+export const displayAllMetrics = (request, reply) =>
+  dbDisplayAllMetrics().then(reply);
+
+export const displayWeekMetrics = (request, reply) =>
+  dbDisplayWeekMetrics().then(reply);
+
+export const displayMonthMetrics = (request, reply) =>
+  dbDisplayMonthMetrics().then(reply);
+
+export const testMetrics = async (request, reply) => {
+  try {
+    await dbUpdateRegisteredUsersData();
+    await dbUpdateActiveUsersData();
+    await dbUpDateActiveConversationsData();
+    await dbUpdateAverageConversationsLength();
+    reply('Test metrics successful');
+  } catch (e) {
+    reply(`Error: ${e}`);
+  }
+};

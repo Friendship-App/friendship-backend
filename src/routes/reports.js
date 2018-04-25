@@ -8,6 +8,7 @@ import {
   CreateReport,
   UpdateReport,
   delReport,
+  getTotalReports
 } from '../handlers/reports';
 
 const validateReportId = {
@@ -34,20 +35,25 @@ const validateReportFields = {
   },
 };
 
-
 const reports = [
   // Get a list of all reports
   {
     method: 'GET',
-    path: '/reports',
-    config: getAuthWithScope('user'),
+    path: '/report/{startIndex}',
+    config: getAuthWithScope('admin'),
     handler: getReports,
+  },
+  {
+    method: 'GET',
+    path: '/getTotalReports',
+    config: getAuthWithScope('admin'),
+    handler: getTotalReports,
   },
   // Get info about a specific reports
   {
     method: 'GET',
     path: '/reports/{reportId}',
-    config: merge({}, validateReportId, getAuthWithScope('user')),
+    config: merge({}, validateReportId, getAuthWithScope('admin')),
     handler: getReport,
   },
   // Register new reports
@@ -77,4 +83,3 @@ export default reports;
 
 // Here we register the routes
 export const routes = server => server.route(reports);
-

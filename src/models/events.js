@@ -329,14 +329,21 @@ const calculateTheIndexForSortByYeahsNaahs = events => {
   });
 };
 
+const calcualteParticipantNum = async eventId => {
+  const participants = await knex.raw(
+    `SELECT COUNT(DISTINCT "userId") as NumberOfUsers  FROM "eventParticipants"
+          WHERE "eventParticipants"."eventId" = ${eventId}`,
+  );
+  return participants.rows[0].numberofusers;
+};
+
 const calculateRecommandationByNumberOfParticipants = async events => {
   const array = events.map(async event => {
-    const participants = await knex.raw(
-      `SELECT COUNT(DISTINCT "userId") as NumberOfUsers  FROM "eventParticipants"
-            WHERE "eventParticipants"."eventId" = ${event.id}`,
+    event.numberOfParticipants = await calcualteParticipantNum(event.id);
+    console.log(
+      'NUMBER OF PARTICIPANTS FOR EVENTS__',
+      event.numberOfParticipants,
     );
-    event.numberOfParticipants = participants.rows[0].numberofusers;
-
     return event;
   });
   const eventsArray = await Promise.all(array);
@@ -360,6 +367,13 @@ export const dbGetEvent = async id => {
 
   if (event.eventImage) {
     event.eventImage = event.eventImage.toString('base64');
+  }
+  const eventParticipantsNum = await calcualteParticipantNum(id);
+
+  if (parseInt(eventParticipantsNum) >= parseInt(event.maxParticipants)) {
+    event.maxParticipantNumberExceed = true;
+  } else {
+    event.maxParticipantNumberExceed = false;
   }
 
   return event;

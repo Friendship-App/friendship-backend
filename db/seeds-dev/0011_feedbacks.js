@@ -1,7 +1,6 @@
 const simpleFixtures = require('simple-fixtures');
 const faker = require('faker/locale/en');
 const moment = require('moment');
-import knex from '../../src/utils/db';
 // there are two type of feedback options
 const feedbackFields = [
   {
@@ -22,11 +21,6 @@ const feedbackFields = [
     suggestImprovement: faker.lorem.sentences
   }
 ];
-
-const feedback_surveyOption = {
-  feedbackId: () => count++,
-  optionId: () => faker.random.arrayElement([1, 2, 3, 4, 5])
-};
 
 exports.seed = knex => {
   return knex

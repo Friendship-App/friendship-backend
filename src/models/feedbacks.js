@@ -21,30 +21,6 @@ export const dbCreateFeedback = ({ checkBoxs, ...fields }) => {
     .then();
 };
 
-export const dbGetFeedback = id => {
-  return knex
-    .raw(
-      `select "feedbacks"."id",
-      "suggestion",
-      "findFriendEasy",
-      "findFriendHard",
-      "suggestImprovement",
-      "rating",
-      "goalRate",
-      "given_by",
-      "OtherReason",
-      "users"."username",
-      array_agg("optionId") as "optionLists",
-      array_agg("surveyOptions"."option") as "joinAppReasons"
-      from "feedbacks"
-      join "users" on "feedbacks"."given_by" = "users"."id"
-      full outer join "feedback_surveyOption" on "feedbacks"."id"="feedback_surveyOption"."feedbackId"
-      full outer join "surveyOptions" on "feedback_surveyOption"."optionId" = "surveyOptions"."id"
-      where "feedbacks"."id" = ${id} GROUP BY "feedbacks"."id","users"."username"`
-    )
-    .then(results => results.rows);
-};
-
 export const dbCreateFeedbackOptions = (feedbackId, options) => {
   let optionArray = [];
 
@@ -58,7 +34,30 @@ export const dbCreateFeedbackOptions = (feedbackId, options) => {
   return;
 };
 
-export const dbGetFeedbacks = () => knex('feedbacks').select(feedbackFields);
+export const dbGetFeedbacks = startIndex =>
+  knex
+    .raw(
+      `select "feedbacks"."id",
+    "suggestion",
+    "findFriendEasy",
+    "findFriendHard",
+    "suggestImprovement",
+    "rating",
+    "goalRate",
+    "feedbacks"."createdAt",
+    "given_by",
+    "OtherReason",
+    "users"."username",
+    array_agg("optionId") as "optionLists",
+    array_agg("surveyOptions"."option") as "joinAppReasons"
+    from "feedbacks"
+    join "users" on "feedbacks"."given_by" = "users"."id"
+    full outer join "feedback_surveyOption" on "feedbacks"."id"="feedback_surveyOption"."feedbackId"
+    full outer join "surveyOptions" on "feedback_surveyOption"."optionId" = "surveyOptions"."id"
+    group by "feedbacks"."id","users"."id"
+    LIMIT 10 offset ${startIndex}`
+    )
+    .then(results => results.rows);
 
 export const dbGetTotalFeedbacks = () => knex('feedbacks').count(`id`);
 

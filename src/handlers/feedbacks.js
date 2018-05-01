@@ -1,13 +1,12 @@
-import Boom from "boom";
-import moment from "moment";
+import Boom from 'boom';
+import moment from 'moment';
 
 import {
   dbCreateFeedback,
   dbGetFeedbacks,
   dbGetTotalFeedbacks,
-  dbDelFeedback,
-  dbGetFeedback
-} from "../models/feedbacks";
+  dbDelFeedback
+} from '../models/feedbacks';
 
 export const CreateFeedback = (request, reply) => {
   return dbCreateFeedback({
@@ -26,15 +25,10 @@ export const CreateFeedback = (request, reply) => {
 };
 
 export const getFeedbacks = (request, reply) =>
-  dbGetFeedbacks()
-    .limit(10)
-    .offset(request.params.startIndex - 1)
-    .then(reply);
+  dbGetFeedbacks(request.params.startIndex).then(reply);
 
-    export const getFeedback = (request, reply) =>
-      dbGetFeedback(request.params.feedbackId).then(reply);
-
-export const getTotalFeedbacks = (request, reply) => dbGetTotalFeedbacks().then(reply);
+export const getTotalFeedbacks = (request, reply) =>
+  dbGetTotalFeedbacks().then(reply);
 
 export const delFeedback = (request, reply) =>
   dbDelFeedback(request.params.feedbackId).then(reply);

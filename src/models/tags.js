@@ -52,23 +52,23 @@ export const dbGetInterests = () => knex('tags').where('category', 2).select(tag
 export const dbGetTag = id =>
   knex("tags")
     .first()
-    .where({ id });
+    .where({id});
 
 //  Get all tags that a user has chosen to be either loved or hated
 export const dbGetTagsForUser = userId =>
   knex("tags")
     .select(tagsForUser)
     .leftJoin("user_tag", "user_tag.tagId", "tags.id")
-    .where({ "user_tag.userId": userId });
+    .where({"user_tag.userId": userId});
 
 // Get all the users of a tag, used by users in searching for users who love/hate a tag. (includes username and emoji)
 export const dbGetUsersInTag = tagId =>
   knex("user_tag")
     .select(tagUserListFields)
     .join("users", "user_tag.userId", "=", "users.id")
-    .where({ tagId });
+    .where({tagId});
 
-export const dbCreateTag = ({ ...fields }) =>
+export const dbCreateTag = ({...fields}) =>
   knex.transaction(async trx => {
     const tag = await trx("tags")
       .insert(fields)
@@ -80,23 +80,23 @@ export const dbCreateTag = ({ ...fields }) =>
 
 export const dbDelTag = id =>
   knex("tags")
-    .where({ id })
+    .where({id})
     .del();
 
 export const dbUpdateTag = (id, fields) =>
   knex("tags")
-    .update({ ...fields })
-    .where({ id })
+    .update({...fields})
+    .where({id})
     .returning("*");
 
 // Get all the users of a tag, used in admin to check how many loves/hates a tag has
 export const dbGetTagsUser = tagId =>
   knex("user_tag")
     .select(userTagListFields)
-    .where({ tagId });
+    .where({tagId});
 
 // Add a new tag that a user loves/hates
-export const dbCreateUserTag = ({ ...fields }) =>
+export const dbCreateUserTag = ({...fields}) =>
   knex.transaction(async trx => {
     const tag = await trx("user_tag")
       .insert(fields)
@@ -106,30 +106,32 @@ export const dbCreateUserTag = ({ ...fields }) =>
     return tag;
   });
 
-export const dbCreateUserTags = (userId, tagArray) =>
-  knex.transaction(async trx => {
-    await trx("user_tag")
-      .where({ userId })
-      .returning("*")
-      .del()
-      .then();
+function dbAddTagsToUser(userId, tagsArray, love = false) {
+  knex.transaction(async (trx) => {
+    const tags = [];
+    tagsArray.forEach((tag) => {
+      tags.push({userId, tagId: tag, love})
+    });
 
-    const userTags = await trx("user_tag")
-      .insert(tagArray)
-      .returning("*")
-      .then(results => results);
+    await trx('user_tag').insert(tags).then();
+  })
+}
 
-    return userTags;
+export const dbCreateUserTags = (userId, yeahsArray, nahsArray) =>
+  knex.transaction(async (trx) => {
+    await trx('user_tag').where({userId}).del();
+    await dbAddTagsToUser(userId, yeahsArray, true);
+    await dbAddTagsToUser(userId, nahsArray);
   });
 
 //  Delete a user_tag
 export const dbDelUserTag = (userId, tagId) =>
   knex('user_tag')
-    .where({ userId, tagId })
+    .where({userId, tagId})
     .del();
 // Activate tag
 export const dbActivateTag = (id, checked) =>
   knex('tags')
     .where('id', id)
-    .update({ active: checked });
+    .update({active: checked});
 

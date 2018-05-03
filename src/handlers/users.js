@@ -12,7 +12,7 @@ import {
   dbGet30DaysUsers,
   dbGetEmailVerification,
   dbGetFilteredUsers,
-  dbGetUser,
+  dbGetUser, dbGetUserByEmail,
   dbGetUserByUsername,
   dbGetUsers,
   dbGetUsersBatch,
@@ -154,7 +154,6 @@ export const banUser = (request, reply) => {
   });
 };
 
-
 export const unbanUser = (request, reply) => {
   if (
     request.pre.user.scope !== 'admin' &&
@@ -167,6 +166,7 @@ export const unbanUser = (request, reply) => {
 
   return dbUnbanUser(request.params.userId).then(reply);
 };
+
 
 export const authUser = (request, reply) =>
   reply(
@@ -233,6 +233,7 @@ export const registerUser = async (request, reply) => {
 
 // check if the hash value exists in the db
 // and verify the user that matches (active=true)
+
 export const verifyUser = (request, reply) => {
   dbGetEmailVerification(request.params.hash)
     .then((data) => {
@@ -247,3 +248,9 @@ export const verifyUser = (request, reply) => {
       reply(Boom.conflict('This verification link is expired'));
     });
 };
+
+export const validateUserByUsername = (request, reply) =>
+  dbGetUserByUsername(request.params.username).then(reply);
+
+export const validateEmailAvailibility = (request, reply) =>
+  dbGetUserByEmail(request.params.email).then(reply);

@@ -153,7 +153,6 @@ const users = [
     config: merge({}, validateBanFields, getAuthWithScope('admin')),
     handler: banUser,
   },
-
   {
     method: 'DELETE',
     path: '/users/unban/{userId}',

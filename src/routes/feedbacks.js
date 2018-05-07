@@ -50,12 +50,6 @@ const feedbacks = [
     handler: getTotalFeedbacks
   },
   {
-    method: "GET",
-    path: "/feedbacks/{feedbackId}",
-    config: merge({}, getAuthWithScope("admin")),
-    handler: getFeedback
-  },
-  {
     method: "DELETE",
     path: "/feedbacks/{feedbackId}",
     config: merge({}, getAuthWithScope("admin")),

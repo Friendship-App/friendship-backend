@@ -187,12 +187,6 @@ export const registerUser = async (request, reply) => {
     fields[field] = request.payload[field];
   }
 
-  // If request contains an image, resize it to max 512x512 pixels
-  if (fields.image) {
-    const buf = Buffer.from(fields.image, 'base64');
-    await resizeImage(buf).then(resized => (fields.image = resized));
-  }
-
   hashPassword(request.payload.password)
     .then(passwordHash =>
       dbCreateUser({
@@ -250,7 +244,7 @@ export const verifyUser = (request, reply) => {
 };
 
 export const validateUserByUsername = (request, reply) =>
-  dbGetUserByUsername(request.params.username).then(reply);
+  dbGetUserByUsername(request.query['username']).then(reply);
 
 export const validateEmailAvailibility = (request, reply) =>
-  dbGetUserByEmail(request.params.email).then(reply);
+  dbGetUserByEmail(request.query['email']).then(reply);

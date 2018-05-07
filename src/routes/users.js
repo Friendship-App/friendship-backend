@@ -193,14 +193,14 @@ const users = [
   // Get info about a specific user by username
   {
     method: 'GET',
-    path: '/users/validate/{username}',
+    path: '/users/validate/username',
     handler: validateUserByUsername,
   },
 
   // Check email is not already used
   {
     method: 'GET',
-    path: '/users/validate/email/{email}',
+    path: '/users/validate/email',
     handler: validateEmailAvailibility,
   },
 ];

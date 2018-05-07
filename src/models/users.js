@@ -293,6 +293,7 @@ export const dbDelVerificationHash = ownerId =>
 
 export const dbCreateUser = ({password, genders, ...fields}) =>
   knex.transaction(async trx => {
+    console.log(fields.image);
     const user = await trx('users')
       .insert(fields)
       .returning('*')

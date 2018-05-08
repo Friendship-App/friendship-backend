@@ -37,7 +37,7 @@ const validateRegistrationFields = {
       birthyear: Joi.number().required(),
       enableMatching: Joi.boolean().required(),
       description: Joi.string().required(),
-      image: Joi.binary(),
+      image: Joi.string(),
       genders: Joi.array().required(),
       locations: Joi.array().required(),
       personalities: Joi.array().required(),

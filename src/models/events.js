@@ -56,12 +56,12 @@ export const dbGetEvents = async userId => {
   calculateTheIndexRecommandationByEventUserLocation(newArrayDataOfOjbect);
 
   calculateTheIndexForDateRecommandation(newArrayDataOfOjbect);
+  await checkifCurrentUserisJoining(newArrayDataOfOjbect, userId);
 
   calculateFinalSortRate(newArrayDataOfOjbect);
 
   await calculateCompatibilityScore(newArrayDataOfOjbect, userId);
   const eventsToReturn = [];
-  console.log('EVENTS BEFORE REMOVE', newArrayDataOfOjbect);
   for (let i = 0; i < newArrayDataOfOjbect.length; i++) {
     if (
       parseInt(newArrayDataOfOjbect[i].compatibilityScore) >=
@@ -73,6 +73,25 @@ export const dbGetEvents = async userId => {
     }
   }
   return eventsToReturn;
+};
+
+const checkifCurrentUserisJoining = async (events, userId) => {
+  const array = events.map(async (event, index) => {
+    const participantsObj = await knex.raw(`SELECT "userId" FROM "eventParticipants"
+            WHERE "eventParticipants"."eventId" = ${event.id}`);
+    const participants = [];
+    participantsObj.rows.map(eventParticipant => {
+      participants.push(parseInt(eventParticipant.userId));
+    });
+
+    if (participants.includes(parseInt(userId))) {
+      event.userIsJoining = true;
+    } else {
+      event.userIsJoining = false;
+    }
+  });
+  const eventsArray = await Promise.all(array);
+  return eventsArray;
 };
 
 const calculateCompatibilityScore = async (events, userId) => {
@@ -310,14 +329,21 @@ const calculateTheIndexForSortByYeahsNaahs = events => {
   });
 };
 
+const calcualteParticipantNum = async eventId => {
+  const participants = await knex.raw(
+    `SELECT COUNT(DISTINCT "userId") as NumberOfUsers  FROM "eventParticipants"
+          WHERE "eventParticipants"."eventId" = ${eventId}`,
+  );
+  return participants.rows[0].numberofusers;
+};
+
 const calculateRecommandationByNumberOfParticipants = async events => {
   const array = events.map(async event => {
-    const participants = await knex.raw(
-      `SELECT COUNT(DISTINCT "userId") as NumberOfUsers  FROM "eventParticipants"
-            WHERE "eventParticipants"."eventId" = ${event.id}`,
+    event.numberOfParticipants = await calcualteParticipantNum(event.id);
+    console.log(
+      'NUMBER OF PARTICIPANTS FOR EVENTS__',
+      event.numberOfParticipants,
     );
-    event.numberOfParticipants = participants.rows[0].numberofusers;
-
     return event;
   });
   const eventsArray = await Promise.all(array);
@@ -341,6 +367,13 @@ export const dbGetEvent = async id => {
 
   if (event.eventImage) {
     event.eventImage = event.eventImage.toString('base64');
+  }
+  const eventParticipantsNum = await calcualteParticipantNum(id);
+
+  if (parseInt(eventParticipantsNum) >= parseInt(event.maxParticipants)) {
+    event.maxParticipantNumberExceed = true;
+  } else {
+    event.maxParticipantNumberExceed = false;
   }
 
   return event;

@@ -1,26 +1,29 @@
 import Boom from 'boom';
 import moment from 'moment';
 
-import { resizeImage } from '../utils/image';
-import { createToken, hashPassword } from '../utils/auth';
+import {resizeImage} from '../utils/image';
+import {createToken, hashPassword} from '../utils/auth';
 import {
+  dbBanUser,
+  dbCreateUser,
+  dbDelUser,
+  dbDelVerificationHash,
+  dbFetchUserBan,
+  dbGet30DaysUsers,
+  dbGetEmailVerification,
+  dbGetFilteredUsers,
+  dbGetUser, dbGetUserByEmail,
+  dbGetUserByUsername,
   dbGetUsers,
   dbGetUsersBatch,
-  dbGetUser,
-  dbDelUser,
-  dbBanUser,
   dbUnbanUser,
-  dbFetchUserBan,
-  dbUpdateUser,
-  dbCreateUser,
-  dbGetEmailVerification,
-  dbDelVerificationHash,
-  dbGetUserByUsername,
   dbUpdatePassword,
-  dbGetFilteredUsers,
-  dbGet30DaysUsers,
+  dbUpdateUser,
 } from '../models/users';
-import { updateUserGender } from '../models/genders';
+import {dbCreateUserLocations} from "../models/locations";
+import {dbCreateUserPersonalities} from "../models/personalities";
+import {dbCreateUserTags} from "../models/tags";
+import {updateUserGender} from '../models/genders';
 
 export const getUsers = (request, reply) => {
   if (request.query.filter) {
@@ -135,12 +138,12 @@ export const banUser = (request, reply) => {
       !request.payload.expire || request.payload.expire === 'x'
         ? null
         : moment()
-            .add(
-              request.payload.expire.split(':')[0],
-              request.payload.expire.split(':')[1],
-            )
-            .utc()
-            .toISOString(),
+          .add(
+            request.payload.expire.split(':')[0],
+            request.payload.expire.split(':')[1],
+          )
+          .utc()
+          .toISOString(),
   };
 
 
@@ -150,7 +153,6 @@ export const banUser = (request, reply) => {
     return dbBanUser(request.params.userId, fields).then(reply);
   });
 };
-
 
 export const unbanUser = (request, reply) => {
   if (
@@ -165,6 +167,7 @@ export const unbanUser = (request, reply) => {
   return dbUnbanUser(request.params.userId).then(reply);
 };
 
+
 export const authUser = (request, reply) =>
   reply(
     createToken({
@@ -176,6 +179,7 @@ export const authUser = (request, reply) =>
 
 export const registerUser = async (request, reply) => {
   const fields = {};
+  let createdUser = {};
 
   // request.payload.forEach((field) => { fields[field] = request.payload[field]; });
 
@@ -183,42 +187,47 @@ export const registerUser = async (request, reply) => {
     fields[field] = request.payload[field];
   }
 
-  // If request contains an image, resize it to max 512x512 pixels
-  if (fields.image) {
-    const buf = Buffer.from(fields.image, 'base64');
-    await resizeImage(buf).then(resized => (fields.image = resized));
-  }
-
-  return hashPassword(request.payload.password)
+  hashPassword(request.payload.password)
     .then(passwordHash =>
       dbCreateUser({
-        ...fields,
-        email: request.payload.email.toLowerCase().trim(),
-        password: passwordHash,
         scope: 'user',
+        email: request.payload.email.toLowerCase().trim(),
+        description: fields.description,
+        username: fields.username,
+        emoji: fields.emoji,
+        image: fields.image,
+        enableMatching: fields.enableMatching,
+        birthyear: fields.birthyear,
+        password: passwordHash,
+        genders: fields.genders
       }).then((userData) => {
-        reply(
-          createToken({
-            id: userData.id,
-            email: userData.email,
-            scope: userData.scope,
-          }),
-        );
-      }),
-    )
-    .catch((err) => {
-      if (err.constraint === 'users_email_unique') {
-        reply(Boom.conflict('Email already exists'));
-      } else if (err.constraint === 'users_username_unique') {
-        reply(Boom.conflict('Username already exists'));
-      } else {
-        reply(Boom.badImplementation(err));
-      }
-    });
+        createdUser = userData;
+      }).then(() => {
+        dbCreateUserLocations(createdUser.id, fields.locations);
+      }).then(() => {
+        dbCreateUserPersonalities(createdUser.id, fields.personalities);
+      }).then(() => {
+        dbCreateUserTags(createdUser.id, fields.yeahs, fields.nahs);
+      })
+    ).then(() => {
+    return reply(
+      createToken({
+        id: createdUser.id,
+        email: createdUser.email,
+        scope: createdUser.scope,
+      }))
+  }).catch((err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      reply(Boom.badImplementation(err));
+    }
+  });
 };
 
 // check if the hash value exists in the db
 // and verify the user that matches (active=true)
+
 export const verifyUser = (request, reply) => {
   dbGetEmailVerification(request.params.hash)
     .then((data) => {
@@ -233,3 +242,9 @@ export const verifyUser = (request, reply) => {
       reply(Boom.conflict('This verification link is expired'));
     });
 };
+
+export const validateUserByUsername = (request, reply) =>
+  dbGetUserByUsername(request.query['username']).then(reply);
+
+export const validateEmailAvailibility = (request, reply) =>
+  dbGetUserByEmail(request.query['email']).then(reply);

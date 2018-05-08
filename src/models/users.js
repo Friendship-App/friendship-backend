@@ -1,5 +1,5 @@
 import knex from '../utils/db';
-import { sendVerificationEmail } from '../utils/email';
+import {sendVerificationEmail} from '../utils/email';
 import moment from 'moment';
 
 const crypto = require('crypto');
@@ -137,7 +137,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
 export const dbGetEmailVerification = hash =>
   knex('email_verification')
     .first()
-    .where({ hash });
+    .where({hash});
 
 export const dbGetUser = async (userId, currentUserId) => {
   // const user = await knex('users')
@@ -231,23 +231,27 @@ export const dbGetUser = async (userId, currentUserId) => {
 
 export const dbUpdatePassword = (id, hash) =>
   knex('secrets')
-    .update({ password: hash })
-    .where({ ownerId: id });
+    .update({password: hash})
+    .where({ownerId: id});
 
 // export const dbGetUserWithContent = userId =>
 //   knex('tags')
 //     .leftJoin('user_tag', 'user_tag.tagId', 'tags.id')
 //     .where({ 'user_tag.userId': userId });
 
-export const dbGetUserByUsername = (username, userId) =>
+export const dbGetUserByUsername = (username, userId = -1) =>
   knex('users')
     .where('id', '!=', userId)
     .andWhere('username', 'like', `%${username}%`);
 
-export const dbUpdateUser = (id, { ...fields }) =>
+export const dbGetUserByEmail = (email) =>
+  knex('users')
+    .where('email', '=', email);
+
+export const dbUpdateUser = (id, {...fields}) =>
   knex('users')
     .update(fields)
-    .where({ id })
+    .where({id})
     .returning('*');
 
 export const dbFetchUserBan = id =>
@@ -272,7 +276,7 @@ export const dbUnbanUser = id =>
 
 export const dbDelUser = id =>
   knex('users')
-    .where({ id })
+    .where({id})
     .del();
 
 export const dbGet30DaysUsers = async () => {
@@ -284,11 +288,12 @@ export const dbGet30DaysUsers = async () => {
 };
 export const dbDelVerificationHash = ownerId =>
   knex('email_verification')
-    .where({ ownerId })
+    .where({ownerId})
     .del();
 
-export const dbCreateUser = ({ password, genders, ...fields }) =>
+export const dbCreateUser = ({password, genders, ...fields}) =>
   knex.transaction(async trx => {
+    console.log(fields.image);
     const user = await trx('users')
       .insert(fields)
       .returning('*')
@@ -304,7 +309,7 @@ export const dbCreateUser = ({ password, genders, ...fields }) =>
     const genderArray = [];
     if (genders) {
       genders.forEach(gender => {
-        genderArray.push({ userId: user.id, genderId: gender });
+        genderArray.push({userId: user.id, genderId: gender});
       });
     }
 

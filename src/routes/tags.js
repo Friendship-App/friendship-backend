@@ -1,21 +1,23 @@
-import { merge } from 'lodash';
+import {merge} from 'lodash';
 import Joi from 'joi';
 
-import { getAuthWithScope } from '../utils/auth';
+import {getAuthWithScope} from '../utils/auth';
 import {
-  getTags,
-  getTag,
+  activateTag,
   addTag,
-  delTag,
-  updateTag,
-  getTagsUser,
   createUserTag,
   createUserTags,
+  delTag,
   delUserTag,
-  getTagsForUser,
+  getActivities,
+  getInterests,
+  getTag,
   getTagList,
+  getTags,
+  getTagsForUser,
+  getTagsUser,
   getUsersInTag,
-  activateTag,
+  updateTag,
 } from '../handlers/tags';
 
 const validateTagId = {
@@ -77,8 +79,15 @@ const tags = [
   {
     method: 'GET',
     path: '/tags',
-    config: getAuthWithScope('user'),
     handler: getTags,
+  },{
+    method: 'GET',
+    path: '/activities',
+    handler: getActivities,
+  },{
+    method: 'GET',
+    path: '/interests',
+    handler: getInterests,
   },
   {
     method: 'GET',

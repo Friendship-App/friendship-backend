@@ -70,7 +70,6 @@ const personalities = [
   {
     method: 'GET',
     path: '/personalities',
-    config: getAuthWithScope('user'),
     handler: getPersonalities,
   },
 

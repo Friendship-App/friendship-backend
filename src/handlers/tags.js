@@ -2,20 +2,22 @@ import Boom from "boom";
 import moment from "moment";
 
 import {
-  dbGetTags,
-  dbGetTag,
+  dbActivateTag,
   dbCreateTag,
-  dbDelTag,
-  dbUpdateTag,
   dbCreateUserTag,
   dbCreateUserTags,
-  dbGetTagsUser,
+  dbDelTag,
   dbDelUserTag,
-  dbGetTagsForUser,
-  dbGetTagList,
-  dbGetUsersInTag,
+  dbGetActivities,
   dbGetFilteredTags,
-  dbActivateTag,
+  dbGetInterests,
+  dbGetTag,
+  dbGetTagList,
+  dbGetTags,
+  dbGetTagsForUser,
+  dbGetTagsUser,
+  dbGetUsersInTag,
+  dbUpdateTag,
 } from "../models/tags";
 
 export const getTagList = (request, reply) => {
@@ -27,6 +29,14 @@ export const getTagList = (request, reply) => {
 
 export const getTags = (request, reply) => {
   dbGetTags().then(reply);
+};
+
+export const getActivities = (request, reply) => {
+  dbGetActivities().then(reply);
+};
+
+export const getInterests = (request, reply) => {
+  dbGetInterests().then(reply);
 };
 
 export const getTag = (request, reply) =>
@@ -64,7 +74,7 @@ export const activateTag = async (request, reply) => {
   if (request.pre.user.scope !== 'admin') {
     return reply(Boom.unauthorized('Unprivileged users cannot activate tag'));
   }
-  return dbActivateTag(request.params.tagId ,request.payload.checked).then(reply);
+  return dbActivateTag(request.params.tagId, request.payload.checked).then(reply);
 };
 
 

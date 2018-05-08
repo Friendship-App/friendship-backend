@@ -29,7 +29,7 @@ const usertagFields = {
 exports.seed = knex =>
   knex.batchInsert(
     'tags',
-    simpleFixtures.generateFixtures(tagFields, 10),
+    simpleFixtures.generateFixtures(tagFields, 20),
   )
   .then(() =>
   knex.batchInsert(

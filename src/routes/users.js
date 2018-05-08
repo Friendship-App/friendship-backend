@@ -15,7 +15,7 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
-  get30DaysUsers,
+  get30DaysUsers, validateUserByUsername, validateEmailAvailibility,
 } from '../handlers/users';
 
 const validateUserId = {
@@ -31,14 +31,18 @@ const validateUserId = {
 const validateRegistrationFields = {
   validate: {
     payload: {
-      email: Joi.string()
-        .email()
-        .required(),
-      password: Joi.string().required(),
       username: Joi.string().required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+      birthyear: Joi.number().required(),
+      enableMatching: Joi.boolean().required(),
+      description: Joi.string().required(),
       image: Joi.binary(),
-      genders: Joi.array(),
-      birthyear: Joi.number(),
+      genders: Joi.array().required(),
+      locations: Joi.array().required(),
+      personalities: Joi.array().required(),
+      yeahs: Joi.array(),
+      nahs: Joi.array(),
       emoji: Joi.string(),
     },
   },
@@ -121,20 +125,12 @@ const users = [
   // Get info about a specific user by username
   {
     method: 'GET',
-    path: '/users/search/{username}',
-    config: merge({}, getAuthWithScope('user')),
-    handler: getUserByUsername,
-  },
-
-  // Get info about a specific user
-  {
-    method: 'GET',
     path: '/users/{userId}',
     config: merge({}, validateUserId, getAuthWithScope('user')),
     handler: getUser,
   },
 
-  // Update user profile
+  // Get info about a specific user
   {
     method: 'PATCH',
     path: '/users/{userId}',
@@ -142,7 +138,7 @@ const users = [
     handler: updateUser,
   },
 
-  // Delete a user, admin only
+  // Update user profile
   {
     method: 'DELETE',
     path: '/users/{userId}',
@@ -150,6 +146,7 @@ const users = [
     handler: delUser,
   },
 
+  // Delete a user, admin only
   {
     method: 'POST',
     path: '/users/{userId}/ban',
@@ -163,7 +160,6 @@ const users = [
     handler: unbanUser,
   },
 
-  // Authenticate as user
   {
     method: 'POST',
     path: '/users/authenticate',
@@ -171,7 +167,7 @@ const users = [
     handler: authUser,
   },
 
-  // Register new user
+  // Authenticate as user
   {
     method: 'POST',
     path: '/users',
@@ -179,11 +175,33 @@ const users = [
     handler: registerUser,
   },
 
-  // Verify a new user using a hash e-mail link
+  // Register new user
   {
     method: 'GET',
     path: '/users/verify/{hash}',
     handler: verifyUser,
+  },
+
+  // Verify a new user using a hash e-mail link
+  {
+    method: 'GET',
+    path: '/users/search/{username}',
+    config: merge({}, getAuthWithScope('user')),
+    handler: getUserByUsername,
+  },
+
+  // Get info about a specific user by username
+  {
+    method: 'GET',
+    path: '/users/validate/username',
+    handler: validateUserByUsername,
+  },
+
+  // Check email is not already used
+  {
+    method: 'GET',
+    path: '/users/validate/email',
+    handler: validateEmailAvailibility,
   },
 ];
 

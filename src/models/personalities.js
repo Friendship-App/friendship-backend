@@ -8,20 +8,20 @@ export const dbGetPersonalities = () => knex('personalities').select(personality
 export const dbGetPersonality = id =>
   knex('personalities')
     .first()
-    .where({ id });
+    .where({id});
 
 export const dbUpdatePersonality = (id, fields) =>
   knex('personalities')
-    .update({ ...fields })
-    .where({ id })
+    .update({...fields})
+    .where({id})
     .returning('*');
 
 export const dbDelPersonality = id =>
   knex('personalities')
-    .where({ id })
+    .where({id})
     .del();
 
-export const dbCreatePersonality = ({ ...fields }) =>
+export const dbCreatePersonality = ({...fields}) =>
   knex.transaction(trx =>
     knex('personalities')
       .transacting(trx)
@@ -34,16 +34,16 @@ export const dbGetUserPersonalities = userId =>
   knex('user_personality')
     .select(userPersonalityFields)
     .join('personalities', 'user_personality.personalityId', '=', 'personalities.id')
-    .where({ userId })
-    .andWhere({ level: '5' });
+    .where({userId})
+    .andWhere({level: '5'});
 
 export const dbUpdateUserPersonality = (userId, personalityId, fields) =>
   knex('user_personality')
-    .update({ ...fields })
-    .where({ userId, personalityId })
+    .update({...fields})
+    .where({userId, personalityId})
     .returning('*');
 
-export const dbCreateUserPersonality = ({ ...fields }) =>
+export const dbCreateUserPersonality = ({...fields}) =>
   knex.transaction(trx =>
     knex('user_personality')
       .transacting(trx)
@@ -55,15 +55,15 @@ export const dbCreateUserPersonality = ({ ...fields }) =>
 export const dbCreateUserPersonalities = (userId, personalityArray) =>
   knex.transaction(async (trx) => {
     await trx('user_personality')
-      .where({ userId })
-      .returning('*')
-      .del()
+      .where({userId})
+      .del();
+
+    const personalities = [];
+    personalityArray.forEach((personality) => {
+      personalities.push({userId, personalityId: personality, level: 5});
+    });
+
+    await trx('user_personality')
+      .insert(personalities)
       .then();
-
-    const userPersonalities = await trx('user_personality')
-      .insert(personalityArray)
-      .returning('*')
-      .then(results => results);
-
-    return userPersonalities;
   });

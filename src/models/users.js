@@ -242,11 +242,11 @@ export const dbUpdatePassword = (id, hash) =>
 export const dbGetUserByUsername = (username, userId = -1) =>
   knex('users')
     .where('id', '!=', userId)
-    .andWhere('username', 'like', `%${username}%`);
+    .andWhereRaw('LOWER("username") like ?', `%${username.toLowerCase()}%`);
 
 export const dbGetUserByEmail = (email) =>
   knex('users')
-    .where('email', '=', email);
+    .whereRaw('LOWER(email) = ?', `${email.toLowerCase()}`);
 
 export const dbUpdateUser = (id, {...fields}) =>
   knex('users')

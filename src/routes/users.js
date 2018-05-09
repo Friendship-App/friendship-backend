@@ -35,7 +35,7 @@ const validateRegistrationFields = {
       email: Joi.string().email().required(),
       password: Joi.string().required(),
       birthyear: Joi.number().required(),
-      enableMatching: Joi.boolean().required(),
+      enableMatching: Joi.boolean(),
       description: Joi.string().required(),
       image: Joi.string(),
       genders: Joi.array().required(),

@@ -1,9 +1,9 @@
 import knex from '../utils/db';
 
 const selectChatroomQuery = `SELECT chatrooms.id, 
-      (SELECT json_build_object('id', id, 'username', username, 'emoji', emoji) 
+      (SELECT json_build_object('id', id, 'username', username, 'avatar', avatar) 
               FROM users WHERE id = user_creator_id) as creator, 
-      (SELECT json_build_object('id', id, 'username', username, 'emoji', emoji) 
+      (SELECT json_build_object('id', id, 'username', username, 'avatar', avatar) 
               FROM users WHERE id = user_receiver_id) as receiver,   
       ARRAY_AGG(row_to_json(messages) ORDER BY messages.id) as messages
     FROM chatrooms JOIN messages ON chatrooms.id = messages.chatroom_id`;

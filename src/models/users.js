@@ -12,7 +12,7 @@ const userListFields = [
   'scope',
   'username',
   'description',
-  'emoji',
+  'avatar',
   'compatibility',
   'active',
   'birthyear',
@@ -48,7 +48,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
       `
     WITH "Users"
     AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
-    "username","description","emoji","active","birthyear","status",
+    "username","description","avatar","active","birthyear","status",
     array_agg(DISTINCT "genders"."gender") AS "genderlist"
     FROM "users"
       left join "user_gender"
@@ -112,7 +112,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
     LIMIT ${pageLimit}
     OFFSET ${pageNumber * pageLimit})
 
-    SELECT "id","createdAt","lastActive","email","scope","username","description","emoji","active",
+    SELECT "id","createdAt","lastActive","email","scope","username","description","avatar","active",
     "birthyear","status","genderlist","loveCommon","hateCommon","locations",
     "image"
     FROM "Users"
@@ -153,7 +153,7 @@ export const dbGetUser = async (userId, currentUserId) => {
       `
     WITH "Users"
     AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
-    "username","description","emoji","active","birthyear","status",
+    "username","description","avatar","active","birthyear","status",
     array_agg(DISTINCT "genders"."gender") AS "genderlist",
     count("banned_users"."id") AS "isbanned"
     FROM "users"
@@ -208,7 +208,7 @@ export const dbGetUser = async (userId, currentUserId) => {
     WHERE "users"."id" = ${userId}
     GROUP BY "users"."id")
 
-    SELECT "id","createdAt","lastActive","image","email","scope","username","description","emoji","active",
+    SELECT "id","createdAt","lastActive","image","email","scope","username","description","avatar","active",
     "birthyear","status","genderlist","loveCommon","hateCommon","locations","isbanned"
     FROM "Users"
     left join "UserLoveCommon"

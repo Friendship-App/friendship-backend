@@ -43,7 +43,7 @@ const validateRegistrationFields = {
       personalities: Joi.array().required(),
       yeahs: Joi.array(),
       nahs: Joi.array(),
-      emoji: Joi.string(),
+      avatar: Joi.string(),
     },
   },
 };
@@ -80,7 +80,7 @@ const validateUserDetails = {
       scope: Joi.string(),
       email: Joi.string().email(),
       description: Joi.string().allow(''),
-      emoji: Joi.string(),
+      avatar: Joi.string(),
       image: Joi.binary(),
       compatibility: Joi.string(),
       location: Joi.string(),

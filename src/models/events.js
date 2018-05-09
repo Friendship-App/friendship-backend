@@ -129,7 +129,7 @@ const calcTotalYeahsNahs = async () => {
   return totalScore;
 };
 const checkPersonalitiesCommon = async (hostId, userId) => {
-  const personalitiesCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+  const personalitiesCommon = await knex.raw(`SELECT "users"."id","users"."avatar","users"."username",
     count(DISTINCT "personalities"."id") AS "personalitiesCommon"
     FROM "users"
     left join "user_personality"
@@ -148,7 +148,7 @@ const checkPersonalitiesCommon = async (hostId, userId) => {
 };
 
 const checkHateCommon = async (hostId, userId) => {
-  const hateCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+  const hateCommon = await knex.raw(`SELECT "users"."id","users"."avatar","users"."username",
     count(DISTINCT "tags"."name") AS "hateCommon"
     FROM "users"
     left join "user_tag"
@@ -168,7 +168,7 @@ const checkHateCommon = async (hostId, userId) => {
 };
 
 const checkloveCommon = async (hostId, userId) => {
-  const loveCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+  const loveCommon = await knex.raw(`SELECT "users"."id","users"."avatar","users"."username",
     count(DISTINCT "tags"."name") AS "loveCommon"
     FROM "users"
     left join "user_tag"
@@ -381,7 +381,7 @@ export const dbGetEvent = async id => {
 
 export const dbGetEventParticipantsNum = async () => {
   const participants = await knex.raw(
-    `SELECT  "eventParticipants"."eventId","users"."emoji" from "users"
+    `SELECT  "eventParticipants"."eventId","users"."avatar" from "users"
       LEFT JOIN "eventParticipants" ON "users"."id" = "eventParticipants"."userId"
       WHERE "eventParticipants"."eventId" NOTNULL`,
   );

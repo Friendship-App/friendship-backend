@@ -1,7 +1,7 @@
 import knex from '../utils/db';
 import { dbGetEvent } from './events.js';
 export const dbGetEventParticipants = async (eventId, userId) => {
-  const hateCommonLoveCommon = await knex.raw(`SELECT "users"."id","users"."emoji","users"."username",
+  const hateCommonLoveCommon = await knex.raw(`SELECT "users"."id","users"."avatar","users"."username",
     count(DISTINCT "tags"."name") AS "hateCommon"
     FROM "users"
     left join "user_tag"

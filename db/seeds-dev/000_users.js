@@ -17,7 +17,6 @@ const userFields = {
   description: faker.lorem.sentences,
   active: true,
   username: faker.internet.userName,
-  emoji: () => emojis[Math.floor(Math.random() * emojis.length)],
   compatibility: () => compatibilities[Math.floor(Math.random() * compatibilities.length)],
   birthyear: () => faker.random.number({ min: 1950, max: 2000 }),
   scope: 'user',

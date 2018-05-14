@@ -194,7 +194,7 @@ export const registerUser = async (request, reply) => {
         email: request.payload.email.toLowerCase().trim(),
         description: fields.description,
         username: fields.username,
-        emoji: fields.emoji,
+        avatar: fields.avatar,
         image: fields.image,
         enableMatching: fields.enableMatching,
         birthyear: fields.birthyear,

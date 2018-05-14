@@ -8,7 +8,7 @@ const tagUserListFields = [
   "users.username",
   "user_tag.tagId",
   "love",
-  "emoji"
+  "avatar"
 ];
 
 export const dbGetTagList = () =>
@@ -61,7 +61,7 @@ export const dbGetTagsForUser = userId =>
     .leftJoin("user_tag", "user_tag.tagId", "tags.id")
     .where({"user_tag.userId": userId});
 
-// Get all the users of a tag, used by users in searching for users who love/hate a tag. (includes username and emoji)
+// Get all the users of a tag, used by users in searching for users who love/hate a tag. (includes username and avatar)
 export const dbGetUsersInTag = tagId =>
   knex("user_tag")
     .select(tagUserListFields)

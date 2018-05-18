@@ -81,7 +81,7 @@ const validateUserDetails = {
       email: Joi.string().email(),
       description: Joi.string().allow(''),
       avatar: Joi.string(),
-      image: Joi.binary(),
+      image: Joi.string(),
       compatibility: Joi.string(),
       location: Joi.string(),
       enableMatching: Joi.boolean(),
@@ -134,7 +134,7 @@ const users = [
   {
     method: 'PATCH',
     path: '/users/{userId}',
-    config: merge({}, validateUserDetails, getAuthWithScope('user')),
+    config: merge({}, getAuthWithScope('user')),
     handler: updateUser,
   },
 

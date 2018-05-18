@@ -65,9 +65,7 @@ export const delUser = (request, reply) => {
 };
 
 export const updateUser = async (request, reply) => {
-  // console.log('Pre', request.pre.user.id);
-  // console.log('params', request.params.userId);
-  // console.log(request.pre.user.id === parseInt(request.params.userId, 10));
+  console.log('STARTING ...');
   if (
     request.pre.user.scope !== 'admin' &&
     request.pre.user.id !== parseInt(request.params.userId, 10)
@@ -78,34 +76,33 @@ export const updateUser = async (request, reply) => {
       ),
     );
   }
+  console.log('ADMIN CHECK DONE ...');
 
   const fields = {};
-  const genders = {};
   const genderArr = [];
   for (const field in request.payload) {
-    if (field !== 'genderArr') {
+    if (field !== 'genders') {
       fields[field] = request.payload[field];
     }
-    if (field === 'genderArr') {
-      genders.genders = request.payload[field];
-    }
   }
-  if (genders.genders) {
-    genders.genders.forEach((gender) => {
-      genderArr.push({ userId: request.params.userId, genderId: gender });
-    });
+  console.log('FIELDS APPENDED DONE ...');
+  console.log(fields);
+
+  if (request.payload.genders) {
+    const genders = JSON.parse(request.payload.genders);
+    for (let i = 0; i < genders.length; i++) {
+      genderArr.push({userId: request.params.userId, genderId: genders[i]})
+    }
+
+    console.log('GENDERS APPENDED DONE ...');
+    console.log(genderArr);
+
     updateUserGender(genderArr, request.params.userId);
   }
 
   // Only admins are allowed to modify user scope
   if (request.pre.user.scope === 'admin' && request.payload.scope) {
     fields.scope = request.payload.scope;
-  }
-
-  // If request contains an image, resize it to max 512x512 pixels
-  if (fields.image) {
-    const buf = Buffer.from(fields.image, 'base64');
-    await resizeImage(buf).then(resized => (fields.image = resized));
   }
 
   if (fields.password) {

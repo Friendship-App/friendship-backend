@@ -65,7 +65,6 @@ export const delUser = (request, reply) => {
 };
 
 export const updateUser = async (request, reply) => {
-  console.log('STARTING ...');
   if (
     request.pre.user.scope !== 'admin' &&
     request.pre.user.id !== parseInt(request.params.userId, 10)
@@ -76,7 +75,6 @@ export const updateUser = async (request, reply) => {
       ),
     );
   }
-  console.log('ADMIN CHECK DONE ...');
 
   const fields = {};
   const genderArr = [];
@@ -85,17 +83,12 @@ export const updateUser = async (request, reply) => {
       fields[field] = request.payload[field];
     }
   }
-  console.log('FIELDS APPENDED DONE ...');
-  console.log(fields);
 
   if (request.payload.genders) {
     const genders = JSON.parse(request.payload.genders);
     for (let i = 0; i < genders.length; i++) {
       genderArr.push({userId: request.params.userId, genderId: genders[i]})
     }
-
-    console.log('GENDERS APPENDED DONE ...');
-    console.log(genderArr);
 
     updateUserGender(genderArr, request.params.userId);
   }

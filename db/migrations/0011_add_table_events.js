@@ -9,7 +9,7 @@ exports.up = knex =>
       table.increments('id').primary();
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.text('title');
-      table.binary('eventImage');
+      table.string('eventImage').defaultTo('https://s3.eu-west-2.amazonaws.com/friendshipapp/events/Test.jpg');
       table.text('description');
       table.text('address');
       table

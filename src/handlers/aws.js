@@ -1,8 +1,8 @@
 import Boom from 'boom';
 import aws from 'aws-sdk';
 
-const S3_BUCKET = 'friendship-app';
-aws.config.region = 'eu-central-1';
+const S3_BUCKET = 'friendshipapp';
+aws.config.region = 'eu-west-2';
 
 export const getSignedUrl = (request, reply) => {
   const s3 = new aws.S3();

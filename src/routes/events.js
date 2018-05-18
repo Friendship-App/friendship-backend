@@ -28,11 +28,12 @@ const validateEventFields = {
       description: Joi.string(),
       city: Joi.string(),
       address: Joi.string(),
-      eventDate: Joi.date().timestamp(),
       minParticipants: Joi.string(),
       maxParticipants: Joi.string(),
       participantsMix: Joi.string(),
-      createdAt: Joi.date().timestamp(),
+      eventImage: Joi.string(),
+      hostId: Joi.number().integer(),
+      eventDate: Joi.date().timestamp()
     },
   },
 };
@@ -48,7 +49,7 @@ const events = [
   {
     method: 'POST',
     path: '/events',
-    //config: merge({}, getAuthWithScope('user')),
+    config: merge({}, getAuthWithScope('user')),
     handler: CreateEvent,
   },
   {

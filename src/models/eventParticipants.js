@@ -1,5 +1,6 @@
 import knex from '../utils/db';
-import { dbGetEvent } from './events.js';
+import {dbGetEvent} from './events.js';
+
 export const dbGetEventParticipants = async (eventId, userId) => {
   const hateCommonLoveCommon = await knex.raw(`SELECT "users"."id","users"."avatar","users"."username",
     count(DISTINCT "tags"."name") AS "hateCommon"
@@ -52,15 +53,9 @@ export const dbGetEventParticipants = async (eventId, userId) => {
   });
   hateCommonLoveCommon.rows.map((user, index) => {
     if (user.id == event.hostId) {
-      console.log('USER ID IS HOST_____', user.id);
       const hostUser = user;
-      console.log('hateCommonLoveCommon_____', hateCommonLoveCommon);
-
       hateCommonLoveCommon.rows.splice(index, index + 1);
-
       hateCommonLoveCommon.rows.unshift(hostUser);
-
-      console.log('hateCommonLoveCommon___AFTER SHIFT__', hateCommonLoveCommon);
     }
   });
   return hateCommonLoveCommon;
@@ -112,7 +107,7 @@ export const dbGetEventTopYeahsNahs = async eventId => {
   return topYeahsNahs;
 };
 
-export const dbCreateEventParticipation = ({ ...fields }) =>
+export const dbCreateEventParticipation = ({...fields}) =>
   knex.transaction(trx =>
     knex('eventParticipants')
       .transacting(trx)
@@ -133,6 +128,6 @@ export const dbGetEventParticipation = async (eventId, userId) => {
 
 export const dbDelEventParticipation = (eventId, userId) =>
   knex('eventParticipants')
-    .where({ userId })
-    .andWhere({ eventId })
+    .where({userId})
+    .andWhere({eventId})
     .del();

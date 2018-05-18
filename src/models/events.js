@@ -203,9 +203,6 @@ const calculateTheIndexRecommandationByEventUserLocation = events => {
     return a.durationValue - b.durationValue;
   });
   events.map((event, index) => {
-    if (event.eventImage) {
-      event.eventImage = event.eventImage.toString('base64');
-    }
     event.locationSortIndex = index + 1;
     delete event['durationValue'];
   });
@@ -287,10 +284,6 @@ const calculateTheIndexForDateRecommandation = events => {
   let eventsInPast = [];
   let eventsInFuture = [];
   events.map((event, index) => {
-    // Small eventImage change to have the correct format
-    if (event.eventImage) {
-      event.eventImage = event.eventImage.toString('base64');
-    }
     let eventDate = new Date(event.eventDate);
     if (currentDate > eventDate) {
       eventsInPast.push(event);
@@ -340,10 +333,6 @@ const calcualteParticipantNum = async eventId => {
 const calculateRecommandationByNumberOfParticipants = async events => {
   const array = events.map(async event => {
     event.numberOfParticipants = await calcualteParticipantNum(event.id);
-    console.log(
-      'NUMBER OF PARTICIPANTS FOR EVENTS__',
-      event.numberOfParticipants,
-    );
     return event;
   });
   const eventsArray = await Promise.all(array);
@@ -364,10 +353,6 @@ export const dbGetEvent = async id => {
   const event = await knex('events')
     .first()
     .where({ id });
-
-  if (event.eventImage) {
-    event.eventImage = event.eventImage.toString('base64');
-  }
   const eventParticipantsNum = await calcualteParticipantNum(id);
 
   if (parseInt(eventParticipantsNum) >= parseInt(event.maxParticipants)) {

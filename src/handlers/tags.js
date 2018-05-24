@@ -109,16 +109,7 @@ export const createUserTag = (request, reply) => {
 // Format payload:
 // { tags: [{"tagId": 1, "love":true}, {"tagId": 3, "love": false}, {"tagId": 4, love: null }] }
 export const createUserTags = (request, reply) => {
-  const tagArray = [];
-  request.payload.tags.forEach(tag => {
-    tagArray.push({
-      tagId: tag.tagId,
-      love: tag.love,
-      userId: request.pre.user.id
-    });
-  });
-
-  return dbCreateUserTags(request.pre.user.id, tagArray)
+  return dbCreateUserTags(request.pre.user.id, request.payload.yeahs, request.payload.nahs)
     .then(reply)
     .catch(err => {
       if (err.constraint) {

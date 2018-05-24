@@ -69,7 +69,8 @@ const validateUserTagFields = {
 const validateUserTagArray = {
   validate: {
     payload: {
-      tags: Joi.array(),
+      yeahs: Joi.array(),
+      nahs: Joi.array(),
     },
   },
 };

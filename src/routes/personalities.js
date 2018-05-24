@@ -10,7 +10,7 @@ import {
   getUserPersonalities,
   updateUserPersonality,
   createUserPersonality,
-  createUserPersonalities,
+  createUserPersonalities, updateUserPersonalities,
 } from '../handlers/personalities';
 import { getAuthWithScope } from '../utils/auth';
 
@@ -60,6 +60,15 @@ const validateUserPersonalityFields = {
 const validateUserPersonalityArray = {
   validate: {
     payload: {
+      personalities: Joi.array(),
+    },
+  },
+};
+
+const validateUpdatePersonalities = {
+  validate: {
+    payload: {
+      userId: Joi.number(),
       personalities: Joi.array(),
     },
   },
@@ -143,6 +152,13 @@ const personalities = [
     config: merge({}, validateUserPersonalityArray, getAuthWithScope('user')),
     handler: createUserPersonalities,
   },
+
+  {
+    method: 'POST',
+    path: '/updatePersonalities',
+    config: merge({}, validateUpdatePersonalities, getAuthWithScope('user')),
+    handler: updateUserPersonalities,
+  }
 ];
 
 export default personalities;

@@ -9,7 +9,7 @@ import {
   dbGetUserPersonalities,
   dbUpdateUserPersonality,
   dbCreateUserPersonality,
-  dbCreateUserPersonalities,
+  dbCreateUserPersonalities, dbUpdateUserPersonalities,
 } from '../models/personalities';
 
 export const getPersonalities = (request, reply) =>
@@ -79,6 +79,10 @@ export const updateUserPersonality = async (request, reply) => {
         reply(Boom.badImplementation(err));
       }
     });
+};
+
+export const updateUserPersonalities = (request, reply) => {
+  return dbUpdateUserPersonalities(request.payload.userId, request.payload.personalities).then(reply)
 };
 
 export const createUserPersonality = (request, reply) =>

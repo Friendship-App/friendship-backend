@@ -249,9 +249,6 @@ export const dbGetUserByEmail = (email) =>
     .whereRaw('LOWER(email) = ?', `${email.toLowerCase()}`);
 
 export const dbUpdateUser = (id, fields) => {
-  console.log('= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =');
-  console.log(fields);
-  console.log('= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =');
   return knex('users')
     .update(fields)
     .where({id})

@@ -76,9 +76,9 @@ export const updateUser = async (request, reply) => {
     );
   }
 
-  const fields = {};
+  const fields = [];
   const genderArr = [];
-  for (const field in request.payload) {
+  for (let field in request.payload) {
     if (field !== 'genders') {
       fields[field] = request.payload[field];
     }
@@ -107,7 +107,8 @@ export const updateUser = async (request, reply) => {
 
     delete fields.password;
   }
-  return dbUpdateUser(request.params.userId, { ...fields }).then(reply);
+
+  return dbUpdateUser(request.params.userId, {...fields}).then(reply);
 };
 
 export const banUser = (request, reply) => {

@@ -248,11 +248,15 @@ export const dbGetUserByEmail = (email) =>
   knex('users')
     .whereRaw('LOWER(email) = ?', `${email.toLowerCase()}`);
 
-export const dbUpdateUser = (id, {...fields}) =>
-  knex('users')
+export const dbUpdateUser = (id, fields) => {
+  console.log('= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =');
+  console.log(fields);
+  console.log('= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =');
+  return knex('users')
     .update(fields)
     .where({id})
     .returning('*');
+};
 
 export const dbFetchUserBan = id =>
   knex('banned_users').where('user_id', '=', id);

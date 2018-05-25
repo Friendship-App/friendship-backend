@@ -43,6 +43,26 @@ export const dbUpdateUserPersonality = (userId, personalityId, fields) =>
     .where({userId, personalityId})
     .returning('*');
 
+export const dbUpdateUserPersonalities = (userId, personalities) => {
+  return knex.transaction(async (trx) => {
+    await trx('user_personality')
+      .where({userId})
+      .del();
+
+    const personalitiesArr = [];
+    personalities.forEach((personality) => {
+      personalitiesArr.push({userId, personalityId: personality, level: 5});
+    });
+
+    console.log(personalitiesArr);
+
+    await trx('user_personality')
+      .insert(personalitiesArr)
+      .returning('*')
+      .then(results => results);
+  })
+};
+
 export const dbCreateUserPersonality = ({...fields}) =>
   knex.transaction(trx =>
     knex('user_personality')

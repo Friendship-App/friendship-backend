@@ -58,22 +58,23 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
   return knex('users')
     .leftJoin('user_gender', 'user_gender.userId', 'users.id')
     .leftJoin('user_location', 'user_location.userId', 'users.id')
+    .leftJoin('locations', 'locations.id', 'user_location.locationId')
     .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
     .leftJoin('user_tag as uthate', 'uthate.userId', 'users.id')
-    .whereNot('id', userId)
+    .whereNot('users.id', userId)
     .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
     .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
     .select([
       ...userListFields,
       knex.raw('array_agg(DISTINCT "genderId") AS genders'),
-      knex.raw('array_agg(DISTINCT "locationId") AS locations'),
-      knex.raw('count(DISTINCT utlove."tagId") AS loveInCommon'),
-      knex.raw('count(DISTINCT uthate."tagId") AS hateInCommon'),
+      knex.raw('array_agg(DISTINCT locations.name) AS locations'),
+      knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
+      knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),
     ])
     .limit(pageLimit)
     .offset(offset)
     .groupBy('users.id')
-    .orderByRaw('loveInCommon DESC, hateInCommon');
+    .orderByRaw('loveCommon DESC, hateCommon');
 };
 
 export const dbGetEmailVerification = hash =>

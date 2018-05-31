@@ -6,18 +6,18 @@ const crypto = require('crypto');
 
 const userListFields = [
   'users.id',
-  'createdAt',
-  'lastActive',
-  'email',
-  'scope',
-  'username',
-  'description',
-  'avatar',
-  'compatibility',
-  'active',
-  'birthyear',
-  'status',
-  'image',
+  'users.createdAt',
+  'users.lastActive',
+  'users.email',
+  'users.scope',
+  'users.username',
+  'users.description',
+  'users.avatar',
+  'users.compatibility',
+  'users.active',
+  'users.birthyear',
+  'users.status',
+  'users.image',
 ];
 
 export const dbGetUsers = () =>
@@ -37,101 +37,43 @@ export const dbGetFilteredUsers = filter =>
 
 export const dbGetUsersBatch = async (pageNumber, userId) => {
   const pageLimit = 10;
-  // knex('users')
-  //   .select(userListFields)
-  //   .limit(pageLimit)
-  //   .offset(pageNumber * pageLimit)
-  //   .where('id', '!=', userId);
+  const offset = pageNumber*pageLimit;
 
-  const users = await knex
-    .raw(
-      `
-    WITH "Users"
-    AS (SELECT "users"."id","users"."createdAt","lastActive","image","email","scope",
-    "username","description","avatar","active","birthyear","status",
-    array_agg(DISTINCT "genders"."gender") AS "genderlist"
-    FROM "users"
-      left join "user_gender"
-      ON "user_gender"."userId" = "users"."id"
-      left join "genders"
-      ON "genders"."id" = "user_gender"."genderId"
-    WHERE "users"."id" != ${userId}
-    GROUP BY "users"."id"
-    LIMIT ${pageLimit}
-    OFFSET ${pageNumber * pageLimit}),
+  const loveTags = await knex('user_tag')
+    .where('userId', userId)
+    .andWhere('love', true)
+    .select(knex.raw('array_agg(DISTINCT "tagId") as tagsArray'))
+    .then(res => {
+      return res[0].tagsarray;
+    });
 
-    "UserLoveCommon"
-    AS (SELECT "users"."id" as "userLoveId", count(DISTINCT "tags"."name") AS "loveCommon"
-    FROM "users"
-      left join "user_gender"
-      ON "user_gender"."userId" = "users"."id"
-      left join "genders"
-      ON "genders"."id" = "user_gender"."genderId"
-        left join "user_tag"
-        ON "user_tag"."userId" = "users"."id"
-        left join "tags"
-        ON "tags"."id" = "user_tag"."tagId"
-    WHERE "user_tag"."love" = ${true}
-    AND "users"."id" != ${userId}
-    AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
-                      left join "tags" ON "tags"."id" = "user_tag"."tagId"
-                      WHERE "user_tag"."userId" = ${userId}
-                      AND "user_tag"."love" = ${true})
-    GROUP BY "users"."id"
-    LIMIT ${pageLimit}
-    OFFSET ${pageNumber * pageLimit}),
+  const hateTags = await knex('user_tag')
+    .where('userId', userId)
+    .andWhere('love', false)
+    .select(knex.raw('array_agg(DISTINCT "tagId") as tagsArray'))
+    .then(res => {
+      return res[0].tagsarray;
+    });
 
-    "UserHateCommon"
-    AS (SELECT "users"."id" as "userHateId",
-    count(DISTINCT "tags"."name") AS "hateCommon"
-    FROM "users"
-        left join "user_tag"
-        ON "user_tag"."userId" = "users"."id"
-        left join "tags"
-        ON "tags"."id" = "user_tag"."tagId"
-    WHERE "user_tag"."love" = ${false}
-    AND "users"."id" != ${userId}
-    AND "tags"."name" IN (SELECT "tags"."name" FROM "user_tag"
-                      left join "tags" ON "tags"."id" = "user_tag"."tagId"
-                      WHERE "user_tag"."userId" = ${userId}
-                      AND "user_tag"."love" = ${false})
-    GROUP BY "users"."id"
-    LIMIT ${pageLimit}
-    OFFSET ${pageNumber * pageLimit}),
-
-    "UserLocation"
-    AS (SELECT "users"."id" as "userId",
-    array_agg(DISTINCT "locations"."name") AS "locations"
-    FROM "users"
-        left join "user_location"
-        ON "user_location"."userId" = "users"."id"
-        left join "locations"
-        ON "locations"."id" = "user_location"."locationId"
-    WHERE "users"."id" != ${userId}
-    GROUP BY "users"."id"
-    LIMIT ${pageLimit}
-    OFFSET ${pageNumber * pageLimit})
-
-    SELECT "id","createdAt","lastActive","email","scope","username","description","avatar","active",
-    "birthyear","status","genderlist","loveCommon","hateCommon","locations",
-    "image"
-    FROM "Users"
-    left join "UserLoveCommon"
-    ON "Users"."id" = "UserLoveCommon"."userLoveId"
-    left join "UserHateCommon"
-    ON "Users"."id" = "UserHateCommon"."userHateId"
-    left join "UserLocation"
-    ON "Users"."id" = "UserLocation"."userId"
-    `,
-    )
-    .then(results => results.rows);
-
-  return users.map(user => {
-    if (user.image) {
-      user.image = user.image.toString('base64');
-    }
-    return user;
-  });
+  return knex('users')
+    .leftJoin('user_gender', 'user_gender.userId', 'users.id')
+    .leftJoin('user_location', 'user_location.userId', 'users.id')
+    .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
+    .leftJoin('user_tag as uthate', 'uthate.userId', 'users.id')
+    .whereNot('id', userId)
+    .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
+    .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
+    .select([
+      ...userListFields,
+      knex.raw('array_agg(DISTINCT "genderId") AS genders'),
+      knex.raw('array_agg(DISTINCT "locationId") AS locations'),
+      knex.raw('count(DISTINCT utlove."tagId") AS loveInCommon'),
+      knex.raw('count(DISTINCT uthate."tagId") AS hateInCommon'),
+    ])
+    .limit(pageLimit)
+    .offset(offset)
+    .groupBy('users.id')
+    .orderByRaw('loveInCommon DESC, hateInCommon');
 };
 
 export const dbGetEmailVerification = hash =>

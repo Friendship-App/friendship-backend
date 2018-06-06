@@ -11,18 +11,18 @@ import {
 } from './eventParticipants';
 
 const eventFields = [
-  'id',
-  'createdAt',
-  'title',
-  'eventImage',
-  'description',
-  'city',
-  'address',
-  'eventDate',
-  'minParticipants',
-  'maxParticipants',
-  'participantsMix',
-  'hostId',
+  'events.id',
+  'events.createdAt',
+  'events.title',
+  'events.eventImage',
+  'events.description',
+  'events.city',
+  'events.address',
+  'events.eventDate',
+  'events.minParticipants',
+  'events.maxParticipants',
+  'events.participantsMix',
+  'events.hostId',
 ];
 
 const userListFields = [
@@ -37,7 +37,48 @@ const userListFields = [
 //export const dbGetEvents = () => knex('events').select(eventFields);
 
 export const dbGetEvents = async userId => {
-  const events = await knex.raw(
+  const loveTags = await knex('user_tag')
+    .where('userId', userId)
+    .andWhere('love', true)
+    .select(knex.raw('array_agg(DISTINCT "tagId") as tagsArray'))
+    .then(res => {
+      return res[0].tagsarray;
+    });
+
+  const hateTags = await knex('user_tag')
+    .where('userId', userId)
+    .andWhere('love', false)
+    .select(knex.raw('array_agg(DISTINCT "tagId") as tagsArray'))
+    .then(res => {
+      return res[0].tagsarray;
+    });
+
+  const userLocations = await knex('user_location')
+    .leftJoin('locations', 'locations.id', 'user_location.locationId')
+    .where('userId', userId)
+    .select(knex.raw('array_agg(DISTINCT locations.name) as locationsArray'))
+    .then(res => {
+      return res[0].locationsarray;
+    });
+
+  return await knex('events')
+    .leftJoin('eventParticipants as participants', 'participants.eventId', 'events.id')
+    .leftJoin('users', 'users.id', 'participants.userId')
+    .leftJoin('user_tag as utlove', 'utlove.userId', 'events.hostId')
+    .leftJoin('user_tag as uthate', 'uthate.userId', 'events.hostId')
+    .whereIn('events.city', userLocations)
+    .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
+    .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
+    .select([
+      ...eventFields,
+      knex.raw('count(DISTINCT participants."userId") AS participants'),
+      knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
+      knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),
+    ])
+    .groupBy('events.id')
+    .orderByRaw('participants DESC, events."eventDate", loveCommon, hateCommon');
+
+  /*const events = await knex.raw(
     `SELECT   "id","createdAt","hostId", "title", "eventImage", "description", "city", "address","minParticipants","maxParticipants","participantsMix", "eventDate" FROM "events" ORDER BY "eventDate" ASC`,
   );
 
@@ -72,7 +113,7 @@ export const dbGetEvents = async userId => {
       eventsToReturn.push(newArrayDataOfOjbect[i]);
     }
   }
-  return eventsToReturn;
+  return eventsToReturn;*/
 };
 
 const checkifCurrentUserisJoining = async (events, userId) => {
@@ -194,12 +235,12 @@ const calculateFinalSortRate = events => {
       event.numberParticipantsIndex * 1 +
       event.locationSortIndex * 2;
   });
-  events.sort(function(a, b) {
+  events.sort(function (a, b) {
     return b.reccomendationIndex - a.reccomendationIndex;
   });
 };
 const calculateTheIndexRecommandationByEventUserLocation = events => {
-  events.sort(function(a, b) {
+  events.sort(function (a, b) {
     return a.durationValue - b.durationValue;
   });
   events.map((event, index) => {
@@ -258,10 +299,8 @@ const calculateRecommandationByEventUserLocation = async (events, userId) => {
   return eventsArray;
 };
 
-const calculateRecommandationByCommonPersonalityNaahsYeahs = async (
-  events,
-  userId,
-) => {
+const calculateRecommandationByCommonPersonalityNaahsYeahs = async (events,
+                                                                    userId,) => {
   const array = events.map(async event => {
     const participantsCommonNaahYeahRow = await dbGetEventParticipants(
       event.id,
@@ -290,7 +329,7 @@ const calculateTheIndexForDateRecommandation = events => {
     }
   });
 
-  eventsInPast.sort(function(a, b) {
+  eventsInPast.sort(function (a, b) {
     return a.eventDate - b.eventDate;
   });
 
@@ -300,7 +339,7 @@ const calculateTheIndexForDateRecommandation = events => {
       eventsInFuture.push(event);
     }
   });
-  eventsInFuture.sort(function(a, b) {
+  eventsInFuture.sort(function (a, b) {
     return b.eventDate - a.eventDate;
   });
 
@@ -313,7 +352,7 @@ const calculateTheIndexForDateRecommandation = events => {
   return eventsToReturn;
 };
 const calculateTheIndexForSortByYeahsNaahs = events => {
-  events.sort(function(a, b) {
+  events.sort(function (a, b) {
     return a.commonNaahYeahsForUser - b.commonNaahYeahsForUser;
   });
   events.map((event, index) => {
@@ -340,7 +379,7 @@ const calculateRecommandationByNumberOfParticipants = async events => {
 };
 
 const calculateTheIndexForSortByParticipants = events => {
-  events.sort(function(a, b) {
+  events.sort(function (a, b) {
     return a.numberOfParticipants - b.numberOfParticipants;
   });
   events.map((event, index) => {
@@ -352,7 +391,7 @@ const calculateTheIndexForSortByParticipants = events => {
 export const dbGetEvent = async id => {
   const event = await knex('events')
     .first()
-    .where({ id });
+    .where({id});
   const eventParticipantsNum = await calcualteParticipantNum(id);
 
   if (parseInt(eventParticipantsNum) >= parseInt(event.maxParticipants)) {
@@ -373,7 +412,7 @@ export const dbGetEventParticipantsNum = async () => {
   return participants.rows;
 };
 
-export const dbCreateEvent = ({ ...fields }) =>
+export const dbCreateEvent = ({...fields}) =>
   knex.transaction(async trx => {
     const report = await trx('events')
       .insert(fields)
@@ -392,11 +431,11 @@ export const dbCreateEvent = ({ ...fields }) =>
 
 export const dbDelEvent = id =>
   knex('events')
-    .where({ id })
+    .where({id})
     .del();
 
 export const dbUpdateEvent = (id, fields) =>
   knex('events')
-    .update({ ...fields })
-    .where({ id })
+    .update({...fields})
+    .where({id})
     .returning('*');

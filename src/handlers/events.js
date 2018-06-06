@@ -1,6 +1,6 @@
 import Boom from 'boom';
 import moment from 'moment';
-import { resizeImage } from '../utils/image';
+import {resizeImage} from '../utils/image';
 
 import {
   dbGetEvents,
@@ -11,8 +11,22 @@ import {
   dbGetEventParticipantsNum,
 } from '../models/events';
 
-export const getEvents = (request, reply) =>
-  dbGetEvents(request.params.userId).then(reply);
+export const getEvents = (request, reply) => {
+  dbGetEvents(request.pre.user.id).then(
+    res => {
+      const events = res;
+      for (let i = events.length - 1; i > -1; i--) {
+        if (moment(moment(events[i].eventDate).format()).isBefore(request.params.time)) {
+          console.log(i);
+          events.splice(i, 1);
+        }
+      }
+      return reply(events);
+    }
+  );
+
+
+};
 
 export const getEventParticipantsNum = (request, reply) =>
   dbGetEventParticipantsNum().then(reply);

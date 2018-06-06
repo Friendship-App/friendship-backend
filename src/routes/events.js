@@ -42,7 +42,8 @@ const events = [
   // Get a list of all events
   {
     method: 'GET',
-    path: '/events/{userId}',
+    path: '/events/{time}',
+    config: merge({}, getAuthWithScope('user')),
     handler: getEvents,
   },
   // Create a new event

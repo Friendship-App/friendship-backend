@@ -20,7 +20,7 @@ const eventFields = [
   'events.address',
   'events.eventDate',
   'events.minParticipants',
-  'events.maxParticipants',
+  'events.maxParticipants as maxParticipants',
   'events.participantsMix',
   'events.hostId',
 ];

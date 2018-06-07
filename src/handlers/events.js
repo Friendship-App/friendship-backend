@@ -16,8 +16,7 @@ export const getEvents = (request, reply) => {
     res => {
       const events = res;
       for (let i = events.length - 1; i > -1; i--) {
-        if (moment(moment(events[i].eventDate).format()).isBefore(request.params.time)) {
-          console.log(i);
+        if (moment(moment(events[i].eventDate).format()).isBefore(request.params.time) || events[i].maxParticipants <= events[i].participants) {
           events.splice(i, 1);
         }
       }

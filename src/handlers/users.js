@@ -15,7 +15,7 @@ import {
   dbGetUser, dbGetUserByEmail,
   dbGetUserByUsername,
   dbGetUsers,
-  dbGetUsersBatch,
+  dbGetUsersBatch, dbRegisterNotificationToken,
   dbUnbanUser,
   dbUpdatePassword,
   dbUpdateUser,
@@ -239,3 +239,6 @@ export const validateUserByUsername = (request, reply) =>
 
 export const validateEmailAvailibility = (request, reply) =>
   dbGetUserByEmail(request.query['email']).then(reply);
+
+export const registerNotificationToken = (request, reply) =>
+  dbRegisterNotificationToken(request.pre.user.id, request.payload.token).then(reply);

@@ -277,3 +277,10 @@ export const dbCreateUser = ({password, genders, ...fields}) =>
 
     return user;
   });
+
+export const dbRegisterNotificationToken = (userId, token) => {
+  return knex('users')
+    .update({notificationToken: token})
+    .where({id: userId})
+    .then();
+};

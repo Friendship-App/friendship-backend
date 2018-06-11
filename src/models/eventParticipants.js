@@ -131,3 +131,10 @@ export const dbDelEventParticipation = (eventId, userId) =>
     .where({userId})
     .andWhere({eventId})
     .del();
+
+export const dbGetEventParticipantsTokens = (eventId, userId) =>
+  knex('eventParticipants')
+    .leftJoin('users', 'users.id', 'eventParticipants.userId')
+    // .whereNot({userId})
+    .where({eventId})
+    .select('notificationToken');

@@ -1,15 +1,15 @@
-import Boom from 'boom';
 import moment from 'moment';
-import {resizeImage} from '../utils/image';
 
 import {
-  dbGetEvents,
-  dbGetEvent,
   dbCreateEvent,
   dbDelEvent,
-  dbUpdateEvent,
+  dbGetEvent,
   dbGetEventParticipantsNum,
+  dbGetEvents,
+  dbUpdateEvent,
 } from '../models/events';
+import {notifyEventCancelled} from "../utils/notifications";
+import {dbGetEventParticipantsTokens} from "../models/eventParticipants";
 
 export const getEvents = (request, reply) => {
   dbGetEvents(request.pre.user.id).then(
@@ -75,5 +75,13 @@ export const UpdateEvent = async (request, reply) => {
 // TODO: only the creator of the event can delete it
 // Delete a Event that is connected to a user
 export const delEvent = (request, reply) => {
-  return dbDelEvent(request.params.id).then(reply);
+  return dbGetEventParticipantsTokens(request.params.id, request.pre.user.id)
+    .then((participantsTokens) => {
+      notifyEventCancelled(participantsTokens);
+      return reply(participantsTokens);
+      /*return dbDelEvent(request.params.id).then(() => {
+        notifyEventCancelled(participantsTokens);
+        return reply;
+      })*/
+    })
 };

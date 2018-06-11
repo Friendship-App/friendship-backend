@@ -59,18 +59,17 @@ const events = [
     //config: merge({}, getAuthWithScope('user')),
     handler: getEventParticipantsNum,
   },
-  // Delete event
   {
     method: 'PATCH',
     path: '/events/{eventId}',
     //config: merge({}, validateEventFields),
     handler: UpdateEvent,
   },
+  // Delete event
   {
     method: 'DELETE',
     path: '/events/{id}',
     config: merge({}, getAuthWithScope('user')),
-
     handler: delEvent,
   },
   // Get info about a specific event

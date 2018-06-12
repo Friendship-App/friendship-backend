@@ -240,5 +240,6 @@ export const validateUserByUsername = (request, reply) =>
 export const validateEmailAvailibility = (request, reply) =>
   dbGetUserByEmail(request.query['email']).then(reply);
 
-export const registerNotificationToken = (request, reply) =>
-  dbRegisterNotificationToken(request.pre.user.id, request.payload.token).then(reply);
+export const registerNotificationToken = (request, reply) => {
+  return dbRegisterNotificationToken(request.payload.userId, request.payload.token).then(reply);
+};

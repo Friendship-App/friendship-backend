@@ -1,6 +1,11 @@
 import knex from '../utils/db';
 import {dbGetEvent} from './events.js';
 
+const eventNotificationFields = [
+  'users.notificationToken',
+  'events.title'
+];
+
 export const dbGetEventParticipants = async (eventId, userId) => {
   const hateCommonLoveCommon = await knex.raw(`SELECT "users"."id","users"."avatar","users"."username",
     count(DISTINCT "tags"."name") AS "hateCommon"
@@ -132,9 +137,9 @@ export const dbDelEventParticipation = (eventId, userId) =>
     .andWhere({eventId})
     .del();
 
-export const dbGetEventParticipantsTokens = (eventId, userId) =>
+export const dbGetParticipantsTokenAndEventDetails = (eventId, userId) =>
   knex('eventParticipants')
     .leftJoin('users', 'users.id', 'eventParticipants.userId')
-    // .whereNot({userId})
-    .where({eventId})
+    .whereNot({userId})
+    .andWhere({eventId})
     .select('notificationToken');

@@ -208,7 +208,6 @@ const users = [
   {
     method: 'PATCH',
     path: '/users/push-token',
-    config: merge({}, getAuthWithScope('user')),
     handler: registerNotificationToken,
   },
 ];

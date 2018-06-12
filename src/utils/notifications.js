@@ -21,8 +21,7 @@ export const notifyEventCancelled = (participantsTokens) => {
     messages.push({
       to: participant.notificationToken,
       sound: 'default',
-      body: 'This is a test notification',
-      // data: { withSome: 'data' },
+      body: `${participant.title} that you joined has been cancelled !`,
     })
   }
 

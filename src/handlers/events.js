@@ -9,7 +9,7 @@ import {
   dbUpdateEvent,
 } from '../models/events';
 import {notifyEventCancelled} from "../utils/notifications";
-import {dbGetEventParticipantsTokens} from "../models/eventParticipants";
+import {dbGetParticipantsTokenAndEventDetails} from "../models/eventParticipants";
 
 export const getEvents = (request, reply) => {
   dbGetEvents(request.pre.user.id).then(
@@ -75,13 +75,11 @@ export const UpdateEvent = async (request, reply) => {
 // TODO: only the creator of the event can delete it
 // Delete a Event that is connected to a user
 export const delEvent = (request, reply) => {
-  return dbGetEventParticipantsTokens(request.params.id, request.pre.user.id)
+  return dbGetParticipantsTokenAndEventDetails(request.params.id, request.pre.user.id)
     .then((participantsTokens) => {
-      notifyEventCancelled(participantsTokens);
-      return reply(participantsTokens);
-      /*return dbDelEvent(request.params.id).then(() => {
+      return dbDelEvent(request.params.id).then(() => {
         notifyEventCancelled(participantsTokens);
-        return reply;
-      })*/
+        return reply();
+      })
     })
 };

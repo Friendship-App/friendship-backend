@@ -279,10 +279,6 @@ export const dbCreateUser = ({password, genders, ...fields}) =>
   });
 
 export const dbRegisterNotificationToken = (userId, token) => {
-  console.log('= = = = = = = = = = == ==  == = = = = = = = = = = = = = = ');
-  console.log(userId);
-  console.log(token);
-  console.log('= = = = = = = = = = == ==  == = = = = = = = = = = = = = = ');
   return knex('users')
     .update({notificationToken: token})
     .where({id: userId})

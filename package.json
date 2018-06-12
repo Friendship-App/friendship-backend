@@ -104,6 +104,7 @@
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.3.0",
+    "expo-server-sdk": "^2.3.3",
     "husky": "^0.14.3",
     "jest": "^20.0.4",
     "lab": "^14.1.0",

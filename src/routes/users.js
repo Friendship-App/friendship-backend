@@ -15,7 +15,7 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
-  get30DaysUsers, validateUserByUsername, validateEmailAvailibility,
+  get30DaysUsers, validateUserByUsername, validateEmailAvailibility, registerNotificationToken,
 } from '../handlers/users';
 
 const validateUserId = {
@@ -202,6 +202,13 @@ const users = [
     method: 'GET',
     path: '/users/validate/email',
     handler: validateEmailAvailibility,
+  },
+
+  // push notifications
+  {
+    method: 'PATCH',
+    path: '/users/push-token',
+    handler: registerNotificationToken,
   },
 ];
 

@@ -93,7 +93,8 @@
     "request": "^2.83.0",
     "simple-fixtures": "^1.0.1",
     "vision": "^4.1.1",
-    "white-out": "^2.0.0"
+    "white-out": "^2.0.0",
+    "expo-server-sdk": "^2.3.3"
   },
   "devDependencies": {
     "babel-jest": "^20.0.3",
@@ -104,7 +105,6 @@
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.3.0",
-    "expo-server-sdk": "^2.3.3",
     "husky": "^0.14.3",
     "jest": "^20.0.4",
     "lab": "^14.1.0",

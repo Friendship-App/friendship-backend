@@ -57,6 +57,10 @@ export const comparePasswords = (passwordAttempt, user) =>
     }),
   );
 
+function userIsBanned(user) {
+  return knex('banned_users').where({'user_id' : user.id}).countDistinct('user_id').then(res => res[0].count > 0);
+}
+
 // Hapi 'pre' method which verifies supplied user credentials
 export const preVerifyCredentials = (
   { payload: { email, password: passwordAttempt } },
@@ -66,12 +70,20 @@ export const preVerifyCredentials = (
     .first()
     .where({ email: email.toLowerCase().trim() })
     .leftJoin('secrets', 'users.id', 'secrets.ownerId')
-    .then((user) => {
+    .then(async (user) => {
+
       if (!user) {
         return Promise.reject(
           `User with email '${email}' not found in database`,
         );
       }
+
+      if (await userIsBanned(user)) {
+        return Promise.reject(
+          `'${email}' has been banned`,
+        );
+      }
+
       if (!user.password) {
         return Promise.reject(
           `User with email '${email}' lacks password: logins disabled`,
@@ -88,7 +100,7 @@ export const preVerifyCredentials = (
       if (err.valueOf().includes('activated')) {
         return reply(Boom.unauthorized(err));
       }
-      return reply(Boom.unauthorized('Incorrect email or password!'));
+      return reply(Boom.unauthorized(err));
     });
 
 // Hapi route config which performs user authentication
@@ -99,7 +111,6 @@ export const doAuth = {
       password: Joi.string().required(),
     },
     failAction: (request, reply) =>
-
       reply(Boom.unauthorized('Incorrect email or password!')),
   },
   pre: [{ method: preVerifyCredentials, assign: 'user' }],

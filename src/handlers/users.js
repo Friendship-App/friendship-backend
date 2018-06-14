@@ -18,7 +18,7 @@ import {
   dbGetUsersBatch, dbRegisterNotificationToken,
   dbUnbanUser,
   dbUpdatePassword,
-  dbUpdateUser,
+  dbUpdateUser, dbUserIsBanned,
 } from '../models/users';
 import {dbCreateUserLocations} from "../models/locations";
 import {dbCreateUserPersonalities} from "../models/personalities";
@@ -167,6 +167,14 @@ export const authUser = (request, reply) =>
       scope: request.pre.user.scope,
     }),
   );
+
+export const checkUserStatus = (request, reply) => {
+  const res = dbUserIsBanned(request.pre.user);
+  console.log('= -= = = = = = = = = = = = = = = = = = = =');
+  console.log(res);
+  console.log('= -= = = = = = = = = = = = = = = = = = = =');
+  return reply(res);
+};
 
 export const registerUser = async (request, reply) => {
   const fields = {};

@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 
 import config from './config';
 import knex from './db';
+import {dbUserIsBanned} from "../models/users";
 
 const bearerRegex = /(Bearer\s+)*(.*)/i;
 
@@ -57,10 +58,6 @@ export const comparePasswords = (passwordAttempt, user) =>
     }),
   );
 
-function userIsBanned(user) {
-  return knex('banned_users').where({'user_id' : user.id}).countDistinct('user_id').then(res => res[0].count > 0);
-}
-
 // Hapi 'pre' method which verifies supplied user credentials
 export const preVerifyCredentials = (
   { payload: { email, password: passwordAttempt } },
@@ -78,7 +75,7 @@ export const preVerifyCredentials = (
         );
       }
 
-      if (await userIsBanned(user)) {
+      if (await dbUserIsBanned(user)) {
         return Promise.reject(
           `'${email}' has been banned`,
         );

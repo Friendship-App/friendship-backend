@@ -15,7 +15,7 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
-  get30DaysUsers, validateUserByUsername, validateEmailAvailibility, registerNotificationToken,
+  get30DaysUsers, validateUserByUsername, validateEmailAvailibility, registerNotificationToken, checkUserStatus,
 } from '../handlers/users';
 
 const validateUserId = {
@@ -165,6 +165,13 @@ const users = [
     path: '/users/authenticate',
     config: doAuth,
     handler: authUser,
+  },
+
+  {
+    method: 'GET',
+    path: '/users/isBanned',
+    config: merge({}, getAuthWithScope('user')),
+    handler: checkUserStatus,
   },
 
   // Authenticate as user

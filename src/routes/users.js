@@ -1,7 +1,7 @@
 import { merge } from 'lodash';
 import Joi from 'joi';
 
-import { getAuthWithScope, doAuth } from '../utils/auth';
+import {getAuthWithScope, doAuth, doAuthAdmin} from '../utils/auth';
 import {
   getUsers,
   getUsersBatch,
@@ -164,6 +164,13 @@ const users = [
     method: 'POST',
     path: '/users/authenticate',
     config: doAuth,
+    handler: authUser,
+  },
+
+  {
+    method: 'POST',
+    path: '/users/authenticateAdmin',
+    config: doAuthAdmin,
     handler: authUser,
   },
 

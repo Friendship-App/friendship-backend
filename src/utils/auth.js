@@ -100,6 +100,54 @@ export const preVerifyCredentials = (
       return reply(Boom.unauthorized(err));
     });
 
+// Hapi 'pre' method which verifies supplied user credentials
+export const preVerifyCredentialsAdmin = (
+  { payload: { email, password: passwordAttempt } },
+  reply,
+) =>
+  knex('users')
+    .first()
+    .where({ email: email.toLowerCase().trim() })
+    .leftJoin('secrets', 'users.id', 'secrets.ownerId')
+    .then(async (user) => {
+
+      if (!user) {
+        return Promise.reject(
+          `User with email '${email}' not found in database`,
+        );
+      }
+
+      if (await dbUserIsBanned(user)) {
+        return Promise.reject(
+          `'${email}' has been banned`,
+        );
+      }
+
+      if (!user.password) {
+        return Promise.reject(
+          `User with email '${email}' lacks password: logins disabled`,
+        );
+      }
+
+      if (user.scope !== 'admin') {
+        return Promise.reject(
+          `User with email '${email}' unauthorized`,
+        );
+      }
+
+      return comparePasswords(passwordAttempt, user);
+    })
+    .then(reply)
+    .catch((err) => {
+      // TODO: log err to server console
+      // TODO: This is dirty but Futurice told me to do this ;)
+      // TODO: Please think of a better way to do this
+      if (err.valueOf().includes('activated')) {
+        return reply(Boom.unauthorized(err));
+      }
+      return reply(Boom.unauthorized(err));
+    });
+
 // Hapi route config which performs user authentication
 export const doAuth = {
   validate: {
@@ -111,6 +159,18 @@ export const doAuth = {
       reply(Boom.unauthorized('Incorrect email or password!')),
   },
   pre: [{ method: preVerifyCredentials, assign: 'user' }],
+};
+
+export const doAuthAdmin = {
+  validate: {
+    payload: {
+      email: Joi.string().required(),
+      password: Joi.string().required(),
+    },
+    failAction: (request, reply) =>
+      reply(Boom.unauthorized('Incorrect email or password!')),
+  },
+  pre: [{ method: preVerifyCredentialsAdmin, assign: 'user' }],
 };
 
 // Create a new JWT for user with `email` and `scope`

@@ -109,7 +109,7 @@ const tags = [
   {
     method: 'GET',
     path: '/tags/{tagId}',
-    config: merge({}, validateTagId),
+    config: merge({}, validateTagId, getAuthWithScope('admin')),
     handler: getTag,
   },
 
@@ -117,7 +117,7 @@ const tags = [
   {
     method: 'POST',
     path: '/tags',
-    config: merge({}, validateTagFields, getAuthWithScope('user')),
+    config: merge({}, validateTagFields, getAuthWithScope('admin')),
     handler: addTag,
   },
 
@@ -146,7 +146,7 @@ const tags = [
   {
     method: 'GET',
     path: '/tags_user/taglist',
-    config: getAuthWithScope('user'),
+    config: getAuthWithScope('admin'),
     handler: getTagList,
   },
   {

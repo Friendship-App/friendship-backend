@@ -170,9 +170,6 @@ export const authUser = (request, reply) =>
 
 export const checkUserStatus = (request, reply) => {
   const res = dbUserIsBanned(request.pre.user);
-  console.log('= -= = = = = = = = = = = = = = = = = = = =');
-  console.log(res);
-  console.log('= -= = = = = = = = = = = = = = = = = = = =');
   return reply(res);
 };
 

@@ -1,7 +1,7 @@
 import { merge } from 'lodash';
 import Joi from 'joi';
 
-import { getAuthWithScope, doAuth } from '../utils/auth';
+import {getAuthWithScope, doAuth, doAuthAdmin} from '../utils/auth';
 import {
   getUsers,
   getUsersBatch,
@@ -15,7 +15,7 @@ import {
   verifyUser,
   getUserByUsername,
   getFilteredUsers,
-  get30DaysUsers, validateUserByUsername, validateEmailAvailibility, registerNotificationToken,
+  get30DaysUsers, validateUserByUsername, validateEmailAvailibility, registerNotificationToken, checkUserStatus,
 } from '../handlers/users';
 
 const validateUserId = {
@@ -165,6 +165,20 @@ const users = [
     path: '/users/authenticate',
     config: doAuth,
     handler: authUser,
+  },
+
+  {
+    method: 'POST',
+    path: '/users/authenticateAdmin',
+    config: doAuthAdmin,
+    handler: authUser,
+  },
+
+  {
+    method: 'GET',
+    path: '/users/isBanned',
+    config: merge({}, getAuthWithScope('user')),
+    handler: checkUserStatus,
   },
 
   // Authenticate as user

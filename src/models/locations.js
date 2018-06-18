@@ -3,7 +3,7 @@ import knex from '../utils/db';
 const locationFields = ['id', 'name'];
 const userLocationFields = ['userId', 'locationId'];
 
-export const dbGetLocations = () => knex('locations').select(locationFields);
+export const dbGetLocations = () => knex('locations').select(locationFields).orderBy('name');
 
 export const dbDelLocation = id =>
   knex('locations')

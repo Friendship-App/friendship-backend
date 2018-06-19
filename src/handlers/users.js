@@ -169,8 +169,9 @@ export const authUser = (request, reply) =>
   );
 
 export const checkUserStatus = (request, reply) => {
-  const res = dbUserIsBanned(request.pre.user);
-  return reply(res);
+  dbUserIsBanned(request.pre.user).then(res => {
+    return reply({isBanned: res});
+  });
 };
 
 export const registerUser = async (request, reply) => {

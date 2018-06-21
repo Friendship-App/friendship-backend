@@ -65,6 +65,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
 
   return knex('users')
     .leftJoin('user_gender', 'user_gender.userId', 'users.id')
+    .leftJoin('genders', 'genders.id', 'user_gender.genderId')
     .leftJoin('user_location', 'user_location.userId', 'users.id')
     .leftJoin('locations', 'locations.id', 'user_location.locationId')
     .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
@@ -75,7 +76,7 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
     .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
     .select([
       ...userListFields,
-      knex.raw('array_agg(DISTINCT "genderId") AS genders'),
+      knex.raw('array_agg(DISTINCT "gender") AS genders'),
       knex.raw('array_agg(DISTINCT locations.name) AS locations'),
       knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
       knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),

@@ -55,13 +55,22 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
       return res[0].tagsarray;
     });
 
+  const userLocations = await knex('user_location')
+    .leftJoin('locations', 'locations.id', 'user_location.locationId')
+    .where('userId', userId)
+    .select(knex.raw('array_agg(DISTINCT locations.id) as locationsArray'))
+    .then(res => {
+      return res[0].locationsarray;
+    });
+
   return knex('users')
     .leftJoin('user_gender', 'user_gender.userId', 'users.id')
     .leftJoin('user_location', 'user_location.userId', 'users.id')
     .leftJoin('locations', 'locations.id', 'user_location.locationId')
     .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
     .leftJoin('user_tag as uthate', 'uthate.userId', 'users.id')
-    .whereNot('users.id', userId)
+    .whereIn('user_location.locationId', userLocations)
+    .andWhereNot('users.id', userId)
     .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
     .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
     .select([

@@ -20,6 +20,22 @@ const userListFields = [
   'users.image',
 ];
 
+const userListFields_2 = [
+  'u.id as uid_2',
+  'u.createdAt',
+  'u.lastActive',
+  'u.email',
+  'u.scope',
+  'u.username',
+  'u.description',
+  'u.avatar',
+  'u.compatibility',
+  'u.active',
+  'u.birthyear',
+  'u.status',
+  'u.image',
+];
+
 export const dbGetUsers = () =>
   knex('users')
     .leftJoin('banned_users', 'banned_users.user_id', 'users.id')
@@ -37,7 +53,7 @@ export const dbGetFilteredUsers = filter =>
 
 export const dbGetUsersBatch = async (pageNumber, userId) => {
   const pageLimit = 10;
-  const offset = pageNumber*pageLimit;
+  const offset = pageNumber * pageLimit;
 
   const loveTags = await knex('user_tag')
     .where('userId', userId)
@@ -63,28 +79,55 @@ export const dbGetUsersBatch = async (pageNumber, userId) => {
       return res[0].locationsarray;
     });
 
-  return knex('users')
-    .leftJoin('user_gender', 'user_gender.userId', 'users.id')
-    .leftJoin('genders', 'genders.id', 'user_gender.genderId')
-    .leftJoin('user_location', 'user_location.userId', 'users.id')
-    .leftJoin('locations', 'locations.id', 'user_location.locationId')
-    .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
-    .leftJoin('user_tag as uthate', 'uthate.userId', 'users.id')
-    .whereIn('user_location.locationId', userLocations)
-    .andWhereNot('users.id', userId)
-    .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
-    .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
-    .select([
-      ...userListFields,
-      knex.raw('array_agg(DISTINCT "gender") AS genders'),
-      knex.raw('array_agg(DISTINCT locations.name) AS locations'),
-      knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
-      knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),
-    ])
+  return knex.from(function () {
+    this
+      .select([
+        ...userListFields,
+        knex.raw('array_agg(DISTINCT "gender") AS genders'),
+        knex.raw('array_agg(DISTINCT locations.name) AS locations'),
+        knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
+        knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),
+      ])
+      .from('users')
+      .leftJoin('user_gender', 'user_gender.userId', 'users.id')
+      .leftJoin('genders', 'genders.id', 'user_gender.genderId')
+      .leftJoin('user_location', 'user_location.userId', 'users.id')
+      .leftJoin('locations', 'locations.id', 'user_location.locationId')
+      .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
+      .leftJoin('user_tag as uthate', 'uthate.userId', 'users.id')
+      .whereIn('user_location.locationId', userLocations)
+      .andWhereNot('users.id', userId)
+      .andWhere('users.scope', 'user')
+      .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
+      .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
+      .as('test')
+      .groupBy('users.id');
+  }, true)
+    .union(function () {
+      this
+        .select([
+          ...userListFields,
+          knex.raw('array_agg(DISTINCT "gender") AS genders'),
+          knex.raw('array_agg(DISTINCT locations.name) AS locations'),
+          knex.raw(`0 AS loveCommon`),
+          knex.raw(`0 AS hateCommon `),
+        ])
+        .from('users')
+        .leftJoin('user_gender', 'user_gender.userId', 'users.id')
+        .leftJoin('genders', 'genders.id', 'user_gender.genderId')
+        .leftJoin('user_location', 'user_location.userId', 'users.id')
+        .leftJoin('locations', 'locations.id', 'user_location.locationId')
+        .leftJoin('user_tag as utlove', 'utlove.userId', 'users.id')
+        .leftJoin('user_tag as uthate', 'uthate.userId', 'users.id')
+        .whereIn('user_location.locationId', userLocations)
+        .andWhereNot('users.id', userId)
+        .andWhere('users.scope', 'user')
+        .groupBy('users.id');
+    }, true)
+    .as('test_2')
     .limit(pageLimit)
     .offset(offset)
-    .groupBy('users.id')
-    .orderByRaw('loveCommon DESC, hateCommon');
+    .orderByRaw('loveCommon DESC, hateCommon DESC');
 };
 
 export const dbGetEmailVerification = hash =>
@@ -296,5 +339,5 @@ export const dbRegisterNotificationToken = (userId, token) => {
 };
 
 export const dbUserIsBanned = (user) => {
-  return knex('banned_users').where({'user_id' : user.id}).countDistinct('user_id').then(res => res[0].count > 0);
+  return knex('banned_users').where({'user_id': user.id}).countDistinct('user_id').then(res => res[0].count > 0);
 };

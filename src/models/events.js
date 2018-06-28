@@ -98,7 +98,7 @@ export const dbGetEvents = async userId => {
         .groupBy('events.id');
     }, true)
     .as('allEvents')
-    .orderByRaw('participants DESC, date DESC, loveCommon DESC, hateCommon DESC');
+    .orderByRaw('participants DESC, date, loveCommon DESC, hateCommon DESC');
 };
 
 const calcualteParticipantNum = async eventId => {

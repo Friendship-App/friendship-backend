@@ -18,20 +18,11 @@ const eventFields = [
   'events.description',
   'events.city',
   'events.address',
-  'events.eventDate',
+  'events.eventDate as date',
   'events.minParticipants',
   'events.maxParticipants as maxParticipants',
   'events.participantsMix',
   'events.hostId',
-];
-
-const userListFields = [
-  'users.id',
-  'createdAt',
-  'lastActive',
-  'email',
-  'username',
-  'location',
 ];
 
 //export const dbGetEvents = () => knex('events').select(eventFields);
@@ -61,8 +52,23 @@ export const dbGetEvents = async userId => {
       return res[0].locationsarray;
     });
 
+  const eventsWithLoveAndHateInCommon = await knex('events')
+    .select(knex.raw('array_agg(DISTINCT events.id) as eventids'))
+    .leftJoin('user_tag as utlove', 'utlove.userId', 'events.hostId')
+    .leftJoin('user_tag as uthate', 'uthate.userId', 'events.hostId')
+    .whereIn('events.city', userLocations)
+    .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
+    .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
+    .then(res => res[0].eventids);
+
   return knex.from(function () {
     this
+      .select([
+        ...eventFields,
+        knex.raw('count(DISTINCT participants."userId") AS participants'),
+        knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
+        knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),
+      ])
       .from('events')
       .leftJoin('eventParticipants as participants', 'participants.eventId', 'events.id')
       .leftJoin('users', 'users.id', 'participants.userId')
@@ -71,23 +77,16 @@ export const dbGetEvents = async userId => {
       .whereIn('events.city', userLocations)
       .andWhere(knex.raw(`utlove."tagId" IN (${loveTags}) AND utlove."love" = true`))
       .andWhere(knex.raw(`uthate."tagId" IN (${hateTags}) AND uthate."love" = false`))
-      .select([
-        ...eventFields,
-        knex.raw('count(DISTINCT participants."userId") AS participants'),
-        knex.raw('count(DISTINCT utlove."tagId") AS loveCommon'),
-        knex.raw('count(DISTINCT uthate."tagId") AS hateCommon'),
-      ])
       .as('filteredEvents')
-      .groupBy('events.id')
-      .orderByRaw('participants DESC, events."eventDate", loveCommon, hateCommon')
+      .groupBy('events.id');
   }, true)
     .union(function () {
       this
         .select([
           ...eventFields,
           knex.raw('count(DISTINCT participants."userId") AS participants'),
-          knex.raw('0 AS loveCommon'),
-          knex.raw('0 AS hateCommon'),
+          knex.raw(`0 AS loveCommon`),
+          knex.raw(`0 AS hateCommon `),
         ])
         .from('events')
         .leftJoin('eventParticipants as participants', 'participants.eventId', 'events.id')
@@ -95,9 +94,11 @@ export const dbGetEvents = async userId => {
         .leftJoin('user_tag as utlove', 'utlove.userId', 'events.hostId')
         .leftJoin('user_tag as uthate', 'uthate.userId', 'events.hostId')
         .whereIn('events.city', userLocations)
-        .groupBy('events.id')
-        .orderByRaw('participants DESC, events."eventDate", loveCommon, hateCommon')
-    }, true);
+        .whereNotIn('events.id', eventsWithLoveAndHateInCommon)
+        .groupBy('events.id');
+    }, true)
+    .as('allEvents')
+    .orderByRaw('participants DESC, date DESC, loveCommon DESC, hateCommon DESC');
 };
 
 const calcualteParticipantNum = async eventId => {

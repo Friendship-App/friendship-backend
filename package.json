@@ -56,6 +56,7 @@
     "cross-env": "^5.0.5",
     "dotenv": "^4.0.0",
     "emailjs": "^1.0.12",
+    "expo-server-sdk": "^2.3.3",
     "express": "^4.16.2",
     "faker": "^4.1.0",
     "fs-sync": "^1.0.4",
@@ -92,9 +93,9 @@
     "register": "0.0.0",
     "request": "^2.83.0",
     "simple-fixtures": "^1.0.1",
+    "socket.io": "^2.1.1",
     "vision": "^4.1.1",
-    "white-out": "^2.0.0",
-    "expo-server-sdk": "^2.3.3"
+    "white-out": "^2.0.0"
   },
   "devDependencies": {
     "babel-jest": "^20.0.3",

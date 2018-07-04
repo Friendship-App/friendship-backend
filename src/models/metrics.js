@@ -1,6 +1,8 @@
 import moment from 'moment';
 import knex from '../utils/db';
 
+const isDebugOn = false;
+
 export const dbUserLastActive = userId =>
   knex('users')
     .where({ id: userId })
@@ -45,7 +47,7 @@ export const dbDisplayRegisteredUsersData = async () => {
 
   // collect data from users table
   const collectUsersCreatedAt = await knex('users')
-    .debug(false)
+    .debug(isDebugOn)
     .select(
       knex.raw(
         'count(\'*\') as users_count, Date(users."createdAt") as timestamp',
@@ -69,14 +71,14 @@ export const dbDisplayRegisteredUsersData = async () => {
 
   // check metrics table to do the inserts
   const collectMetricsUsersRegistered = await knex('metrics_users_registered')
-    .debug(false)
+    .debug(isDebugOn)
     .select('*');
 
   if (collectMetricsUsersRegistered.length === 0) {
     await data.forEach(async element => {
       await knex.transaction(trx =>
         trx('metrics_users_registered')
-          .debug(false)
+          .debug(isDebugOn)
           .insert({
             users_count: element.count,
             timestamp: element.timestamp,
@@ -87,6 +89,7 @@ export const dbDisplayRegisteredUsersData = async () => {
     });
   }
   return knex('metrics_users_registered')
+    .debug(isDebugOn)
     .select('*')
     .orderBy('timestamp', 'desc');
 };
@@ -96,7 +99,7 @@ export const dbUpdateRegisteredUsersData = async () => {
   const existingData = await dbDisplayRegisteredUsersData();
 
   const dayRegisteredUsers = await knex('users')
-    .debug(false)
+    .debug(isDebugOn)
     .count('*')
     .where(knex.raw('??::date = ?', ['createdAt', moment().startOf('day')]));
 
@@ -110,7 +113,7 @@ export const dbUpdateRegisteredUsersData = async () => {
   ) {
     await knex.transaction(trx =>
       trx('metrics_users_registered')
-        .debug(false)
+        .debug(isDebugOn)
         .update({ users_count: dayRegisteredUsers[0].count })
         .where(
           knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]),
@@ -119,7 +122,7 @@ export const dbUpdateRegisteredUsersData = async () => {
   } else {
     await knex.transaction(trx =>
       trx('metrics_users_registered')
-        .debug(false)
+        .debug(isDebugOn)
         .insert({
           users_count: dayRegisteredUsers[0].count,
           timestamp: moment().startOf('day'),
@@ -127,6 +130,7 @@ export const dbUpdateRegisteredUsersData = async () => {
     );
   }
   return knex('metrics_users_registered')
+    .debug(isDebugOn)
     .select('*')
     .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
@@ -137,7 +141,7 @@ export const dbDisplayActiveUsersData = async () => {
   const data = [];
 
   const collectUsersLastActive = await knex('users')
-    .debug(false)
+    .debug(isDebugOn)
     .select(
       knex.raw(
         'count(\'*\') as users_count, Date(users."lastActive") as timestamp',
@@ -157,14 +161,14 @@ export const dbDisplayActiveUsersData = async () => {
   });
 
   const collectMetricsActiveUsers = await knex('metrics_active_users')
-    .debug(false)
+    .debug(isDebugOn)
     .select('*');
 
   if (collectMetricsActiveUsers.length === 0) {
     await data.forEach(async element => {
       await knex.transaction(trx =>
         trx('metrics_active_users')
-          .debug(false)
+          .debug(isDebugOn)
           .insert({
             users_count: element.count,
             timestamp: element.timestamp,
@@ -175,6 +179,7 @@ export const dbDisplayActiveUsersData = async () => {
     });
   }
   return knex('metrics_active_users')
+    .debug(isDebugOn)
     .select('*')
     .orderBy('timestamp', 'desc');
 };
@@ -185,7 +190,7 @@ export const dbUpdateActiveUsersData = async () => {
   const existingData = await dbDisplayActiveUsersData();
 
   const dayActiveUsers = await knex('users')
-    .debug(false)
+    .debug(isDebugOn)
     .count('*')
     .where(knex.raw('??::date = ?', ['lastActive', moment().startOf('day')]));
 
@@ -198,7 +203,7 @@ export const dbUpdateActiveUsersData = async () => {
   ) {
     await knex.transaction(trx =>
       trx('metrics_active_users')
-        .debug(false)
+        .debug(isDebugOn)
         .update({ users_count: dayActiveUsers[0].count })
         .where(
           knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]),
@@ -207,7 +212,7 @@ export const dbUpdateActiveUsersData = async () => {
   } else {
     await knex.transaction(trx =>
       trx('metrics_active_users')
-        .debug(false)
+        .debug(isDebugOn)
         .insert({
           users_count: dayActiveUsers[0].count,
           timestamp: moment().startOf('day'),
@@ -215,6 +220,7 @@ export const dbUpdateActiveUsersData = async () => {
     );
   }
   return knex('metrics_active_users')
+    .debug(isDebugOn)
     .select('*')
     .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
@@ -225,7 +231,7 @@ export const dbDisplayActiveConversationData = async () => {
   const data = [];
 
   const collectLastMessagesByDate = await knex('messages')
-    .debug(false)
+    .debug(isDebugOn)
     .select(
       knex.raw(
         'Date(messages."chat_time") as timestamp, count(distinct messages."chatroom_id") as conversations_count',
@@ -247,14 +253,14 @@ export const dbDisplayActiveConversationData = async () => {
   const collectMetricsActiveConversations = await knex(
     'metrics_active_conversations',
   )
-    .debug(false)
+    .debug(isDebugOn)
     .select('*');
 
   if (collectMetricsActiveConversations.length === 0) {
     await data.forEach(async element => {
       await knex.transaction(trx =>
         trx('metrics_active_conversations')
-          .debug(false)
+          .debug(isDebugOn)
           .insert({
             conversations_count: element.count,
             timestamp: element.timestamp,
@@ -265,6 +271,7 @@ export const dbDisplayActiveConversationData = async () => {
     });
   }
   return knex('metrics_active_conversations')
+    .debug(isDebugOn)
     .select('*')
     .orderBy('timestamp', 'desc');
 };
@@ -274,7 +281,7 @@ export const dbUpDateActiveConversationsData = async () => {
   const existingData = await dbDisplayActiveConversationData();
 
   const dayActiveConversations = await knex('messages')
-    .debug(false)
+    .debug(isDebugOn)
     .countDistinct('chatroom_id')
     .where(knex.raw('??::date = ?', ['chat_time', moment().startOf('day')]));
 
@@ -285,7 +292,7 @@ export const dbUpDateActiveConversationsData = async () => {
   ) {
     await knex.transaction(trx =>
       trx('metrics_active_conversations')
-        .debug(false)
+        .debug(isDebugOn)
         .update({ conversations_count: dayActiveConversations[0].count })
         .where(
           knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]),
@@ -294,7 +301,7 @@ export const dbUpDateActiveConversationsData = async () => {
   } else {
     await knex.transaction(trx =>
       trx('metrics_active_conversations')
-        .debug(false)
+        .debug(isDebugOn)
         .insert({
           conversations_count: dayActiveConversations[0].count,
           timestamp: moment().startOf('day'),
@@ -303,6 +310,7 @@ export const dbUpDateActiveConversationsData = async () => {
   }
 
   return knex('metrics_active_conversations')
+    .debug(isDebugOn)
     .select('*')
     .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };
@@ -315,6 +323,7 @@ export const dbDisplayAverageConversationsLength = async () => {
   await dbDisplayActiveConversationData();
 
   const joinChatroomMessagesByDate = await knex('metrics_active_conversations')
+    .debug(isDebugOn)
     .join(
       'messages',
       knex.raw('??::date', ['timestamp']),
@@ -341,7 +350,7 @@ export const dbDisplayAverageConversationsLength = async () => {
   const collectMetricsConversationsLength = await knex(
     'metrics_conversations_length',
   )
-    .debug(false)
+    .debug(isDebugOn)
     .select('*');
 
   if (collectMetricsConversationsLength.length === 0) {
@@ -350,7 +359,7 @@ export const dbDisplayAverageConversationsLength = async () => {
       Number.isNaN(avgLength)
         ? await knex.transaction(trx =>
             trx('metrics_conversations_length')
-              .debug(false)
+              .debug(isDebugOn)
               .insert({
                 conversations_length: 0,
                 timestamp: element.timestamp,
@@ -358,7 +367,7 @@ export const dbDisplayAverageConversationsLength = async () => {
           )
         : await knex.transaction(trx =>
             trx('metrics_conversations_length')
-              .debug(false)
+              .debug(isDebugOn)
               .insert({
                 conversations_length: avgLength.toFixed(2),
                 timestamp: element.timestamp,
@@ -367,6 +376,7 @@ export const dbDisplayAverageConversationsLength = async () => {
     });
   }
   return knex('metrics_conversations_length')
+    .debug(isDebugOn)
     .select('*')
     .orderBy('timestamp', 'desc');
 };
@@ -375,6 +385,7 @@ export const dbDisplayAverageConversationsLength = async () => {
 export const dbUpdateAverageConversationsLength = async () => {
   const existingData = await dbDisplayAverageConversationsLength();
   const dayStats = await knex('metrics_active_conversations')
+    .debug(isDebugOn)
     .join(
       knex('messages')
         .select(
@@ -408,7 +419,7 @@ export const dbUpdateAverageConversationsLength = async () => {
     Number.isNaN(avgLength)
       ? await knex.transaction(trx =>
           trx('metrics_conversations_length')
-            .debug(false)
+            .debug(isDebugOn)
             .update({
               conversations_length: 0,
             })
@@ -418,7 +429,7 @@ export const dbUpdateAverageConversationsLength = async () => {
         )
       : await knex.transaction(trx =>
           trx('metrics_conversations_length')
-            .debug(false)
+            .debug(isDebugOn)
             .update({
               conversations_length: avgLength.toFixed(2),
             })
@@ -430,7 +441,7 @@ export const dbUpdateAverageConversationsLength = async () => {
     Number.isNaN(avgLength)
       ? await knex.transaction(trx =>
           trx('metrics_conversations_length')
-            .debug(false)
+            .debug(isDebugOn)
             .insert({
               conversations_length: 0,
               timestamp: moment().startOf('day'),
@@ -438,7 +449,7 @@ export const dbUpdateAverageConversationsLength = async () => {
         )
       : await knex.transaction(trx =>
           trx('metrics_conversations_length')
-            .debug(false)
+            .debug(isDebugOn)
             .insert({
               conversations_length: avgLength.toFixed(2),
               timestamp: moment().startOf('day'),
@@ -447,6 +458,7 @@ export const dbUpdateAverageConversationsLength = async () => {
   }
 
   return knex('metrics_conversations_length')
+    .debug(isDebugOn)
     .select('*')
     .where(knex.raw('??::date = ?', ['timestamp', moment().startOf('day')]));
 };

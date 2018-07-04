@@ -33,7 +33,7 @@ export const createMessage = function (request, reply) {
 };
 
 export const updateReadMessages = (request, reply) =>
-  dbUpdateReadMessages(request.payload.messageIdArr)
+  dbUpdateReadMessages(request.payload)
     .then(reply)
     .catch((err) => {
       if (err.constraint) {

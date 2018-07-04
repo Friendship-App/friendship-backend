@@ -29,10 +29,7 @@ export const dbCreateMessage = ({ ...fields }) =>
     .then(results => results[0]);
 
 // change the read status of multiple messages
-export const dbUpdateReadMessages = async (messageIdArr) => {
-  messageIdArr.forEach(async (messageId) => {
-    await knex('messages')
-      .where({ id: messageId })
-      .update({ read: true });
-  });
-};
+export const dbUpdateReadMessages = (data) =>
+  knex('messages')
+    .where({user_id: data.userId, chatroom_id: data.chatroomId})
+    .update({read: true});

@@ -56,7 +56,7 @@ const events = [
   {
     method: 'GET',
     path: '/eventParticipantsNum',
-    //config: merge({}, getAuthWithScope('user')),
+    config: merge({}, getAuthWithScope('user')),
     handler: getEventParticipantsNum,
   },
   {

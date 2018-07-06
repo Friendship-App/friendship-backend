@@ -10,6 +10,7 @@ import {
 } from '../models/events';
 import {notifyEventCancelled} from "../utils/notifications";
 import {dbGetParticipantsTokenAndEventDetails} from "../models/eventParticipants";
+import {dbCreateChatroom} from "../models/chatrooms";
 
 export const getEvents = (request, reply) => {
   dbGetEvents(request.pre.user.id).then(
@@ -40,6 +41,12 @@ export const CreateEvent = async (request, reply) => {
     fields[field] = request.payload[field];
   }
 
+  const chatroomId = await dbCreateChatroom({
+    user_creator_id: request.payload.hostId,
+    user_receiver_id: null,
+    event: true
+  }).then(res => res.id);
+
   dbCreateEvent({
     createdAt: moment(),
     title: request.payload.title,
@@ -51,7 +58,8 @@ export const CreateEvent = async (request, reply) => {
     maxParticipants: request.payload.maxParticipants,
     participantsMix: request.payload.participantsMix,
     eventImage: request.payload.eventImage,
-    hostId: request.payload.hostId
+    hostId: request.payload.hostId,
+    chatroomId
   }).then(reply);
 };
 

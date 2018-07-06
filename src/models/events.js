@@ -23,6 +23,7 @@ const eventFields = [
   'events.maxParticipants as maxParticipants',
   'events.participantsMix',
   'events.hostId',
+  'events.chatroomId',
 ];
 
 //export const dbGetEvents = () => knex('events').select(eventFields);
@@ -126,7 +127,7 @@ export const dbGetEvent = async id => {
 
 export const dbGetEventParticipantsNum = async () => {
   const participants = await knex.raw(
-    `SELECT  "eventParticipants"."eventId","users"."avatar" from "users"
+    `SELECT  "eventParticipants"."eventId","users"."avatar","users"."id" from "users"
       LEFT JOIN "eventParticipants" ON "users"."id" = "eventParticipants"."userId"
       WHERE "eventParticipants"."eventId" NOTNULL`,
   );

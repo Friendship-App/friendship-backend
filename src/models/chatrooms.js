@@ -1,6 +1,6 @@
 import knex from '../utils/db';
 
-const selectChatroomQuery = `SELECT chatrooms.id, 
+const selectChatroomQuery = `SELECT chatrooms.id, chatrooms.event,
       (SELECT json_build_object('id', id, 'username', username, 'avatar', avatar) 
               FROM users WHERE id = user_creator_id) as creator, 
       (SELECT json_build_object('id', id, 'username', username, 'avatar', avatar) 

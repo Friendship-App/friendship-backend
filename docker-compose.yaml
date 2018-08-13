@@ -1,0 +1,19 @@
+version: '3.2'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - '5432:5432'
+
+  backend:
+    build: ./Dockerfile
+    ports:
+      - '3888:3888'
+    volumes:
+      - .:/Friendship/Friendship-backend
+    links:
+      - db
+
+volumes:
+  backend:

@@ -33,10 +33,10 @@ const config = {
     debug: true, // Toggle db debugging
     client: 'pg',
     connection: env.DATABASE_URL || {
-      host: '127.0.0.1',
+      host: 'db',
       user: 'postgres',
       password: '',
-      database: 'friendship',
+      database: '',
       ssl: false,
     },
     pool: {

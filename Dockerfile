@@ -1,11 +1,9 @@
-# first choose enviroment
+  # Using node alpine version
 FROM node:9-alpine
   # Expose port container number
 EXPOSE 3888
-  # Install tini helper
+  # Install tini helper( to remove container after its done)
 RUN apk add --update tini
-  # Install yarn
-#RUN apk add yarn
   # Create work dir
 RUN mkdir -p /Friendship/Friendship-backend
   # Change to work dir
@@ -16,8 +14,7 @@ COPY package.json package.json
 RUN yarn
   # Copy from source dir to container
 COPY . .
-  # Init db
-CMD ["yarn","db:init"]
-  # Launch backend
-#CMD ["tini","--","yarn","watch","./src/server.js"]
+# Run server
+CMD ["tini","--","yarn","start"]
+
 

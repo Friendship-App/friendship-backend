@@ -28,7 +28,16 @@ This is a sample Node.js backend to get you started with the following stack qui
 * [jest](https://facebook.github.io/jest/), painless JavaScript testing
 
 ### Docker 
-docker run -p 5432:5432 -d postgres
+
+#### For initial build(wipe db and populate it and launch server) :
+    docker-compose build
+    docker-compose up
+
+#### For launching server without wiping db:
+    
+ 
+#### When shutting down server use:
+    docker-compose down   
 
 ### DB
 yarn db:init
